@@ -15,6 +15,13 @@
       "when": 1774039394525,
       "tag": "0001_lazy_gladiator",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1774040323538,
+      "tag": "0002_remarkable_exodus",
+      "breakpoints": true
     }
   ]
 }
