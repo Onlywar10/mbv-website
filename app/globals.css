@@ -7,9 +7,9 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-sans);
+  --font-sans: var(--font-body);
   --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-sans);
+  --font-heading: var(--font-display);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -39,82 +39,65 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
-  --radius-sm: calc(var(--radius) * 0.6);
-  --radius-md: calc(var(--radius) * 0.8);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) * 1.4);
-  --radius-2xl: calc(var(--radius) * 1.8);
-  --radius-3xl: calc(var(--radius) * 2.2);
-  --radius-4xl: calc(var(--radius) * 2.6);
+
+  /* MBV Earthy Brand Tokens */
+  --color-stone: #e4e3d9;
+  --color-stone-light: #eeedea;
+  --color-cream: #f9f8f3;
+  --color-ink: #1f2626;
+  --color-ink-soft: #313131;
+  --color-rust: #c73e1d;
+  --color-rust-light: #d95a3a;
+  --color-ochre: #c57e38;
+  --color-ochre-light: #d99a55;
+  --color-sage: #6b7c6b;
+  --color-sage-light: #8a9c8a;
+  --color-mid-gray: #b3b5b2;
+
+  /* Sharp radius system */
+  --radius-sm: 0px;
+  --radius-md: 2px;
+  --radius-lg: 2px;
+  --radius-xl: 3px;
+  --radius-2xl: 4px;
+  --radius-3xl: 4px;
+  --radius-4xl: 4px;
 }
 
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
-}
-
-.dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  /* Muted earthy palette */
+  --background: #e4e3d9;
+  --foreground: #1f2626;
+  --card: #f9f8f3;
+  --card-foreground: #1f2626;
+  --popover: #f9f8f3;
+  --popover-foreground: #1f2626;
+  --primary: #1f2626;
+  --primary-foreground: #f9f8f3;
+  --secondary: #c73e1d;
+  --secondary-foreground: #f9f8f3;
+  --muted: #eeedea;
+  --muted-foreground: #5a5e5a;
+  --accent: #c57e38;
+  --accent-foreground: #1f2626;
+  --destructive: #c73e1d;
+  --border: hsla(100, 2%, 70%, 0.8);
+  --input: hsla(100, 2%, 70%, 0.8);
+  --ring: #c73e1d;
+  --chart-1: #1f2626;
+  --chart-2: #c73e1d;
+  --chart-3: #c57e38;
+  --chart-4: #6b7c6b;
+  --chart-5: #b3b5b2;
+  --radius: 2px;
+  --sidebar: #f9f8f3;
+  --sidebar-foreground: #1f2626;
+  --sidebar-primary: #1f2626;
+  --sidebar-primary-foreground: #f9f8f3;
+  --sidebar-accent: #eeedea;
+  --sidebar-accent-foreground: #1f2626;
+  --sidebar-border: hsla(100, 2%, 70%, 0.8);
+  --sidebar-ring: #c73e1d;
 }
 
 @layer base {
@@ -125,6 +108,61 @@
     @apply bg-background text-foreground;
   }
   html {
-    @apply font-sans;
+    @apply font-sans scroll-smooth;
+  }
+
+  /* Condensed heading typography */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display), sans-serif;
+    letter-spacing: -0.03em;
+  }
+}
+
+/* Custom utility styles */
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .hero-gradient {
+    background: linear-gradient(
+      180deg,
+      transparent 20%,
+      rgba(31, 38, 38, 0.5) 50%,
+      rgba(31, 38, 38, 0.85) 100%
+    );
+  }
+
+  .section-gradient {
+    background: linear-gradient(
+      135deg,
+      #1f2626 0%,
+      #313131 100%
+    );
+  }
+
+  /* Sharp offset shadow — the PHW signature */
+  .shadow-sharp {
+    box-shadow: 6px 6px 0px rgba(31, 38, 38, 0.12);
+  }
+  .shadow-sharp-lg {
+    box-shadow: 8px 8px 0px rgba(31, 38, 38, 0.15);
+  }
+  .shadow-sharp-rust {
+    box-shadow: 6px 6px 0px rgba(199, 62, 29, 0.2);
+  }
+
+  /* Subtle divider line */
+  .divider-muted {
+    border-color: hsla(100, 2%, 70%, 0.5);
+  }
+
+  /* Uppercase tracking used on labels/overlines */
+  .overline {
+    font-family: var(--font-display), sans-serif;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
   }
 }
