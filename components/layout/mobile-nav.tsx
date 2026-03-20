@@ -47,6 +47,7 @@ export function MobileNav({ onClose }: MobileNavProps) {
               width={160}
               height={80}
               className="h-14 w-auto object-contain"
+              unoptimized
             />
           </div>
 

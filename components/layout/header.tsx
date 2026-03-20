@@ -42,6 +42,7 @@ export function Header() {
               height={200}
               className="h-52 w-52 object-contain translate-y-7"
               priority
+              unoptimized
             />
           </Link>
 
