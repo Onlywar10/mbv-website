@@ -79,9 +79,7 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col">
         <PageTransition />
-        <Header />
-        <main className="flex-1">{children}</main>
-        <Footer />
+        {children}
       </body>
     </html>
   );
