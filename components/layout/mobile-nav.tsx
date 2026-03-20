@@ -42,7 +42,7 @@ export function MobileNav({ onClose }: MobileNavProps) {
           {/* Header */}
           <div className="flex items-center border-b border-border px-6 py-4">
             <Image
-              src="/MBV-Logo.png"
+              src="/images/MBV-Logo.png"
               alt="Monterey Bay Veterans"
               width={160}
               height={80}

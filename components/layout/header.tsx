@@ -36,7 +36,7 @@ export function Header() {
             style={{ zIndex: 1, top: "calc(3.5rem - 7rem)" }}
           >
             <Image
-              src="/MBV-Logo.png"
+              src="/images/MBV-Logo.png"
               alt="Monterey Bay Veterans"
               width={200}
               height={200}

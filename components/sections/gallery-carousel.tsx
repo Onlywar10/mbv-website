@@ -28,8 +28,8 @@ const sizeClasses = [
 function GalleryCard({ image, index }: { image: GalleryImage; index: number }) {
   const sizeClass = sizeClasses[index % sizeClasses.length];
   // Vertical offset for the stacked/scattered look
-  const yOffset = seededRandom(index) * 40 - 20; // -20px to +20px
-  const rotation = seededRandom(index + 100) * 6 - 3; // -3deg to +3deg
+  const yOffset = Math.round((seededRandom(index) * 40 - 20) * 100) / 100;
+  const rotation = Math.round((seededRandom(index + 100) * 6 - 3) * 100) / 100;
 
   return (
     <div

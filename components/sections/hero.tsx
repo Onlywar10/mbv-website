@@ -8,13 +8,13 @@ import { ChevronDown } from "lucide-react";
 
 export function Hero() {
   return (
-    <section className="relative flex min-h-screen items-center justify-center overflow-hidden">
+    <section className="relative -mt-14 flex min-h-screen items-center justify-center overflow-hidden bg-[#0b3d5e]">
       {/* Background image */}
       <div className="absolute inset-0">
         <img
           src="/images/hero/MBV-Boat.png"
           alt="The Pescador — Monterey Bay Veterans boat on the water"
-          className="h-full w-full object-cover"
+          className="h-full w-full object-cover object-center"
         />
         {/* Dark gradient overlay */}
         <div className="absolute inset-0 hero-gradient" />

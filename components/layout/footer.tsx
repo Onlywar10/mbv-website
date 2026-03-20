@@ -27,7 +27,7 @@ export function Footer() {
           <div className="sm:col-span-2 lg:col-span-1">
             <Link href="/">
               <Image
-                src="/MBV-Logo.png"
+                src="/images/MBV-Logo.png"
                 alt="Monterey Bay Veterans"
                 width={160}
                 height={80}
