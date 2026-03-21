@@ -1,4 +1,4 @@
-import { pgTable, text, date, integer, timestamp, uuid } from "drizzle-orm/pg-core";
+import { date, integer, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 import { clients } from "./clients";
 
 export const clientEventHistory = pgTable("client_event_history", {

@@ -1,4 +1,4 @@
-import { pgTable, pgEnum, text, integer, timestamp, uuid, unique } from "drizzle-orm/pg-core";
+import { integer, pgEnum, pgTable, text, timestamp, unique, uuid } from "drizzle-orm/pg-core";
 import { clients } from "./clients";
 import { events } from "./events";
 

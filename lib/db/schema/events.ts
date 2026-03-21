@@ -1,10 +1,10 @@
 import {
-	pgTable,
-	pgEnum,
-	text,
+	boolean,
 	date,
 	integer,
-	boolean,
+	pgEnum,
+	pgTable,
+	text,
 	timestamp,
 	uuid,
 } from "drizzle-orm/pg-core";

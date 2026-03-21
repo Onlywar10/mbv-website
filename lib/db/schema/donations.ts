@@ -1,4 +1,4 @@
-import { pgTable, pgEnum, text, numeric, timestamp, uuid } from "drizzle-orm/pg-core";
+import { numeric, pgEnum, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 import { clients } from "./clients";
 
 export const paymentMethodEnum = pgEnum("payment_method", [
