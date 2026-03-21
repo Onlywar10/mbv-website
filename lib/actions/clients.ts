@@ -7,8 +7,9 @@ import { requireAuth } from "@/lib/auth/require-auth";
 import { db } from "@/lib/db";
 import { clientRoles } from "@/lib/db/schema/client-roles";
 import { clients } from "@/lib/db/schema/clients";
+import { donations } from "@/lib/db/schema/donations";
 import type { ActionState } from "@/lib/types";
-import { clientRoleSchema, clientSchema } from "@/lib/validations/clients";
+import { clientRoleSchema, clientSchema, donationSchema } from "@/lib/validations/clients";
 
 export async function createClientAction(
 	_prevState: ActionState,
@@ -145,4 +146,56 @@ export async function removeClientRoleAction(clientId: string, role: string): Pr
 	revalidatePath("/admin/clients");
 
 	return { success: `${role} role removed` };
+}
+
+// -- Donations ----------------------------------------------
+
+export async function createDonationAction(
+	_prevState: ActionState,
+	formData: FormData,
+): Promise<ActionState> {
+	await requireAuth();
+
+	const parsed = donationSchema.safeParse(Object.fromEntries(formData));
+	if (!parsed.success) {
+		return { error: parsed.error.issues[0].message };
+	}
+
+	const data = parsed.data;
+
+	await db.insert(donations).values({
+		clientId: data.clientId || null,
+		amount: data.amount.toFixed(2),
+		paymentMethod: data.paymentMethod,
+		donatedAt: new Date(data.donatedAt),
+		transactionId: data.transactionId || null,
+		notes: data.notes || null,
+	});
+
+	revalidatePath("/admin/donations");
+	if (data.clientId) {
+		revalidatePath(`/admin/clients/${data.clientId}`);
+	}
+
+	return { success: "Donation recorded" };
+}
+
+export async function deleteClientAction(id: string): Promise<ActionState> {
+	await requireAuth();
+
+	await db.delete(clients).where(eq(clients.id, id));
+
+	revalidatePath("/admin/clients");
+
+	return { success: "Client deleted" };
+}
+
+export async function deleteDonationAction(id: string): Promise<ActionState> {
+	await requireAuth();
+
+	await db.delete(donations).where(eq(donations.id, id));
+
+	revalidatePath("/admin/donations");
+
+	return { success: "Donation removed" };
 }

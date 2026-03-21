@@ -1,6 +1,6 @@
 "use client";
 
-import { Calendar, LayoutDashboard, Users } from "lucide-react";
+import { Calendar, DollarSign, LayoutDashboard, Users } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -9,6 +9,7 @@ const navItems = [
 	{ href: "/admin", label: "Dashboard", icon: LayoutDashboard },
 	{ href: "/admin/events", label: "Events", icon: Calendar },
 	{ href: "/admin/clients", label: "Clients", icon: Users },
+	{ href: "/admin/donations", label: "Donations", icon: DollarSign },
 ];
 
 export function AdminSidebar() {

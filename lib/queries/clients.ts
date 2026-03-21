@@ -1,4 +1,4 @@
-import { count, desc, eq } from "drizzle-orm";
+import { count, desc, eq, ilike, or, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { clientEventHistory } from "@/lib/db/schema/client-event-history";
 import { clientRoles } from "@/lib/db/schema/client-roles";
@@ -7,6 +7,15 @@ import { donations } from "@/lib/db/schema/donations";
 
 export async function getClients() {
 	return db.select().from(clients).orderBy(desc(clients.createdAt));
+}
+
+export async function findClientByEmail(email: string) {
+	const result = await db
+		.select()
+		.from(clients)
+		.where(eq(sql`lower(${clients.email})`, email.toLowerCase()))
+		.limit(1);
+	return result[0] ?? null;
 }
 
 export async function getClientById(id: string) {
@@ -44,4 +53,43 @@ export async function getClientDonations(clientId: string) {
 export async function getClientCount() {
 	const result = await db.select({ value: count() }).from(clients);
 	return result[0]?.value ?? 0;
+}
+
+export async function searchClients(query: string) {
+	const pattern = `%${query}%`;
+	return db
+		.select({
+			id: clients.id,
+			firstName: clients.firstName,
+			lastName: clients.lastName,
+			email: clients.email,
+		})
+		.from(clients)
+		.where(
+			or(
+				ilike(clients.firstName, pattern),
+				ilike(clients.lastName, pattern),
+				ilike(clients.email, pattern),
+			),
+		)
+		.limit(20);
+}
+
+export async function getAllDonations() {
+	return db
+		.select({
+			id: donations.id,
+			clientId: donations.clientId,
+			firstName: clients.firstName,
+			lastName: clients.lastName,
+			amount: donations.amount,
+			paymentMethod: donations.paymentMethod,
+			transactionId: donations.transactionId,
+			donatedAt: donations.donatedAt,
+			notes: donations.notes,
+			createdAt: donations.createdAt,
+		})
+		.from(donations)
+		.leftJoin(clients, eq(donations.clientId, clients.id))
+		.orderBy(desc(donations.donatedAt));
 }

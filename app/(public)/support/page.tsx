@@ -13,11 +13,10 @@ import {
 import Link from "next/link";
 import { PageHero } from "@/components/layout/page-hero";
 import { DonationTiers } from "@/components/sections/donation-tiers";
-import { VolunteerCards } from "@/components/sections/volunteer-cards";
 import { VolunteerForm } from "@/components/sections/volunteer-form";
 import { ScrollReveal } from "@/components/shared/scroll-reveal";
 import { SectionHeading } from "@/components/shared/section-heading";
-import { donationTiers, volunteerOpportunities } from "@/lib/data";
+import { donationTiers } from "@/lib/data";
 
 export const metadata = {
 	title: "Get Involved",
@@ -110,34 +109,7 @@ export default function SupportPage() {
 				</div>
 			</section>
 
-			{/* --- 3. Volunteer Opportunities ----------------- */}
-			<section className="bg-cream py-20">
-				<div className="mx-auto max-w-6xl px-6">
-					<ScrollReveal>
-						<SectionHeading
-							title="Volunteer Opportunities"
-							subtitle="From racetracks to fishing boats, there's a role for everyone"
-						/>
-					</ScrollReveal>
-
-					<VolunteerCards opportunities={volunteerOpportunities} />
-
-					<ScrollReveal delay={0.3}>
-						<p className="mt-10 text-center text-sm text-muted-foreground">
-							Don&apos;t see what you&apos;re looking for? We&apos;re always open to new ideas.{" "}
-							<a
-								href="#volunteer-form"
-								className="font-medium text-rust underline underline-offset-4 hover:text-rust-light"
-							>
-								Tell us how you&apos;d like to help
-							</a>
-							.
-						</p>
-					</ScrollReveal>
-				</div>
-			</section>
-
-			{/* --- 4. Volunteer Form -------------------------- */}
+			{/* --- 3. Volunteer Form -------------------------- */}
 			<VolunteerForm />
 
 			{/* --- 5. Support Our Mission (Donate) ------------ */}

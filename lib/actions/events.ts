@@ -5,10 +5,12 @@ import { revalidatePath } from "next/cache";
 
 import { requireAuth } from "@/lib/auth/require-auth";
 import { db } from "@/lib/db";
+import { eventRegistrations } from "@/lib/db/schema/event-registrations";
+import { eventTemplates } from "@/lib/db/schema/event-templates";
 import { events } from "@/lib/db/schema/events";
 import type { ActionState } from "@/lib/types";
 import { slugify } from "@/lib/utils";
-import { eventSchema } from "@/lib/validations/events";
+import { eventSchema, templateSchema } from "@/lib/validations/events";
 
 export async function createEventAction(
 	_prevState: ActionState,
@@ -41,7 +43,12 @@ export async function createEventAction(
 		longDescription: data.longDescription || null,
 		imageUrl: data.imageUrl || null,
 		accessibility: data.accessibility || null,
-		spotsAvailable: data.spotsAvailable,
+		participantCapacity: data.participantCapacity,
+		volunteerCapacity: data.volunteerCapacity,
+		volunteerEnabled: data.volunteerEnabled,
+		volunteerDescription: data.volunteerDescription || null,
+		volunteerTime: data.volunteerTime || null,
+		volunteerNotes: data.volunteerNotes || null,
 		isPublished: data.isPublished,
 	});
 
@@ -93,7 +100,12 @@ export async function updateEventAction(
 			longDescription: data.longDescription || null,
 			imageUrl: data.imageUrl || null,
 			accessibility: data.accessibility || null,
-			spotsAvailable: data.spotsAvailable,
+			participantCapacity: data.participantCapacity,
+			volunteerCapacity: data.volunteerCapacity,
+			volunteerEnabled: data.volunteerEnabled,
+			volunteerDescription: data.volunteerDescription || null,
+			volunteerTime: data.volunteerTime || null,
+			volunteerNotes: data.volunteerNotes || null,
 			isPublished: data.isPublished,
 			updatedAt: new Date(),
 		})
@@ -140,4 +152,74 @@ export async function togglePublishAction(id: string): Promise<ActionState> {
 	revalidatePath("/");
 
 	return { success: current[0].isPublished ? "Event unpublished" : "Event published" };
+}
+
+// -- Registrations ------------------------------------------
+
+export async function updateRegistrationStatusAction(
+	registrationId: string,
+	eventId: string,
+	status: "registered" | "waitlisted" | "attended" | "cancelled",
+): Promise<ActionState> {
+	await requireAuth();
+
+	await db
+		.update(eventRegistrations)
+		.set({ status })
+		.where(eq(eventRegistrations.id, registrationId));
+
+	revalidatePath(`/admin/events/${eventId}`);
+	return { success: `Status updated to ${status}` };
+}
+
+export async function deleteRegistrationAction(
+	registrationId: string,
+	eventId: string,
+): Promise<ActionState> {
+	await requireAuth();
+
+	await db.delete(eventRegistrations).where(eq(eventRegistrations.id, registrationId));
+
+	revalidatePath(`/admin/events/${eventId}`);
+	return { success: "Registration removed" };
+}
+
+// -- Templates ----------------------------------------------
+
+export async function createTemplateAction(
+	_prevState: ActionState,
+	formData: FormData,
+): Promise<ActionState> {
+	await requireAuth();
+
+	const parsed = templateSchema.safeParse(Object.fromEntries(formData));
+	if (!parsed.success) {
+		return { error: parsed.error.issues[0].message };
+	}
+
+	const data = parsed.data;
+
+	await db.insert(eventTemplates).values({
+		name: data.name,
+		title: data.title,
+		location: data.location || null,
+		category: data.category,
+		description: data.description || null,
+		longDescription: data.longDescription || null,
+		imageUrl: data.imageUrl || null,
+		accessibility: data.accessibility || null,
+		defaultSpots: data.defaultSpots,
+	});
+
+	revalidatePath("/admin/events");
+	return { success: "Template created" };
+}
+
+export async function deleteTemplateAction(id: string): Promise<ActionState> {
+	await requireAuth();
+
+	await db.delete(eventTemplates).where(eq(eventTemplates.id, id));
+
+	revalidatePath("/admin/events");
+	return { success: "Template deleted" };
 }

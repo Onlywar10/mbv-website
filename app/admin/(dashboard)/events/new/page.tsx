@@ -30,7 +30,8 @@ export default async function NewEventPage({ searchParams }: PageProps) {
 				longDescription: template.longDescription ?? "",
 				imageUrl: template.imageUrl ?? "",
 				accessibility: template.accessibility ?? "",
-				spotsAvailable: template.defaultSpots,
+				participantCapacity: template.defaultSpots,
+				volunteerCapacity: 0,
 			};
 		}
 	}

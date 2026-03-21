@@ -78,12 +78,12 @@ function EventCard({ event, index }: { event: PublicEvent; index: number }) {
 					<div className="mt-auto flex items-center gap-2">
 						<Badge variant="secondary" className="bg-rust/10 text-rust border-rust/20">
 							<Users className="mr-1 h-3 w-3" />
-							{event.spotsAvailable} spots left
+							{event.participantCapacity} spots left
 						</Badge>
 					</div>
 				</CardContent>
 
-				<CardFooter>
+				<CardFooter className="flex-col gap-2">
 					<Link
 						href={`/events/${event.slug}`}
 						className={cn(
@@ -92,6 +92,12 @@ function EventCard({ event, index }: { event: PublicEvent; index: number }) {
 						)}
 					>
 						View Details
+					</Link>
+					<Link
+						href="/support#volunteer-form"
+						className="text-xs text-muted-foreground transition-colors hover:text-rust"
+					>
+						Interested in volunteering? Click here
 					</Link>
 				</CardFooter>
 			</Card>

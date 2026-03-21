@@ -45,3 +45,26 @@ export function RoleBadge({ role }: { role: string }) {
 		</Badge>
 	);
 }
+
+const registrationStatusColors: Record<string, string> = {
+	registered: "bg-sage/10 text-sage border-sage/20",
+	waitlisted: "bg-ochre/10 text-ochre border-ochre/20",
+	attended: "bg-ink/10 text-ink border-ink/20",
+	cancelled: "bg-rust/10 text-rust border-rust/20",
+};
+
+export function RegistrationStatusBadge({ status }: { status: string }) {
+	return (
+		<Badge variant="outline" className={registrationStatusColors[status] ?? ""}>
+			{status}
+		</Badge>
+	);
+}
+
+export function PaymentMethodBadge({ method }: { method: string }) {
+	return (
+		<Badge variant="outline" className="bg-ink/5 text-muted-foreground border-ink/10">
+			{method}
+		</Badge>
+	);
+}

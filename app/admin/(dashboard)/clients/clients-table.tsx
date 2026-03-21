@@ -3,7 +3,9 @@
 import { Eye, Pencil } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
+import { DeleteDialog } from "@/components/admin/delete-dialog";
 import { Button } from "@/components/ui/button";
+import { deleteClientAction } from "@/lib/actions/clients";
 
 type Client = {
 	id: string;
@@ -102,6 +104,12 @@ export function ClientsTable({ clients }: ClientsTableProps) {
 													<Pencil className="h-4 w-4" />
 												</Button>
 											</Link>
+											<DeleteDialog
+												title={`${client.firstName} ${client.lastName}`}
+												onConfirm={async () => {
+													await deleteClientAction(client.id);
+												}}
+											/>
 										</div>
 									</td>
 								</tr>

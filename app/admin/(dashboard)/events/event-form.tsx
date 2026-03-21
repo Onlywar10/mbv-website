@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { FormField } from "@/components/admin/form-field";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -26,7 +26,12 @@ interface EventFormProps {
 		longDescription?: string;
 		imageUrl?: string;
 		accessibility?: string;
-		spotsAvailable?: number;
+		participantCapacity?: number;
+		volunteerCapacity?: number;
+		volunteerEnabled?: boolean;
+		volunteerDescription?: string;
+		volunteerTime?: string;
+		volunteerNotes?: string;
 		isPublished?: boolean;
 	};
 	submitLabel?: string;
@@ -36,6 +41,9 @@ const initialState: ActionState = {};
 
 export function EventForm({ action, defaultValues, submitLabel = "Create Event" }: EventFormProps) {
 	const [state, formAction, isPending] = useActionState(action, initialState);
+	const [volunteerEnabled, setVolunteerEnabled] = useState(
+		defaultValues?.volunteerEnabled ?? false,
+	);
 
 	return (
 		<form action={formAction} className="space-y-6">
@@ -92,10 +100,10 @@ export function EventForm({ action, defaultValues, submitLabel = "Create Event" 
 					</select>
 				</div>
 				<FormField
-					name="spotsAvailable"
-					label="Spots Available"
+					name="participantCapacity"
+					label="Participant Capacity"
 					type="number"
-					defaultValue={defaultValues?.spotsAvailable ?? 0}
+					defaultValue={defaultValues?.participantCapacity ?? 0}
 				/>
 			</div>
 
@@ -129,6 +137,62 @@ export function EventForm({ action, defaultValues, submitLabel = "Create Event" 
 				textarea
 				placeholder="ADA and accessibility details"
 			/>
+
+			{/* Volunteer Section */}
+			<div className="rounded-sm border border-ochre/30 bg-ochre/5 p-5 space-y-5">
+				<div className="flex items-center gap-3">
+					<input
+						type="checkbox"
+						id="field-volunteerEnabled"
+						name="volunteerEnabled"
+						value="on"
+						checked={volunteerEnabled}
+						onChange={(e) => setVolunteerEnabled(e.target.checked)}
+						className="h-4 w-4 rounded-sm border-border"
+					/>
+					<Label
+						htmlFor="field-volunteerEnabled"
+						className="font-heading text-sm uppercase tracking-wider text-ochre"
+					>
+						Enable Volunteering for This Event
+					</Label>
+				</div>
+
+				{volunteerEnabled && (
+					<div className="space-y-5">
+						<div className="grid gap-6 sm:grid-cols-2">
+							<FormField
+								name="volunteerCapacity"
+								label="Volunteers Needed"
+								type="number"
+								defaultValue={defaultValues?.volunteerCapacity ?? 0}
+							/>
+							<FormField
+								name="volunteerTime"
+								label="Volunteer Arrival Time"
+								defaultValue={defaultValues?.volunteerTime}
+								placeholder="e.g. 5:00 AM (1 hour before event)"
+							/>
+						</div>
+
+						<FormField
+							name="volunteerDescription"
+							label="Volunteer Role Description"
+							defaultValue={defaultValues?.volunteerDescription}
+							textarea
+							placeholder="What will volunteers be doing? e.g. Setting up equipment, guiding participants, etc."
+						/>
+
+						<FormField
+							name="volunteerNotes"
+							label="Volunteer Notes"
+							defaultValue={defaultValues?.volunteerNotes}
+							textarea
+							placeholder="Extra notes for volunteers. e.g. Wear comfortable shoes, bring sunscreen, etc."
+						/>
+					</div>
+				)}
+			</div>
 
 			<div className="flex items-center gap-3">
 				<input

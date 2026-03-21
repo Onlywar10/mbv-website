@@ -22,14 +22,6 @@ export interface Stat {
 	description: string;
 }
 
-export interface VolunteerOpportunity {
-	title: string;
-	location: string;
-	dates: string;
-	description: string;
-	icon: string;
-}
-
 export interface DonationTier {
 	name: string;
 	amount: string;
@@ -182,51 +174,6 @@ export const impactStats: Stat[] = [
 		value: 10000,
 		suffix: "+",
 		description: "Hours donated by our incredible volunteer community",
-	},
-];
-
-// ─── VOLUNTEER OPPORTUNITIES ─────────────────────────────
-
-export const volunteerOpportunities: VolunteerOpportunity[] = [
-	{
-		title: "WeatherTech Raceway Laguna Seca",
-		location: "Monterey, CA",
-		dates: "May – September 2026",
-		description:
-			"Support motorsport events at one of the world's most iconic racetracks. Help with parking, spectator services, and event logistics while enjoying world-class racing.",
-		icon: "trophy",
-	},
-	{
-		title: "Pebble Beach Golf Events",
-		location: "Pebble Beach, CA",
-		dates: "June – August 2026",
-		description:
-			"Volunteer at prestigious golf tournaments on the stunning Pebble Beach coastline. Support event operations and guest services.",
-		icon: "flag",
-	},
-	{
-		title: "Monterey County Fair",
-		location: "Monterey Fairgrounds",
-		dates: "August 2026",
-		description:
-			"Help make the Monterey County Fair a success! Assist with veteran outreach, booth operations, and community engagement.",
-		icon: "star",
-	},
-	{
-		title: "Fishing Trip Crew",
-		location: "Monterey Harbor",
-		dates: "Year-round",
-		description:
-			"Join the Pescador crew as a volunteer deckhand. Help disabled veterans with fishing equipment, accessibility, and on-water safety.",
-		icon: "anchor",
-	},
-	{
-		title: "Salinas Valley Events",
-		location: "Salinas, CA",
-		dates: "July – September 2026",
-		description:
-			"Support events at the Salinas Rodeo, California International Airshow, and other community gatherings that fund our veteran programs.",
-		icon: "heart",
 	},
 ];
 

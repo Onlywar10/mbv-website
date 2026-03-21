@@ -27,3 +27,14 @@ export const clientRoleSchema = z.object({
 });
 
 export type ClientFormData = z.infer<typeof clientSchema>;
+
+export const donationSchema = z.object({
+	clientId: z.string().optional().default(""),
+	amount: z.coerce.number().positive("Amount must be greater than 0"),
+	paymentMethod: z.enum(["venmo", "paypal", "check", "cash", "card", "other"], {
+		message: "Payment method is required",
+	}),
+	donatedAt: z.string().min(1, "Date is required"),
+	transactionId: z.string().optional().default(""),
+	notes: z.string().optional().default(""),
+});

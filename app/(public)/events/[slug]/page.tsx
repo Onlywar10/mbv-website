@@ -1,8 +1,9 @@
-import { Accessibility, CalendarDays, ChevronLeft, Clock, Mail, MapPin, Users } from "lucide-react";
+import { Accessibility, CalendarDays, ChevronLeft, Clock, MapPin, Users } from "lucide-react";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { EventSignupDialog } from "@/components/sections/event-signup-dialog";
 import { ScrollReveal } from "@/components/shared/scroll-reveal";
 import { SectionHeading } from "@/components/shared/section-heading";
 import { Badge } from "@/components/ui/badge";
@@ -158,7 +159,9 @@ export default async function EventDetailPage({ params }: PageProps) {
 										</div>
 										<div>
 											<p className="text-xs text-muted-foreground">Availability</p>
-											<p className="font-medium text-primary">{event.spotsAvailable} spots left</p>
+											<p className="font-medium text-primary">
+												{event.participantCapacity} spots left
+											</p>
 										</div>
 									</div>
 								</div>
@@ -198,17 +201,19 @@ export default async function EventDetailPage({ params }: PageProps) {
 							<ScrollReveal direction="right" delay={0.1}>
 								<Card className="rounded-sm ring-1 ring-border shadow-sharp">
 									<CardContent className="pt-2 text-center">
-										<div className="mb-2 text-4xl font-bold text-rust">{event.spotsAvailable}</div>
+										<div className="mb-2 text-4xl font-bold text-rust">
+											{event.participantCapacity}
+										</div>
 										<p className="text-sm font-medium text-muted-foreground">Spots Available</p>
 										<div className="mt-4 h-2 w-full overflow-hidden rounded-full bg-muted">
 											<div
 												className="h-full rounded-full bg-rust transition-all"
 												style={{
-													width: `${Math.max(10, 100 - event.spotsAvailable * 2)}%`,
+													width: `${Math.max(10, 100 - event.participantCapacity * 2)}%`,
 												}}
 												role="progressbar"
-												aria-valuenow={event.spotsAvailable}
-												aria-label={`${event.spotsAvailable} spots remaining`}
+												aria-valuenow={event.participantCapacity}
+												aria-label={`${event.participantCapacity} spots remaining`}
 											/>
 										</div>
 										<p className="mt-2 text-xs text-muted-foreground">
@@ -224,24 +229,14 @@ export default async function EventDetailPage({ params }: PageProps) {
 									<CardContent className="space-y-4 pt-2">
 										<h3 className="text-lg font-bold">Ready to Sign Up?</h3>
 										<p className="text-sm text-cream/80">
-											Contact us to reserve your spot for this event. All programs are provided at
-											no cost to veterans.
+											Reserve your spot for this event. All programs are provided at no cost to
+											veterans.
 										</p>
-										<div className="space-y-2">
-											<a
-												href="mailto:Info@mbv.org"
-												className="flex items-center gap-2 rounded-sm bg-cream/10 px-4 py-2.5 text-sm font-medium transition-colors hover:bg-cream/20"
-											>
-												<Mail className="h-4 w-4" />
-												Info@mbv.org
-											</a>
-											<Link
-												href="/events#contact"
-												className="flex items-center justify-center gap-2 rounded-sm bg-rust px-4 py-2.5 font-heading text-sm font-medium uppercase tracking-wider text-cream transition-colors hover:bg-rust-light"
-											>
-												Contact Us to Sign Up
-											</Link>
-										</div>
+										<EventSignupDialog
+											eventId={event.id}
+											eventTitle={event.title}
+											category={event.category}
+										/>
 									</CardContent>
 								</Card>
 							</ScrollReveal>
