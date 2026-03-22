@@ -1,7 +1,7 @@
 "use client";
 
 import { CheckCircle, Info, Send } from "lucide-react";
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
 	Dialog,
@@ -26,6 +26,7 @@ const initialState: ActionState = {};
 
 export function EventSignupDialog({ eventId, eventTitle, category }: EventSignupDialogProps) {
 	const [state, formAction, isPending] = useActionState(publicEventSignupAction, initialState);
+	const [hasGuest, setHasGuest] = useState(false);
 
 	const showVaCheckbox = category === "fishing" || category === "derby";
 
@@ -41,7 +42,7 @@ export function EventSignupDialog({ eventId, eventTitle, category }: EventSignup
 					</button>
 				}
 			/>
-			<DialogContent className="sm:max-w-md">
+			<DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-md">
 				<DialogHeader>
 					<DialogTitle>Sign Up for Event</DialogTitle>
 					<DialogDescription>{eventTitle}</DialogDescription>
@@ -125,17 +126,76 @@ export function EventSignupDialog({ eventId, eventTitle, category }: EventSignup
 							/>
 						</div>
 
-						{/* Guest Count */}
-						<div className="space-y-1.5">
-							<Label htmlFor="signup-guestCount">Additional Guests</Label>
-							<Input
-								id="signup-guestCount"
-								name="guestCount"
-								type="number"
-								min={0}
-								defaultValue={0}
-								className="h-9"
-							/>
+						{/* Guest checkbox */}
+						<div className="space-y-3">
+							<label className="flex items-center gap-2 text-sm">
+								<input
+									type="checkbox"
+									name="hasGuest"
+									checked={hasGuest}
+									onChange={(e) => setHasGuest(e.target.checked)}
+									className="h-4 w-4 rounded border-gray-300"
+								/>
+								<span className="font-medium">I'm bringing a guest</span>
+							</label>
+
+							{hasGuest && (
+								<div className="space-y-3 rounded-sm border border-border bg-muted/30 p-3">
+									<p className="text-xs font-medium text-muted-foreground">Guest Information</p>
+									<div className="grid gap-3 sm:grid-cols-2">
+										<div className="space-y-1.5">
+											<Label htmlFor="signup-guestFirstName">
+												First Name <span className="text-destructive">*</span>
+											</Label>
+											<Input
+												id="signup-guestFirstName"
+												name="guestFirstName"
+												placeholder="Guest first name"
+												required
+												className="h-9"
+											/>
+										</div>
+										<div className="space-y-1.5">
+											<Label htmlFor="signup-guestLastName">
+												Last Name <span className="text-destructive">*</span>
+											</Label>
+											<Input
+												id="signup-guestLastName"
+												name="guestLastName"
+												placeholder="Guest last name"
+												required
+												className="h-9"
+											/>
+										</div>
+									</div>
+									<div className="space-y-1.5">
+										<Label htmlFor="signup-guestEmail">
+											Email <span className="text-destructive">*</span>
+										</Label>
+										<Input
+											id="signup-guestEmail"
+											name="guestEmail"
+											type="email"
+											placeholder="guest@example.com"
+											required
+											className="h-9"
+										/>
+									</div>
+									<div className="space-y-1.5">
+										<Label htmlFor="signup-guestPhone">
+											Phone <span className="text-destructive">*</span>
+										</Label>
+										<Input
+											id="signup-guestPhone"
+											name="guestPhone"
+											type="tel"
+											placeholder="(831) 555-0000"
+											required
+											className="h-9"
+										/>
+									</div>
+								</div>
+							)}
 						</div>
 
 						{/* VA Checkbox — only for fishing/derby events */}

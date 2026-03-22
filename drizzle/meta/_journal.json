@@ -1,55 +1,62 @@
 {
-  "version": "7",
-  "dialect": "postgresql",
-  "entries": [
-    {
-      "idx": 0,
-      "version": "7",
-      "when": 1774021554708,
-      "tag": "0000_curly_ironclad",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1774039394525,
-      "tag": "0001_lazy_gladiator",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1774040323538,
-      "tag": "0002_remarkable_exodus",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1774252800000,
-      "tag": "0003_event_capacity_and_registration_role",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "7",
-      "when": 1774339200000,
-      "tag": "0004_volunteer_event_details",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "7",
-      "when": 1774425600000,
-      "tag": "0005_neat_colossus",
-      "breakpoints": true
-    },
-    {
-      "idx": 6,
-      "version": "7",
-      "when": 1774512000000,
-      "tag": "0006_red_king_cobra",
-      "breakpoints": true
-    }
-  ]
+	"version": "7",
+	"dialect": "postgresql",
+	"entries": [
+		{
+			"idx": 0,
+			"version": "7",
+			"when": 1774021554708,
+			"tag": "0000_curly_ironclad",
+			"breakpoints": true
+		},
+		{
+			"idx": 1,
+			"version": "7",
+			"when": 1774039394525,
+			"tag": "0001_lazy_gladiator",
+			"breakpoints": true
+		},
+		{
+			"idx": 2,
+			"version": "7",
+			"when": 1774040323538,
+			"tag": "0002_remarkable_exodus",
+			"breakpoints": true
+		},
+		{
+			"idx": 3,
+			"version": "7",
+			"when": 1774252800000,
+			"tag": "0003_event_capacity_and_registration_role",
+			"breakpoints": true
+		},
+		{
+			"idx": 4,
+			"version": "7",
+			"when": 1774339200000,
+			"tag": "0004_volunteer_event_details",
+			"breakpoints": true
+		},
+		{
+			"idx": 5,
+			"version": "7",
+			"when": 1774425600000,
+			"tag": "0005_neat_colossus",
+			"breakpoints": true
+		},
+		{
+			"idx": 6,
+			"version": "7",
+			"when": 1774512000000,
+			"tag": "0006_red_king_cobra",
+			"breakpoints": true
+		},
+		{
+			"idx": 7,
+			"version": "7",
+			"when": 1774598400000,
+			"tag": "0007_guest_registration_revamp",
+			"breakpoints": true
+		}
+	]
 }

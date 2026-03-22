@@ -1,4 +1,4 @@
-import { integer, pgEnum, pgTable, text, timestamp, unique, uuid } from "drizzle-orm/pg-core";
+import { pgEnum, pgTable, text, timestamp, unique, uuid } from "drizzle-orm/pg-core";
 import { clients } from "./clients";
 import { events } from "./events";
 
@@ -9,10 +9,7 @@ export const registrationStatusEnum = pgEnum("registration_status", [
 	"cancelled",
 ]);
 
-export const registrationRoleEnum = pgEnum("registration_role", [
-	"participant",
-	"volunteer",
-]);
+export const registrationRoleEnum = pgEnum("registration_role", ["participant", "volunteer"]);
 
 export const eventRegistrations = pgTable(
 	"event_registrations",
@@ -26,7 +23,7 @@ export const eventRegistrations = pgTable(
 			.references(() => clients.id, { onDelete: "cascade" }),
 		role: registrationRoleEnum("role").notNull().default("participant"),
 		status: registrationStatusEnum("status").notNull().default("registered"),
-		guestCount: integer("guest_count").notNull().default(0),
+		registeredBy: uuid("registered_by"),
 		registeredAt: timestamp("registered_at", { withTimezone: true }).defaultNow().notNull(),
 		notes: text("notes"),
 	},

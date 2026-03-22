@@ -1,6 +1,6 @@
 "use server";
 
-import { and, eq } from "drizzle-orm";
+import { and, count, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
@@ -8,6 +8,7 @@ import { db } from "@/lib/db";
 import { clientRoles } from "@/lib/db/schema/client-roles";
 import { clients } from "@/lib/db/schema/clients";
 import { eventRegistrations } from "@/lib/db/schema/event-registrations";
+import { events } from "@/lib/db/schema/events";
 import { findClientByEmail } from "@/lib/queries/clients";
 import type { ActionState } from "@/lib/types";
 import { eventSignupSchema, volunteerSignupSchema } from "@/lib/validations/public";
@@ -47,6 +48,42 @@ export async function publicEventSignupAction(
 
 	const data = parsed.data;
 
+	// Validate guest fields if bringing a guest
+	if (data.hasGuest) {
+		if (!data.guestFirstName || !data.guestLastName || !data.guestEmail || !data.guestPhone) {
+			return { error: "All guest fields are required when bringing a guest" };
+		}
+	}
+
+	// Check capacity
+	const event = await db
+		.select({ participantCapacity: events.participantCapacity })
+		.from(events)
+		.where(eq(events.id, data.eventId))
+		.limit(1);
+
+	if (!event[0]) {
+		return { error: "Event not found" };
+	}
+
+	const regCountResult = await db
+		.select({ value: count() })
+		.from(eventRegistrations)
+		.where(
+			and(
+				eq(eventRegistrations.eventId, data.eventId),
+				eq(eventRegistrations.role, "participant"),
+				eq(eventRegistrations.status, "registered"),
+			),
+		);
+
+	const currentCount = regCountResult[0]?.value ?? 0;
+	const spotsNeeded = data.hasGuest ? 2 : 1;
+
+	if (currentCount + spotsNeeded > event[0].participantCapacity) {
+		return { error: "Not enough spots available for this event" };
+	}
+
 	const clientId = await findOrCreateClient({
 		firstName: data.firstName,
 		lastName: data.lastName,
@@ -71,13 +108,18 @@ export async function publicEventSignupAction(
 		return { error: "You are already registered for this event" };
 	}
 
-	await db.insert(eventRegistrations).values({
-		eventId: data.eventId,
-		clientId,
-		role: "participant",
-		status: "waitlisted",
-		guestCount: data.guestCount,
-	});
+	// Create parent registration
+	const parentResult = await db
+		.insert(eventRegistrations)
+		.values({
+			eventId: data.eventId,
+			clientId,
+			role: "participant",
+			status: "waitlisted",
+		})
+		.returning({ id: eventRegistrations.id });
+
+	const parentId = parentResult[0].id;
 
 	// Add participant role if not already assigned
 	const hasRole = await db
@@ -88,6 +130,35 @@ export async function publicEventSignupAction(
 
 	if (hasRole.length === 0) {
 		await db.insert(clientRoles).values({ clientId, role: "participant" });
+	}
+
+	// Create guest registration if bringing a guest
+	if (data.hasGuest && data.guestFirstName && data.guestEmail) {
+		const guestClientId = await findOrCreateClient({
+			firstName: data.guestFirstName,
+			lastName: data.guestLastName,
+			email: data.guestEmail,
+			phone: data.guestPhone,
+		});
+
+		await db.insert(eventRegistrations).values({
+			eventId: data.eventId,
+			clientId: guestClientId,
+			role: "participant",
+			status: "waitlisted",
+			registeredBy: parentId,
+		});
+
+		// Add participant role to guest
+		const guestHasRole = await db
+			.select({ id: clientRoles.id })
+			.from(clientRoles)
+			.where(and(eq(clientRoles.clientId, guestClientId), eq(clientRoles.role, "participant")))
+			.limit(1);
+
+		if (guestHasRole.length === 0) {
+			await db.insert(clientRoles).values({ clientId: guestClientId, role: "participant" });
+		}
 	}
 
 	revalidatePath("/events");
@@ -156,7 +227,6 @@ export async function volunteerForEventAction(
 		clientId,
 		role: "volunteer",
 		status: "waitlisted",
-		guestCount: 0,
 	});
 
 	revalidatePath("/support/volunteer");

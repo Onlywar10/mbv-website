@@ -50,7 +50,7 @@ export async function getEventRegistrations(eventId: string) {
 			email: clients.email,
 			role: eventRegistrations.role,
 			status: eventRegistrations.status,
-			guestCount: eventRegistrations.guestCount,
+			registeredBy: eventRegistrations.registeredBy,
 			registeredAt: eventRegistrations.registeredAt,
 			notes: eventRegistrations.notes,
 		})

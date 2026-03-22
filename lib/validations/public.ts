@@ -6,7 +6,14 @@ export const eventSignupSchema = z.object({
 	lastName: z.string().min(1, "Last name is required"),
 	email: z.string().email("Invalid email address"),
 	phone: z.string().min(1, "Phone number is required"),
-	guestCount: z.coerce.number().int().min(0, "Must be 0 or more").default(0),
+	hasGuest: z
+		.string()
+		.optional()
+		.transform((v) => v === "on"),
+	guestFirstName: z.string().optional().default(""),
+	guestLastName: z.string().optional().default(""),
+	guestEmail: z.string().optional().default(""),
+	guestPhone: z.string().optional().default(""),
 });
 
 export const volunteerSignupSchema = z.object({

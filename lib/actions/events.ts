@@ -189,6 +189,12 @@ export async function updateRegistrationStatusAction(
 		.set({ status })
 		.where(eq(eventRegistrations.id, registrationId));
 
+	// Also update any guest registered by this person
+	await db
+		.update(eventRegistrations)
+		.set({ status })
+		.where(eq(eventRegistrations.registeredBy, registrationId));
+
 	revalidatePath(`/admin/events/${eventId}`);
 	return { success: `Status updated to ${status}` };
 }
