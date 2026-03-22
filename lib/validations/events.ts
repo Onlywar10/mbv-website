@@ -27,8 +27,6 @@ export const eventSchema = z.object({
 		.transform((v) => v === "on" || v === "true"),
 });
 
-export type EventFormData = z.infer<typeof eventSchema>;
-
 export const templateSchema = z.object({
 	name: z.string().min(1, "Template name is required"),
 	title: z.string().min(1, "Title is required"),

@@ -78,7 +78,7 @@ function EventCard({ event, index }: { event: PublicEvent; index: number }) {
 					<div className="mt-auto flex items-center gap-2">
 						<Badge variant="secondary" className="bg-rust/10 text-rust border-rust/20">
 							<Users className="mr-1 h-3 w-3" />
-							{event.participantCapacity} spots left
+							{event.spotsLeft} spots left
 						</Badge>
 					</div>
 				</CardContent>

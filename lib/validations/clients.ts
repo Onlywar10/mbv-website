@@ -26,8 +26,6 @@ export const clientRoleSchema = z.object({
 	}),
 });
 
-export type ClientFormData = z.infer<typeof clientSchema>;
-
 export const donationSchema = z.object({
 	clientId: z.string().optional().default(""),
 	amount: z.coerce.number().positive("Amount must be greater than 0"),

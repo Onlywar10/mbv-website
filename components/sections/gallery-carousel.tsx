@@ -2,7 +2,6 @@
 
 import { animate } from "motion";
 import { useEffect, useRef } from "react";
-import { type GalleryImage, galleryImages } from "@/lib/gallery";
 
 // Deterministic "random" offsets per index so layout is consistent across renders
 function seededRandom(seed: number) {
@@ -10,9 +9,15 @@ function seededRandom(seed: number) {
 	return x - Math.floor(x);
 }
 
+type GalleryImage = {
+	src: string;
+	alt: string;
+};
+
 interface GalleryCarouselProps {
 	/** "compact" for home page, "full" for about page */
 	variant?: "compact" | "full";
+	images: GalleryImage[];
 }
 
 // Size presets for the mosaic effect
@@ -38,6 +43,7 @@ function GalleryCard({ image, index }: { image: GalleryImage; index: number }) {
 				transform: `translateY(${yOffset}px) rotate(${rotation}deg)`,
 			}}
 		>
+			{/* biome-ignore lint/performance/noImgElement: next/image sizing constraints break infinite scroll layout */}
 			<img
 				src={image.src}
 				alt={image.alt}
@@ -48,16 +54,16 @@ function GalleryCard({ image, index }: { image: GalleryImage; index: number }) {
 	);
 }
 
-export function GalleryCarousel({ variant = "full" }: GalleryCarouselProps) {
+export function GalleryCarousel({ variant = "full", images }: GalleryCarouselProps) {
 	const trackRef = useRef<HTMLDivElement>(null);
 	const animationRef = useRef<ReturnType<typeof animate> | null>(null);
 
 	// Triple the images for seamless infinite loop
-	const images = [...galleryImages, ...galleryImages, ...galleryImages];
+	const tripled = [...images, ...images, ...images];
 
 	useEffect(() => {
 		const track = trackRef.current;
-		if (!track) return;
+		if (!track || images.length === 0) return;
 
 		// Measure one set of images (1/3 of the track)
 		const singleSetWidth = track.scrollWidth / 3;
@@ -76,7 +82,7 @@ export function GalleryCarousel({ variant = "full" }: GalleryCarouselProps) {
 		return () => {
 			animationRef.current?.stop();
 		};
-	}, [variant]);
+	}, [variant, images.length]);
 
 	// Pause on hover
 	const handleMouseEnter = () => animationRef.current?.pause();
@@ -84,7 +90,12 @@ export function GalleryCarousel({ variant = "full" }: GalleryCarouselProps) {
 
 	const height = variant === "compact" ? "h-72" : "h-96";
 
+	if (images.length === 0) {
+		return null;
+	}
+
 	return (
+		// biome-ignore lint/a11y/noStaticElementInteractions: hover pause is a non-essential enhancement
 		<div
 			className={`${height} w-full overflow-hidden`}
 			onMouseEnter={handleMouseEnter}
@@ -95,8 +106,12 @@ export function GalleryCarousel({ variant = "full" }: GalleryCarouselProps) {
 				className="flex items-center gap-6 py-4"
 				style={{ willChange: "transform" }}
 			>
-				{images.map((image, i) => (
-					<GalleryCard key={`${image.src}-${i}`} image={image} index={i} />
+				{tripled.map((image, i) => (
+					<GalleryCard
+						key={`${image.src}-set${Math.floor(i / images.length)}`}
+						image={image}
+						index={i}
+					/>
 				))}
 			</div>
 		</div>

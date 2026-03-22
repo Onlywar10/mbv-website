@@ -2,6 +2,7 @@
 
 import { useActionState, useState } from "react";
 import { FormField } from "@/components/admin/form-field";
+import { ImageUpload } from "@/components/admin/image-upload";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import type { ActionState } from "@/lib/types";
@@ -123,12 +124,7 @@ export function EventForm({ action, defaultValues, submitLabel = "Create Event" 
 				placeholder="Detailed event description"
 			/>
 
-			<FormField
-				name="imageUrl"
-				label="Image URL"
-				defaultValue={defaultValues?.imageUrl}
-				placeholder="/images/events/photo.jpg"
-			/>
+			<ImageUpload name="imageUrl" label="Event Image" currentUrl={defaultValues?.imageUrl} />
 
 			<FormField
 				name="accessibility"

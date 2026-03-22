@@ -5,16 +5,6 @@ export interface TeamMember {
 	image: string;
 }
 
-export interface Testimonial {
-	id: number;
-	name: string;
-	branch: string;
-	yearsServed: string;
-	quote: string;
-	longQuote: string;
-	image: string;
-}
-
 export interface Stat {
 	label: string;
 	value: number;
@@ -82,69 +72,6 @@ export const team: TeamMember[] = [
 		bio: "Ed brings decades of marine and boating experience to MBV, supporting fleet operations and on-water safety for all veteran programs.",
 		image:
 			"https://images.unsplash.com/photo-1519345182560-3f2917c472ef?w=300&h=300&fit=crop&crop=face",
-	},
-];
-
-// ─── TESTIMONIALS ────────────────────────────────────────
-
-export const testimonials: Testimonial[] = [
-	{
-		id: 1,
-		name: "Marcus Thompson",
-		branch: "U.S. Marine Corps",
-		yearsServed: "2004-2012",
-		quote:
-			"Being out on the water with other veterans who understand — that's something no therapy session can replicate.",
-		longQuote:
-			"After two deployments, I struggled with the transition back to civilian life. A buddy told me about MBV's fishing trips. That first morning on the Pescador, watching the sun rise over Monterey Bay, I felt something I hadn't felt in years — peace. Being out on the water with other veterans who understand, who've been through it — that's something no therapy session can replicate. MBV gave me my weekends back. They gave me a community.",
-		image:
-			"https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=300&h=300&fit=crop&crop=face",
-	},
-	{
-		id: 2,
-		name: "Sarah Mitchell",
-		branch: "U.S. Navy",
-		yearsServed: "2008-2016",
-		quote:
-			"MBV doesn't just take you fishing — they remind you that you're still part of something bigger than yourself.",
-		longQuote:
-			"I was medically retired after an injury during my second deployment. The isolation was the hardest part. When I found Monterey Bay Veterans, I was skeptical — another veteran program, right? But from the moment I stepped on that boat, I knew this was different. The volunteers genuinely care. The other veterans become your family. MBV doesn't just take you fishing — they remind you that you're still part of something bigger than yourself.",
-		image:
-			"https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=300&h=300&fit=crop&crop=face",
-	},
-	{
-		id: 3,
-		name: "Robert Chen",
-		branch: "U.S. Army",
-		yearsServed: "1998-2008",
-		quote: "My wheelchair doesn't stop me from catching a 20-pound salmon. MBV made sure of that.",
-		longQuote:
-			"When you're in a wheelchair, people assume there are a lot of things you can't do. MBV showed me that fishing isn't one of them. Their boat is fully accessible, the crew helps with everything, and out there on the bay, I'm not a disabled veteran — I'm just a fisherman trying to land a big one. My wheelchair doesn't stop me from catching a 20-pound salmon. MBV made sure of that. I've been coming to the salmon derby every year since 2015.",
-		image:
-			"https://images.unsplash.com/photo-1463453091185-61582044d556?w=300&h=300&fit=crop&crop=face",
-	},
-	{
-		id: 4,
-		name: "Diana Reyes",
-		branch: "U.S. Air Force",
-		yearsServed: "2010-2018",
-		quote:
-			"The whale watching trip was the first time my kids saw me truly relax since coming home.",
-		longQuote:
-			"My daughter signed us up for the whale watching trip. She said, 'Mom, you need to get outside.' She was right. Standing on that boat, watching a humpback whale breach just a hundred yards away, with my kids screaming with excitement — I cried. It was the first time they'd seen me truly relax since coming home. MBV gave my family a memory we'll never forget. We've been on three more trips since.",
-		image:
-			"https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=300&h=300&fit=crop&crop=face",
-	},
-	{
-		id: 5,
-		name: 'James "JD" Davidson',
-		branch: "U.S. Coast Guard",
-		yearsServed: "2001-2011",
-		quote: "I came for the fishing. I stayed for the brotherhood. MBV is family.",
-		longQuote:
-			"Being Coast Guard, I always loved the water. But after my service, I lost touch with it. MBV brought me back. The fishing is incredible — Monterey Bay is world-class — but it's the people that keep me coming back. I've made lifelong friends through these trips. Now I volunteer as crew on the Pescador. I came for the fishing. I stayed for the brotherhood. MBV is family.",
-		image:
-			"https://images.unsplash.com/photo-1504257432389-52343af06ae3?w=300&h=300&fit=crop&crop=face",
 	},
 ];
 

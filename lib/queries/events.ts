@@ -31,19 +31,6 @@ export async function getEventBySlug(slug: string) {
 	return result[0] ?? null;
 }
 
-export async function getEventCount() {
-	const result = await db.select({ value: count() }).from(events);
-	return result[0]?.value ?? 0;
-}
-
-export async function getPublishedEventCount() {
-	const result = await db
-		.select({ value: count() })
-		.from(events)
-		.where(eq(events.isPublished, true));
-	return result[0]?.value ?? 0;
-}
-
 export async function getEventTemplates() {
 	return db.select().from(eventTemplates).orderBy(asc(eventTemplates.name));
 }
@@ -79,6 +66,21 @@ export async function getRegistrationCount(eventId: string) {
 		.from(eventRegistrations)
 		.where(eq(eventRegistrations.eventId, eventId));
 	return result[0]?.value ?? 0;
+}
+
+export async function getParticipantCountsByEvent() {
+	const result = await db
+		.select({
+			eventId: eventRegistrations.eventId,
+			value: count(),
+		})
+		.from(eventRegistrations)
+		.where(
+			and(eq(eventRegistrations.role, "participant"), eq(eventRegistrations.status, "registered")),
+		)
+		.groupBy(eventRegistrations.eventId);
+
+	return Object.fromEntries(result.map((r) => [r.eventId, r.value]));
 }
 
 export async function getWaitlistedCountsByEvent() {

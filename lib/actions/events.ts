@@ -1,5 +1,6 @@
 "use server";
 
+import { del } from "@vercel/blob";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
@@ -87,6 +88,17 @@ export async function updateEventAction(
 		}
 	}
 
+	// Clean up old blob if image changed
+	const oldImageUrl = current[0].imageUrl;
+	const newImageUrl = data.imageUrl || null;
+	if (
+		oldImageUrl &&
+		oldImageUrl !== newImageUrl &&
+		oldImageUrl.includes("blob.vercel-storage.com")
+	) {
+		await del(oldImageUrl);
+	}
+
 	await db
 		.update(events)
 		.set({
@@ -121,6 +133,15 @@ export async function updateEventAction(
 
 export async function deleteEventAction(id: string): Promise<ActionState> {
 	await requireAuth();
+
+	const event = await db
+		.select({ imageUrl: events.imageUrl })
+		.from(events)
+		.where(eq(events.id, id))
+		.limit(1);
+	if (event[0]?.imageUrl?.includes("blob.vercel-storage.com")) {
+		await del(event[0].imageUrl);
+	}
 
 	await db.delete(events).where(eq(events.id, id));
 
@@ -217,6 +238,15 @@ export async function createTemplateAction(
 
 export async function deleteTemplateAction(id: string): Promise<ActionState> {
 	await requireAuth();
+
+	const template = await db
+		.select({ imageUrl: eventTemplates.imageUrl })
+		.from(eventTemplates)
+		.where(eq(eventTemplates.id, id))
+		.limit(1);
+	if (template[0]?.imageUrl?.includes("blob.vercel-storage.com")) {
+		await del(template[0].imageUrl);
+	}
 
 	await db.delete(eventTemplates).where(eq(eventTemplates.id, id));
 

@@ -5,10 +5,20 @@ import { GalleryCarousel } from "@/components/sections/gallery-carousel";
 import { Hero } from "@/components/sections/hero";
 import { ImpactCounters } from "@/components/sections/impact-counters";
 import { MissionBar } from "@/components/sections/mission-bar";
-import { getPublishedEvents } from "@/lib/queries/events";
+import { getParticipantCountsByEvent, getPublishedEvents } from "@/lib/queries/events";
+import { getGalleryImages } from "@/lib/queries/gallery";
 
 export default async function Home() {
-	const events = await getPublishedEvents();
+	const [rawEvents, participantCounts, galleryImages] = await Promise.all([
+		getPublishedEvents(),
+		getParticipantCountsByEvent(),
+		getGalleryImages(),
+	]);
+
+	const events = rawEvents.map((e) => ({
+		...e,
+		spotsLeft: Math.max(0, e.participantCapacity - (participantCounts[e.id] ?? 0)),
+	}));
 
 	return (
 		<>
@@ -25,7 +35,10 @@ export default async function Home() {
 						A glimpse into the experiences we create for our veterans.
 					</p>
 				</div>
-				<GalleryCarousel variant="compact" />
+				<GalleryCarousel
+					variant="compact"
+					images={galleryImages.map((img) => ({ src: img.url, alt: img.alt ?? "" }))}
+				/>
 			</section>
 			<AboutPreview />
 			<CtaBanner />

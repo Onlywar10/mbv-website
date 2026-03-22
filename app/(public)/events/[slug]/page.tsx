@@ -8,7 +8,7 @@ import { ScrollReveal } from "@/components/shared/scroll-reveal";
 import { SectionHeading } from "@/components/shared/section-heading";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { getEventBySlug, getPublishedEvents } from "@/lib/queries/events";
+import { getEventBySlug, getPublishedEvents, getRegistrationCount } from "@/lib/queries/events";
 import type { PublicEvent } from "@/lib/types";
 
 // -- Dynamic metadata ---------------------------------------
@@ -66,8 +66,12 @@ export default async function EventDetailPage({ params }: PageProps) {
 		notFound();
 	}
 
-	// Get related events (same category first, then others, excluding current)
-	const allEvents = await getPublishedEvents();
+	const [allEvents, regCount] = await Promise.all([
+		getPublishedEvents(),
+		getRegistrationCount(event.id),
+	]);
+
+	const spotsLeft = Math.max(0, event.participantCapacity - regCount);
 	const related = allEvents
 		.filter((e) => e.slug !== event.slug)
 		.sort((a, b) => {
@@ -159,9 +163,7 @@ export default async function EventDetailPage({ params }: PageProps) {
 										</div>
 										<div>
 											<p className="text-xs text-muted-foreground">Availability</p>
-											<p className="font-medium text-primary">
-												{event.participantCapacity} spots left
-											</p>
+											<p className="font-medium text-primary">{spotsLeft} spots left</p>
 										</div>
 									</div>
 								</div>
@@ -201,23 +203,24 @@ export default async function EventDetailPage({ params }: PageProps) {
 							<ScrollReveal direction="right" delay={0.1}>
 								<Card className="rounded-sm ring-1 ring-border shadow-sharp">
 									<CardContent className="pt-2 text-center">
-										<div className="mb-2 text-4xl font-bold text-rust">
-											{event.participantCapacity}
-										</div>
-										<p className="text-sm font-medium text-muted-foreground">Spots Available</p>
+										<div className="mb-2 text-4xl font-bold text-rust">{spotsLeft}</div>
+										<p className="text-sm font-medium text-muted-foreground">
+											of {event.participantCapacity} Spots Available
+										</p>
 										<div className="mt-4 h-2 w-full overflow-hidden rounded-full bg-muted">
 											<div
 												className="h-full rounded-full bg-rust transition-all"
 												style={{
-													width: `${Math.max(10, 100 - event.participantCapacity * 2)}%`,
+													width: `${event.participantCapacity > 0 ? Math.round((regCount / event.participantCapacity) * 100) : 0}%`,
 												}}
 												role="progressbar"
-												aria-valuenow={event.participantCapacity}
-												aria-label={`${event.participantCapacity} spots remaining`}
+												aria-valuenow={spotsLeft}
+												aria-valuemax={event.participantCapacity}
+												aria-label={`${spotsLeft} of ${event.participantCapacity} spots remaining`}
 											/>
 										</div>
 										<p className="mt-2 text-xs text-muted-foreground">
-											Filling up fast — sign up today!
+											{regCount} registered — {spotsLeft > 0 ? "sign up today!" : "fully booked"}
 										</p>
 									</CardContent>
 								</Card>

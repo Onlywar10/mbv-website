@@ -1,4 +1,4 @@
-import { count, desc, eq, ilike, or, sql } from "drizzle-orm";
+import { desc, eq, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { clientEventHistory } from "@/lib/db/schema/client-event-history";
 import { clientRoles } from "@/lib/db/schema/client-roles";
@@ -48,31 +48,6 @@ export async function getClientDonations(clientId: string) {
 		.from(donations)
 		.where(eq(donations.clientId, clientId))
 		.orderBy(desc(donations.donatedAt));
-}
-
-export async function getClientCount() {
-	const result = await db.select({ value: count() }).from(clients);
-	return result[0]?.value ?? 0;
-}
-
-export async function searchClients(query: string) {
-	const pattern = `%${query}%`;
-	return db
-		.select({
-			id: clients.id,
-			firstName: clients.firstName,
-			lastName: clients.lastName,
-			email: clients.email,
-		})
-		.from(clients)
-		.where(
-			or(
-				ilike(clients.firstName, pattern),
-				ilike(clients.lastName, pattern),
-				ilike(clients.email, pattern),
-			),
-		)
-		.limit(20);
 }
 
 export async function getAllDonations() {

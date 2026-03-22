@@ -11,6 +11,7 @@ import { AnimatedCounter } from "@/components/shared/animated-counter";
 import { ScrollReveal } from "@/components/shared/scroll-reveal";
 import { SectionHeading } from "@/components/shared/section-heading";
 import { impactStats, milestones, programs, team } from "@/lib/data";
+import { getGalleryImages } from "@/lib/queries/gallery";
 
 export const metadata = {
 	title: "About & Impact",
@@ -39,7 +40,8 @@ const values = [
 	},
 ];
 
-export default function AboutPage() {
+export default async function AboutPage() {
+	const galleryImages = await getGalleryImages();
 	return (
 		<article>
 			{/* -- 1. Page Hero ----------------------------------- */}
@@ -220,7 +222,10 @@ export default function AboutPage() {
 						subtitle="Moments from our fishing trips, whale watching expeditions, and community events"
 					/>
 				</div>
-				<GalleryCarousel variant="full" />
+				<GalleryCarousel
+					variant="full"
+					images={galleryImages.map((img) => ({ src: img.url, alt: img.alt ?? "" }))}
+				/>
 			</section>
 
 			{/* -- 9. CTA ----------------------------------------- */}

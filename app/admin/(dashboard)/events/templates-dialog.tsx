@@ -4,6 +4,7 @@ import { FileText, Plus, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useActionState, useState } from "react";
 import { FormField } from "@/components/admin/form-field";
+import { ImageUpload } from "@/components/admin/image-upload";
 import { CategoryBadge } from "@/components/admin/status-badge";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -112,6 +113,7 @@ export function TemplatesDialog({ templates }: TemplatesDialogProps) {
 						</div>
 						<FormField name="defaultSpots" label="Default Spots" type="number" defaultValue={0} />
 					</div>
+					<ImageUpload name="imageUrl" label="Template Image" />
 					<Button
 						type="submit"
 						disabled={isPending}
