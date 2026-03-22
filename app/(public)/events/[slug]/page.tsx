@@ -126,7 +126,7 @@ export default async function EventDetailPage({ params }: PageProps) {
 				<div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
 					<div className="grid gap-12 lg:grid-cols-3">
 						{/* Main Content — 2 cols */}
-						<div className="lg:col-span-2 space-y-10">
+						<div className="min-w-0 lg:col-span-2 space-y-10">
 							{/* Quick Info Bar */}
 							<ScrollReveal>
 								<div className="flex flex-wrap gap-6 rounded-sm bg-cream p-6 shadow-sharp ring-1 ring-border">
@@ -171,9 +171,9 @@ export default async function EventDetailPage({ params }: PageProps) {
 
 							{/* Long Description */}
 							<ScrollReveal delay={0.1}>
-								<article>
+								<article className="overflow-hidden">
 									<h2 className="mb-4 text-2xl font-bold text-primary">About This Event</h2>
-									<p className="text-lg leading-relaxed text-muted-foreground">
+									<p className="break-words text-lg leading-relaxed text-muted-foreground">
 										{event.longDescription}
 									</p>
 								</article>
@@ -211,7 +211,7 @@ export default async function EventDetailPage({ params }: PageProps) {
 											<div
 												className="h-full rounded-full bg-rust transition-all"
 												style={{
-													width: `${event.participantCapacity > 0 ? Math.round((regCount / event.participantCapacity) * 100) : 0}%`,
+													width: `${event.participantCapacity > 0 ? Math.round((spotsLeft / event.participantCapacity) * 100) : 0}%`,
 												}}
 												role="progressbar"
 												aria-valuenow={spotsLeft}
