@@ -9,6 +9,7 @@ import { clientRoles } from "@/lib/db/schema/client-roles";
 import { clients } from "@/lib/db/schema/clients";
 import { eventRegistrations } from "@/lib/db/schema/event-registrations";
 import { events } from "@/lib/db/schema/events";
+import { sendRegistrationConfirmation } from "@/lib/email";
 import { findClientByEmail } from "@/lib/queries/clients";
 import type { ActionState } from "@/lib/types";
 import { eventSignupSchema, volunteerSignupSchema } from "@/lib/validations/public";
@@ -161,6 +162,46 @@ export async function publicEventSignupAction(
 		}
 	}
 
+	// Fetch event details for confirmation email
+	const eventDetails = await db
+		.select({
+			title: events.title,
+			date: events.date,
+			time: events.time,
+			location: events.location,
+		})
+		.from(events)
+		.where(eq(events.id, data.eventId))
+		.limit(1);
+
+	if (eventDetails[0]) {
+		const ev = eventDetails[0];
+
+		// Send confirmation to primary registrant
+		sendRegistrationConfirmation({
+			to: data.email,
+			firstName: data.firstName,
+			role: "participant",
+			eventTitle: ev.title,
+			eventDate: ev.date,
+			eventTime: ev.time,
+			eventLocation: ev.location,
+		}).catch(console.error);
+
+		// Send confirmation to guest if applicable
+		if (data.hasGuest && data.guestEmail && data.guestFirstName) {
+			sendRegistrationConfirmation({
+				to: data.guestEmail,
+				firstName: data.guestFirstName,
+				role: "participant",
+				eventTitle: ev.title,
+				eventDate: ev.date,
+				eventTime: ev.time,
+				eventLocation: ev.location,
+			}).catch(console.error);
+		}
+	}
+
 	revalidatePath("/events");
 	revalidatePath("/admin/events");
 
@@ -228,6 +269,37 @@ export async function volunteerForEventAction(
 		role: "volunteer",
 		status: "waitlisted",
 	});
+
+	// Fetch client and event details for confirmation email
+	const [clientResult, eventResult] = await Promise.all([
+		db
+			.select({ firstName: clients.firstName, email: clients.email })
+			.from(clients)
+			.where(eq(clients.id, clientId))
+			.limit(1),
+		db
+			.select({
+				title: events.title,
+				date: events.date,
+				time: events.time,
+				location: events.location,
+			})
+			.from(events)
+			.where(eq(events.id, eventId))
+			.limit(1),
+	]);
+
+	if (clientResult[0]?.email && eventResult[0]) {
+		sendRegistrationConfirmation({
+			to: clientResult[0].email,
+			firstName: clientResult[0].firstName,
+			role: "volunteer",
+			eventTitle: eventResult[0].title,
+			eventDate: eventResult[0].date,
+			eventTime: eventResult[0].time,
+			eventLocation: eventResult[0].location,
+		}).catch(console.error);
+	}
 
 	revalidatePath("/support/volunteer");
 	revalidatePath("/admin/events");
