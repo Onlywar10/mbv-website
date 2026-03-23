@@ -4,6 +4,7 @@ import { del } from "@vercel/blob";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
+import { notifyRegistrationStatusChange } from "@/lib/actions/email";
 import { requireAuth } from "@/lib/auth/require-auth";
 import { db } from "@/lib/db";
 import { eventRegistrations } from "@/lib/db/schema/event-registrations";
@@ -195,6 +196,11 @@ export async function updateRegistrationStatusAction(
 		.set({ status })
 		.where(eq(eventRegistrations.registeredBy, registrationId));
 
+	// Send approval email
+	if (status === "registered") {
+		notifyRegistrationStatusChange(registrationId, status).catch(console.error);
+	}
+
 	revalidatePath(`/admin/events/${eventId}`);
 	return { success: `Status updated to ${status}` };
 }
@@ -202,8 +208,12 @@ export async function updateRegistrationStatusAction(
 export async function deleteRegistrationAction(
 	registrationId: string,
 	eventId: string,
+	reason?: string,
 ): Promise<ActionState> {
 	await requireAuth();
+
+	// Send denial email before deleting the record
+	await notifyRegistrationStatusChange(registrationId, "cancelled", reason).catch(console.error);
 
 	await db.delete(eventRegistrations).where(eq(eventRegistrations.id, registrationId));
 

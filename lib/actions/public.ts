@@ -142,6 +142,23 @@ export async function publicEventSignupAction(
 			phone: data.guestPhone,
 		});
 
+		// Check if guest is already registered for this event
+		const guestExisting = await db
+			.select({ id: eventRegistrations.id })
+			.from(eventRegistrations)
+			.where(
+				and(
+					eq(eventRegistrations.eventId, data.eventId),
+					eq(eventRegistrations.clientId, guestClientId),
+					eq(eventRegistrations.role, "participant"),
+				),
+			)
+			.limit(1);
+
+		if (guestExisting.length > 0) {
+			return { error: "Your guest is already registered for this event." };
+		}
+
 		await db.insert(eventRegistrations).values({
 			eventId: data.eventId,
 			clientId: guestClientId,
