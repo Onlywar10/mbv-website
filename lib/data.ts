@@ -17,6 +17,7 @@ export interface DonationTier {
 	amount: string;
 	description: string;
 	features: string[];
+	highlighted?: boolean;
 }
 
 // Events are now served from the database via lib/queries/events.ts
@@ -111,7 +112,7 @@ export const donationTiers: DonationTier[] = [
 		name: "Supporter",
 		amount: "$25",
 		description: "Help cover bait and tackle for one veteran fishing trip",
-		features: ["Thank-you letter from MBV", "Name on our supporters page", "Quarterly newsletter"],
+		features: ["Thank-you letter from MBV", "Quarterly newsletter", "Name on our supporters page"],
 	},
 	{
 		name: "Advocate",
@@ -121,20 +122,15 @@ export const donationTiers: DonationTier[] = [
 	},
 	{
 		name: "Champion",
-		amount: "$100",
+		amount: "$100+",
 		description: "Fund a complete fishing trip experience for one veteran",
-		features: ["Everything in Advocate", "MBV t-shirt", "Invitation to annual celebration"],
-	},
-	{
-		name: "Hero",
-		amount: "$250+",
-		description: "Sponsor an entire group outing for disabled veterans",
 		features: [
-			"Everything in Champion",
-			"Personal thank-you from Executive Director",
+			"Everything in Advocate",
+			"MBV t-shirt",
+			"Invitation to annual celebration",
 			"Sponsor recognition at events",
-			"Annual impact report",
 		],
+		highlighted: true,
 	},
 ];
 
@@ -188,45 +184,5 @@ export const milestones: Milestone[] = [
 		title: "5,000+ Veterans Annually",
 		description:
 			"Today, MBV impacts over 5,000 veterans yearly through fishing trips, whale watching, derbies, volunteer events, and community programs.",
-	},
-];
-
-// ─── PROGRAMS ────────────────────────────────────────────
-
-export interface Program {
-	title: string;
-	description: string;
-	icon: string;
-	stats: string;
-}
-
-export const programs: Program[] = [
-	{
-		title: "Fishing Trips",
-		description:
-			"Year-round deep-sea fishing excursions aboard the Pescador targeting rockfish, salmon, and Dungeness crab. All equipment provided free of charge.",
-		icon: "fish",
-		stats: "40+ trips per year",
-	},
-	{
-		title: "Whale Watching",
-		description:
-			"Guided expeditions to see gray whales, humpbacks, orcas, and dolphins in the rich waters of Monterey Bay National Marine Sanctuary.",
-		icon: "waves",
-		stats: "20+ expeditions per year",
-	},
-	{
-		title: "Salmon Derbies",
-		description:
-			"Our flagship wheelchair-accessible salmon fishing tournaments, running annually since 1987 with prizes and community celebrations.",
-		icon: "trophy",
-		stats: "38 consecutive years",
-	},
-	{
-		title: "ADA Shuttle Service",
-		description:
-			"Wheelchair-accessible shuttles transporting disabled veterans to local events including raceway, golf, fairground, and community gatherings.",
-		icon: "bus",
-		stats: "500+ rides per year",
 	},
 ];

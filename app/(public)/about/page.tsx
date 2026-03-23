@@ -6,11 +6,10 @@ import { PageHero } from "@/components/layout/page-hero";
 import { GalleryCarousel } from "@/components/sections/gallery-carousel";
 import { HistoryTimeline } from "@/components/sections/history-timeline";
 import { LeadershipGrid } from "@/components/sections/leadership-grid";
-import { ProgramsGrid } from "@/components/sections/programs-grid";
 import { AnimatedCounter } from "@/components/shared/animated-counter";
 import { ScrollReveal } from "@/components/shared/scroll-reveal";
 import { SectionHeading } from "@/components/shared/section-heading";
-import { impactStats, milestones, programs, team } from "@/lib/data";
+import { impactStats, milestones, team } from "@/lib/data";
 import { getGalleryImages } from "@/lib/queries/gallery";
 
 export const metadata = {
@@ -203,18 +202,7 @@ export default async function AboutPage() {
 				</div>
 			</section>
 
-			{/* -- 7. Programs Breakdown -------------------------- */}
-			<section className="bg-cream py-20">
-				<div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-					<SectionHeading
-						title="Our Programs"
-						subtitle="From fishing to transportation, we serve veterans in every way we can"
-					/>
-					<ProgramsGrid programs={programs} />
-				</div>
-			</section>
-
-			{/* -- 8. Photo Gallery -------------------------------- */}
+			{/* -- 7. Photo Gallery -------------------------------- */}
 			<section className="bg-stone py-20">
 				<div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
 					<SectionHeading

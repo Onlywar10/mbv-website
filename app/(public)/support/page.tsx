@@ -1,14 +1,11 @@
 import {
 	ArrowRight,
-	ClipboardList,
+	Check,
 	CreditCard,
-	Gift,
+	Crown,
 	HandCoins,
-	Heart,
-	Mail,
 	Smartphone,
-	Star,
-	Users,
+	Sparkles,
 } from "lucide-react";
 import Link from "next/link";
 import { PageHero } from "@/components/layout/page-hero";
@@ -16,56 +13,22 @@ import { DonationTiers } from "@/components/sections/donation-tiers";
 import { VolunteerForm } from "@/components/sections/volunteer-form";
 import { ScrollReveal } from "@/components/shared/scroll-reveal";
 import { SectionHeading } from "@/components/shared/section-heading";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { donationTiers } from "@/lib/data";
 
 export const metadata = {
-	title: "Get Involved",
+	title: "Support Us",
 	description:
-		"Volunteer with Monterey Bay Veterans or support our mission to provide free fishing and community events for disabled veterans.",
+		"Support Monterey Bay Veterans through donations, membership, or volunteering. Help provide free fishing and community events for disabled veterans.",
 };
 
-const whyReasons = [
-	{
-		icon: Heart,
-		title: "Make a Difference",
-		description:
-			"Your time and support directly impacts the lives of disabled veterans in the Monterey Bay community.",
-	},
-	{
-		icon: Users,
-		title: "Build Community",
-		description:
-			"Join a passionate group of volunteers dedicated to honoring those who served our country.",
-	},
-	{
-		icon: Star,
-		title: "Create Memories",
-		description:
-			"Help create unforgettable experiences on the water that promote healing and connection.",
-	},
-];
-
-const otherWays = [
-	{
-		icon: Smartphone,
-		label: "Venmo",
-		detail: "Send directly via @MontereyBayVeterans",
-	},
-	{
-		icon: CreditCard,
-		label: "PayPal",
-		detail: "donate@montereybayvetera.org",
-	},
-	{
-		icon: ClipboardList,
-		label: "Membership Application",
-		detail: "Become an official MBV member and supporter",
-	},
-	{
-		icon: Gift,
-		label: "In-Kind Donations",
-		detail: "Fishing gear, event supplies, and other materials welcome",
-	},
+const membershipBenefits = [
+	"Support veteran programs year-round",
+	"Voting rights at annual meetings",
+	"Quarterly newsletter and updates",
+	"Invitation to member-only events",
+	"MBV member card and merchandise",
 ];
 
 export default function SupportPage() {
@@ -73,51 +36,17 @@ export default function SupportPage() {
 		<main>
 			{/* --- 1. Page Hero ------------------------------- */}
 			<PageHero
-				title="Get Involved"
-				subtitle="Volunteer your time or support our mission to serve disabled veterans"
+				title="Support Our Veterans"
+				subtitle="Donate, become a member, or volunteer your time to serve disabled veterans"
 				image="https://images.unsplash.com/photo-1559027615-cd4628902d4a?w=1920&h=600&fit=crop"
 			/>
 
-			{/* --- 2. Why Get Involved ------------------------ */}
+			{/* --- 2. Donate ---------------------------------- */}
 			<section className="py-20">
 				<div className="mx-auto max-w-6xl px-6">
 					<ScrollReveal>
 						<SectionHeading
-							title="Why Get Involved"
-							subtitle="Every hour volunteered and every dollar donated goes directly to serving those who served us"
-						/>
-					</ScrollReveal>
-
-					<div className="grid gap-8 sm:grid-cols-3">
-						{whyReasons.map((reason, i) => {
-							const Icon = reason.icon;
-							return (
-								<ScrollReveal key={reason.title} delay={i * 0.15}>
-									<div className="flex flex-col items-center text-center">
-										<div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-rust/10">
-											<Icon className="h-7 w-7 text-rust" />
-										</div>
-										<h3 className="mb-2 text-lg font-semibold text-primary">{reason.title}</h3>
-										<p className="text-sm leading-relaxed text-muted-foreground">
-											{reason.description}
-										</p>
-									</div>
-								</ScrollReveal>
-							);
-						})}
-					</div>
-				</div>
-			</section>
-
-			{/* --- 3. Volunteer Form -------------------------- */}
-			<VolunteerForm />
-
-			{/* --- 5. Support Our Mission (Donate) ------------ */}
-			<section className="py-20">
-				<div className="mx-auto max-w-6xl px-6">
-					<ScrollReveal>
-						<SectionHeading
-							title="Support Our Mission"
+							title="Make a Donation"
 							subtitle="Every contribution helps a veteran experience the healing power of the ocean"
 						/>
 					</ScrollReveal>
@@ -127,16 +56,31 @@ export default function SupportPage() {
 							<p className="text-muted-foreground leading-relaxed">
 								Monterey Bay Veterans is a 501(c)(19) nonprofit. Your generous contributions fund
 								free fishing trips, whale watching expeditions, adaptive equipment, and community
-								events for disabled veterans throughout the Monterey Bay region. Every dollar makes
-								a real difference.
+								events for disabled veterans throughout the Monterey Bay region.
 							</p>
 						</div>
 					</ScrollReveal>
 
 					<DonationTiers tiers={donationTiers} />
 
+					{/* Payment methods */}
 					<ScrollReveal delay={0.3}>
-						<p className="mt-10 text-center text-sm text-muted-foreground">
+						<div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center sm:gap-8">
+							<div className="flex items-center gap-2 text-sm text-muted-foreground">
+								<Smartphone className="h-4 w-4 text-rust" />
+								<span>
+									Venmo: <span className="font-medium text-primary">@MontereyBayVeterans</span>
+								</span>
+							</div>
+							<div className="flex items-center gap-2 text-sm text-muted-foreground">
+								<CreditCard className="h-4 w-4 text-rust" />
+								<span>
+									PayPal:{" "}
+									<span className="font-medium text-primary">donate@montereybayvetera.org</span>
+								</span>
+							</div>
+						</div>
+						<p className="mt-4 text-center text-xs text-muted-foreground">
 							All donations are tax-deductible. MBV is a registered 501(c)(19) veterans
 							organization.
 						</p>
@@ -144,53 +88,117 @@ export default function SupportPage() {
 				</div>
 			</section>
 
-			{/* --- 6. Other Ways to Give ---------------------- */}
+			{/* --- 3. Membership ------------------------------ */}
 			<section className="bg-cream py-20">
 				<div className="mx-auto max-w-4xl px-6">
 					<ScrollReveal>
 						<SectionHeading
-							title="Other Ways to Give"
-							subtitle="There are many ways to support our veteran programs"
+							title="Become a Member"
+							subtitle="Join our community and help sustain programs that serve veterans year-round"
 						/>
 					</ScrollReveal>
 
-					<div className="grid gap-6 sm:grid-cols-2">
-						{otherWays.map((way, i) => {
-							const Icon = way.icon;
-							return (
-								<ScrollReveal key={way.label} delay={i * 0.1}>
-									<div className="flex items-start gap-4 rounded-sm bg-card p-5 ring-1 ring-border">
-										<div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-sm bg-rust/10">
-											<Icon className="h-5 w-5 text-rust" />
-										</div>
-										<div>
-											<h3 className="font-semibold text-primary">{way.label}</h3>
-											<p className="mt-1 text-sm text-muted-foreground">{way.detail}</p>
-										</div>
-									</div>
-								</ScrollReveal>
-							);
-						})}
-					</div>
-
-					<ScrollReveal delay={0.4}>
-						<div className="mt-10 flex items-center justify-center gap-2 text-sm text-muted-foreground">
-							<Mail className="h-4 w-4" />
-							<span>
-								Questions about giving?{" "}
-								<a
-									href="mailto:info@montereybayvetera.org"
-									className="font-medium text-rust underline underline-offset-4 hover:text-rust-light"
-								>
-									info@montereybayvetera.org
-								</a>
-							</span>
+					<ScrollReveal delay={0.1}>
+						<div className="mx-auto mb-12 max-w-2xl text-center">
+							<p className="text-muted-foreground leading-relaxed">
+								MBV members play a vital role in keeping our programs running. Your membership
+								directly funds fishing trips, whale watching expeditions, and community events for
+								disabled veterans.
+							</p>
 						</div>
 					</ScrollReveal>
+
+					<div className="mx-auto grid max-w-3xl gap-6 sm:grid-cols-2">
+						{/* Annual */}
+						<ScrollReveal delay={0.15}>
+							<Card className="relative flex h-full flex-col rounded-sm bg-card ring-1 ring-border transition-shadow hover:shadow-sharp">
+								<CardHeader>
+									<CardTitle className="text-base font-semibold text-primary">
+										Annual Membership
+									</CardTitle>
+									<div className="text-3xl font-bold tracking-tight text-rust">
+										$40
+										<span className="text-base font-normal text-muted-foreground">/year</span>
+									</div>
+								</CardHeader>
+								<CardContent className="flex-1">
+									<ul className="space-y-2">
+										{membershipBenefits.map((benefit) => (
+											<li
+												key={benefit}
+												className="flex items-start gap-2 text-sm text-muted-foreground"
+											>
+												<Check className="mt-0.5 h-4 w-4 shrink-0 text-rust" />
+												{benefit}
+											</li>
+										))}
+									</ul>
+								</CardContent>
+								<CardFooter>
+									<Button
+										disabled
+										className="w-full rounded-sm bg-rust font-heading uppercase tracking-wider text-cream"
+									>
+										Coming Soon
+									</Button>
+								</CardFooter>
+							</Card>
+						</ScrollReveal>
+
+						{/* Lifetime */}
+						<ScrollReveal delay={0.25}>
+							<Card className="relative flex h-full flex-col rounded-sm bg-card ring-2 ring-ochre shadow-sharp transition-shadow">
+								<div className="absolute -top-3 left-1/2 -translate-x-1/2">
+									<span className="inline-flex items-center gap-1 rounded-full bg-ochre px-3 py-1 text-xs font-semibold text-ink">
+										<Sparkles className="h-3 w-3" />
+										Best Value
+									</span>
+								</div>
+								<CardHeader className="pt-4">
+									<CardTitle className="flex items-center gap-2 text-base font-semibold text-ochre">
+										<Crown className="h-4 w-4" />
+										Lifetime Membership
+									</CardTitle>
+									<div className="text-3xl font-bold tracking-tight text-ochre">
+										$385
+										<span className="text-base font-normal text-muted-foreground"> one-time</span>
+									</div>
+								</CardHeader>
+								<CardContent className="flex-1">
+									<ul className="space-y-2">
+										{membershipBenefits.map((benefit) => (
+											<li
+												key={benefit}
+												className="flex items-start gap-2 text-sm text-muted-foreground"
+											>
+												<Check className="mt-0.5 h-4 w-4 shrink-0 text-ochre" />
+												{benefit}
+											</li>
+										))}
+										<li className="flex items-start gap-2 text-sm font-medium text-ochre">
+											<Check className="mt-0.5 h-4 w-4 shrink-0" />
+											Never pay dues again
+										</li>
+									</ul>
+								</CardContent>
+								<CardFooter>
+									<Button
+										disabled
+										className="w-full rounded-sm bg-ochre font-heading uppercase tracking-wider text-ink"
+									>
+										Coming Soon
+									</Button>
+								</CardFooter>
+							</Card>
+						</ScrollReveal>
+					</div>
 				</div>
 			</section>
 
-			{/* --- 7. Bottom CTA ------------------------------ */}
+			{/* --- 4. Volunteer ------------------------------- */}
+			<VolunteerForm />
+
+			{/* --- 5. Bottom CTA ------------------------------ */}
 			<section className="section-gradient py-20">
 				<div className="mx-auto max-w-3xl px-6 text-center">
 					<ScrollReveal>
@@ -199,8 +207,7 @@ export default function SupportPage() {
 							Questions? We&apos;d Love to Hear From You
 						</h2>
 						<p className="mx-auto mt-4 max-w-xl text-lg text-white/80">
-							Whether you want to volunteer, donate, or just learn more about how we serve disabled
-							veterans, we&apos;re here to help.
+							Whether you want to donate, become a member, or volunteer, we&apos;re here to help.
 						</p>
 						<div className="mt-8">
 							<Link
