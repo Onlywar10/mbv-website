@@ -1,21 +1,12 @@
-import {
-	ArrowRight,
-	Check,
-	CreditCard,
-	Crown,
-	HandCoins,
-	Smartphone,
-	Sparkles,
-} from "lucide-react";
+import { ArrowRight, Check, Crown, HandCoins, Sparkles } from "lucide-react";
 import Link from "next/link";
+import Script from "next/script";
 import { PageHero } from "@/components/layout/page-hero";
-import { DonationTiers } from "@/components/sections/donation-tiers";
 import { VolunteerForm } from "@/components/sections/volunteer-form";
 import { ScrollReveal } from "@/components/shared/scroll-reveal";
 import { SectionHeading } from "@/components/shared/section-heading";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { donationTiers } from "@/lib/data";
 
 export const metadata = {
 	title: "Support Us",
@@ -61,26 +52,20 @@ export default function SupportPage() {
 						</div>
 					</ScrollReveal>
 
-					<DonationTiers tiers={donationTiers} />
+					{/* GiveButter donation widget */}
+					<div
+						className="mx-auto max-w-lg"
+						dangerouslySetInnerHTML={{
+							__html: '<givebutter-widget id="gmBVGm"></givebutter-widget>',
+						}}
+					/>
+					<Script
+						src="https://widgets.givebutter.com/latest.umd.cjs?acct=UXc2o743eV4mLOV3&p=other"
+						strategy="afterInteractive"
+					/>
 
-					{/* Payment methods */}
 					<ScrollReveal delay={0.3}>
-						<div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center sm:gap-8">
-							<div className="flex items-center gap-2 text-sm text-muted-foreground">
-								<Smartphone className="h-4 w-4 text-rust" />
-								<span>
-									Venmo: <span className="font-medium text-primary">@MontereyBayVeterans</span>
-								</span>
-							</div>
-							<div className="flex items-center gap-2 text-sm text-muted-foreground">
-								<CreditCard className="h-4 w-4 text-rust" />
-								<span>
-									PayPal:{" "}
-									<span className="font-medium text-primary">donate@montereybayvetera.org</span>
-								</span>
-							</div>
-						</div>
-						<p className="mt-4 text-center text-xs text-muted-foreground">
+						<p className="mt-6 text-center text-xs text-muted-foreground">
 							All donations are tax-deductible. MBV is a registered 501(c)(19) veterans
 							organization.
 						</p>
@@ -111,7 +96,7 @@ export default function SupportPage() {
 					<div className="mx-auto grid max-w-3xl gap-6 sm:grid-cols-2">
 						{/* Annual */}
 						<ScrollReveal delay={0.15}>
-							<Card className="relative flex h-full flex-col rounded-sm bg-card ring-1 ring-border transition-shadow hover:shadow-sharp">
+							<Card className="relative flex h-full flex-col overflow-visible rounded-sm bg-card ring-2 ring-ochre shadow-sharp transition-shadow">
 								<CardHeader>
 									<CardTitle className="text-base font-semibold text-primary">
 										Annual Membership
@@ -147,7 +132,7 @@ export default function SupportPage() {
 
 						{/* Lifetime */}
 						<ScrollReveal delay={0.25}>
-							<Card className="relative flex h-full flex-col rounded-sm bg-card ring-2 ring-ochre shadow-sharp transition-shadow">
+							<Card className="relative flex h-full flex-col overflow-visible rounded-sm bg-card ring-2 ring-ochre shadow-sharp transition-shadow">
 								<div className="absolute -top-3 left-1/2 -translate-x-1/2">
 									<span className="inline-flex items-center gap-1 rounded-full bg-ochre px-3 py-1 text-xs font-semibold text-ink">
 										<Sparkles className="h-3 w-3" />

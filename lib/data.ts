@@ -12,14 +12,6 @@ export interface Stat {
 	description: string;
 }
 
-export interface DonationTier {
-	name: string;
-	amount: string;
-	description: string;
-	features: string[];
-	highlighted?: boolean;
-}
-
 // Events are now served from the database via lib/queries/events.ts
 
 // --- TEAM ------------------------------------------------
@@ -102,35 +94,6 @@ export const impactStats: Stat[] = [
 		value: 10000,
 		suffix: "+",
 		description: "Hours donated by our incredible volunteer community",
-	},
-];
-
-// ─── DONATION TIERS ──────────────────────────────────────
-
-export const donationTiers: DonationTier[] = [
-	{
-		name: "Supporter",
-		amount: "$25",
-		description: "Help cover bait and tackle for one veteran fishing trip",
-		features: ["Thank-you letter from MBV", "Quarterly newsletter", "Name on our supporters page"],
-	},
-	{
-		name: "Advocate",
-		amount: "$50",
-		description: "Sponsor a veteran's spot on a whale watching expedition",
-		features: ["Everything in Supporter", "MBV sticker and pin", "Social media recognition"],
-	},
-	{
-		name: "Champion",
-		amount: "$100+",
-		description: "Fund a complete fishing trip experience for one veteran",
-		features: [
-			"Everything in Advocate",
-			"MBV t-shirt",
-			"Invitation to annual celebration",
-			"Sponsor recognition at events",
-		],
-		highlighted: true,
 	},
 ];
 
