@@ -5,7 +5,6 @@ import { PageHero } from "@/components/layout/page-hero";
 import { VolunteerForm } from "@/components/sections/volunteer-form";
 import { ScrollReveal } from "@/components/shared/scroll-reveal";
 import { SectionHeading } from "@/components/shared/section-heading";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 
 export const metadata = {
@@ -120,12 +119,12 @@ export default function SupportPage() {
 									</ul>
 								</CardContent>
 								<CardFooter>
-									<Button
-										disabled
-										className="w-full rounded-sm bg-rust font-heading uppercase tracking-wider text-cream"
-									>
-										Coming Soon
-									</Button>
+									<div
+										className="w-full"
+										dangerouslySetInnerHTML={{
+											__html: '<givebutter-widget id="gMYaEN"></givebutter-widget>',
+										}}
+									/>
 								</CardFooter>
 							</Card>
 						</ScrollReveal>
@@ -167,12 +166,12 @@ export default function SupportPage() {
 									</ul>
 								</CardContent>
 								<CardFooter>
-									<Button
-										disabled
-										className="w-full rounded-sm bg-ochre font-heading uppercase tracking-wider text-ink"
-									>
-										Coming Soon
-									</Button>
+									<div
+										className="w-full"
+										dangerouslySetInnerHTML={{
+											__html: '<givebutter-widget id="p71J92"></givebutter-widget>',
+										}}
+									/>
 								</CardFooter>
 							</Card>
 						</ScrollReveal>
