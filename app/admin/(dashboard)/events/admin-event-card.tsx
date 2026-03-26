@@ -1,9 +1,9 @@
 "use client";
 
-import { CalendarDays, Eye, EyeOff, MapPin, Pencil, Users } from "lucide-react";
+import { CalendarDays, Eye, EyeOff, MapPin, Pencil, Trash2, Users } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { DeleteDialog } from "@/components/admin/delete-dialog";
+import { ReasonDialog } from "@/components/admin/reason-dialog";
 import { CategoryBadge, PublishBadge } from "@/components/admin/status-badge";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -103,10 +103,19 @@ export function AdminEventCard({ event, waitlistedCount }: AdminEventCardProps) 
 						{event.isPublished ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
 					</Button>
 				</form>
-				<DeleteDialog
-					title={event.title}
-					onConfirm={async () => {
-						await deleteEventAction(event.id);
+				<ReasonDialog
+					title="Cancel Event"
+					description={`"${event.title}" will be deleted and all registered participants and volunteers will be notified by email.`}
+					confirmLabel="Cancel Event"
+					pendingLabel="Cancelling..."
+					placeholder="e.g. Weather conditions, venue unavailable, insufficient signups..."
+					trigger={
+						<Button variant="ghost" size="sm">
+							<Trash2 className="h-4 w-4" />
+						</Button>
+					}
+					onConfirm={async (reason) => {
+						await deleteEventAction(event.id, reason);
 					}}
 				/>
 			</CardFooter>

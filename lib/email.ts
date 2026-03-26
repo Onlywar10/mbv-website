@@ -122,11 +122,15 @@ export async function sendStatusUpdateEmail({
 
 				${message}
 
-				${approved ? `<div style="background: #f7fafc; border-left: 4px solid #276749; padding: 12px 16px; margin: 16px 0;">
+				${
+					approved
+						? `<div style="background: #f7fafc; border-left: 4px solid #276749; padding: 12px 16px; margin: 16px 0;">
 					<p style="margin: 0; font-weight: bold; font-size: 18px;">${eventTitle}</p>
 					<p style="margin: 4px 0 0; color: #4a5568;">${dateFormatted}${eventTime ? ` at ${eventTime}` : ""}</p>
 					${eventLocation ? `<p style="margin: 4px 0 0; color: #4a5568;">${eventLocation}</p>` : ""}
-				</div>` : ""}
+				</div>`
+						: ""
+				}
 
 				<p style="margin-top: 24px;">— The Monterey Bay Veterans Team</p>
 
@@ -229,6 +233,64 @@ export async function sendDailyRegistrationReport({
 					This report was generated from the Monterey Bay Veterans admin system.
 					<a href="${baseUrl}/admin/events" style="color: #c0392b;">View all events</a>
 				</p>
+			</div>
+		`,
+	});
+}
+
+export async function sendEventCancellationEmail({
+	to,
+	firstName,
+	eventTitle,
+	eventDate,
+	reason,
+}: {
+	to: string;
+	firstName: string;
+	eventTitle: string;
+	eventDate: string;
+	reason?: string;
+}) {
+	const dateFormatted = new Date(`${eventDate}T00:00:00`).toLocaleDateString("en-US", {
+		weekday: "long",
+		year: "numeric",
+		month: "long",
+		day: "numeric",
+	});
+
+	const reasonBlock = reason
+		? `<div style="background: #fff5f5; border-left: 4px solid #c0392b; padding: 12px 16px; margin: 12px 0;">
+				<p style="margin: 0; font-weight: 600; font-size: 13px; color: #718096; text-transform: uppercase;">Reason</p>
+				<p style="margin: 4px 0 0; color: #1a202c;">${reason}</p>
+			</div>`
+		: "";
+
+	await resend.emails.send({
+		from: EMAIL_FROM,
+		to: [to],
+		subject: `Event Cancelled — ${eventTitle}`,
+		html: `
+			<div style="font-family: sans-serif; max-width: 520px; margin: 0 auto; color: #1a202c;">
+				<h1 style="color: #1a365d; font-size: 24px; margin-bottom: 4px;">Monterey Bay Veterans</h1>
+				<hr style="border: none; border-top: 2px solid #c0392b; margin: 16px 0;" />
+
+				<p>Hi ${firstName},</p>
+
+				<p>We regret to inform you that the following event has been <strong style="color: #c0392b;">cancelled</strong>:</p>
+
+				<div style="background: #f7fafc; border-left: 4px solid #c0392b; padding: 12px 16px; margin: 16px 0;">
+					<p style="margin: 0; font-weight: bold; font-size: 18px;">${eventTitle}</p>
+					<p style="margin: 4px 0 0; color: #4a5568;">${dateFormatted}</p>
+				</div>
+
+				${reasonBlock}
+
+				<p>We apologize for any inconvenience. Please check our events page for upcoming opportunities.</p>
+
+				<p style="margin-top: 24px;">— The Monterey Bay Veterans Team</p>
+
+				<hr style="border: none; border-top: 1px solid #e2e8f0; margin: 24px 0;" />
+				<p style="color: #a0aec0; font-size: 12px;">You received this email because you were registered for an event at Monterey Bay Veterans.</p>
 			</div>
 		`,
 	});

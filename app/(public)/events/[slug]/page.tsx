@@ -180,21 +180,23 @@ export default async function EventDetailPage({ params }: PageProps) {
 							</ScrollReveal>
 
 							{/* Accessibility */}
-							<ScrollReveal delay={0.15}>
-								<div className="rounded-sm border border-rust/20 bg-rust/5 p-6">
-									<div className="flex items-start gap-4">
-										<div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-sm bg-rust/10">
-											<Accessibility className="h-5 w-5 text-rust" />
-										</div>
-										<div>
-											<h3 className="mb-1 text-lg font-semibold text-primary">
-												Accessibility Information
-											</h3>
-											<p className="text-muted-foreground">{event.accessibility}</p>
+							{event.accessibility && (
+								<ScrollReveal delay={0.15}>
+									<div className="rounded-sm border border-rust/20 bg-rust/5 p-6">
+										<div className="flex items-start gap-4">
+											<div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-sm bg-rust/10">
+												<Accessibility className="h-5 w-5 text-rust" />
+											</div>
+											<div>
+												<h3 className="mb-1 text-lg font-semibold text-primary">
+													Accessibility Information
+												</h3>
+												<p className="text-muted-foreground">{event.accessibility}</p>
+											</div>
 										</div>
 									</div>
-								</div>
-							</ScrollReveal>
+								</ScrollReveal>
+							)}
 						</div>
 
 						{/* Sidebar — 1 col */}
@@ -240,6 +242,12 @@ export default async function EventDetailPage({ params }: PageProps) {
 											eventTitle={event.title}
 											category={event.category}
 										/>
+										<p className="text-center text-xs text-cream/60">
+											Want to help out?{" "}
+											<Link href="/support#volunteer-form" className="underline underline-offset-2 hover:text-cream">
+												Sign up to volunteer
+											</Link>
+										</p>
 									</CardContent>
 								</Card>
 							</ScrollReveal>
