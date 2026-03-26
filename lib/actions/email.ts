@@ -7,7 +7,11 @@ import { db } from "@/lib/db";
 import { clients } from "@/lib/db/schema/clients";
 import { eventRegistrations } from "@/lib/db/schema/event-registrations";
 import { events } from "@/lib/db/schema/events";
-import { sendDailyRegistrationReport, sendStatusUpdateEmail } from "@/lib/email";
+import {
+	sendDailyRegistrationReport,
+	sendEventCancellationEmail,
+	sendStatusUpdateEmail,
+} from "@/lib/email";
 import { getActiveAdminEmails, getWaitlistedRegistrations } from "@/lib/queries/email";
 import type { ActionState } from "@/lib/types";
 
@@ -143,6 +147,41 @@ export async function notifyRegistrationStatusChange(
 				eventDate: r.eventDate,
 				eventTime: r.eventTime,
 				eventLocation: r.eventLocation,
+				reason,
+			}).catch(console.error);
+		}
+	}
+}
+
+export async function notifyEventCancellation(eventId: string, reason?: string) {
+	// Fetch event details
+	const eventResult = await db
+		.select({ title: events.title, date: events.date })
+		.from(events)
+		.where(eq(events.id, eventId))
+		.limit(1);
+
+	if (!eventResult[0]) return;
+
+	const event = eventResult[0];
+
+	// Fetch all registered clients for this event
+	const registrants = await db
+		.select({
+			email: clients.email,
+			firstName: clients.firstName,
+		})
+		.from(eventRegistrations)
+		.innerJoin(clients, eq(eventRegistrations.clientId, clients.id))
+		.where(eq(eventRegistrations.eventId, eventId));
+
+	for (const registrant of registrants) {
+		if (registrant.email) {
+			sendEventCancellationEmail({
+				to: registrant.email,
+				firstName: registrant.firstName,
+				eventTitle: event.title,
+				eventDate: event.date,
 				reason,
 			}).catch(console.error);
 		}

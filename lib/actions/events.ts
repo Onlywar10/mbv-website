@@ -4,7 +4,7 @@ import { del } from "@vercel/blob";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
-import { notifyRegistrationStatusChange } from "@/lib/actions/email";
+import { notifyEventCancellation, notifyRegistrationStatusChange } from "@/lib/actions/email";
 import { requireAuth } from "@/lib/auth/require-auth";
 import { db } from "@/lib/db";
 import { eventRegistrations } from "@/lib/db/schema/event-registrations";
@@ -132,8 +132,11 @@ export async function updateEventAction(
 	return { success: "Event updated successfully" };
 }
 
-export async function deleteEventAction(id: string): Promise<ActionState> {
+export async function deleteEventAction(id: string, reason?: string): Promise<ActionState> {
 	await requireAuth();
+
+	// Notify all registrants before deleting
+	await notifyEventCancellation(id, reason).catch(console.error);
 
 	const event = await db
 		.select({ imageUrl: events.imageUrl })
@@ -215,6 +218,8 @@ export async function deleteRegistrationAction(
 	// Send denial email before deleting the record
 	await notifyRegistrationStatusChange(registrationId, "cancelled", reason).catch(console.error);
 
+	// Delete guest registrations linked to this parent
+	await db.delete(eventRegistrations).where(eq(eventRegistrations.registeredBy, registrationId));
 	await db.delete(eventRegistrations).where(eq(eventRegistrations.id, registrationId));
 
 	revalidatePath(`/admin/events/${eventId}`);
