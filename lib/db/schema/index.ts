@@ -12,4 +12,5 @@ export { eventCategoryEnum, events } from "./events";
 export { galleryImages } from "./gallery-images";
 export { membershipStatusEnum, memberships, membershipTypeEnum } from "./memberships";
 export { sessions } from "./sessions";
+export { siteSettings } from "./site-settings";
 export { users } from "./users";

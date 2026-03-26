@@ -9,6 +9,7 @@ import { donations } from "@/lib/db/schema/donations";
 import { memberships } from "@/lib/db/schema/memberships";
 import { sendMembershipConfirmationEmail } from "@/lib/email";
 import { findClientByEmail } from "@/lib/queries/clients";
+import { getGivebutterCampaignCodes } from "@/lib/queries/settings";
 
 function verifySignature(payload: string, signature: string | null): boolean {
 	const secret = process.env.GIVEBUTTER_WEBHOOK_SECRET;
@@ -16,12 +17,6 @@ function verifySignature(payload: string, signature: string | null): boolean {
 
 	const expected = createHmac("sha256", secret).update(payload).digest("hex");
 	return expected === signature;
-}
-
-function determineMembershipType(amount: number): "annual" | "lifetime" | null {
-	if (amount >= 385) return "lifetime";
-	if (amount >= 40) return "annual";
-	return null;
 }
 
 export async function POST(request: NextRequest) {
@@ -49,6 +44,7 @@ export async function POST(request: NextRequest) {
 	const amount = Number.parseFloat(transaction.amount);
 	const method = transaction.method ?? "other";
 	const transactionId = String(transaction.id ?? transaction.number ?? "");
+	const campaignCode = transaction.campaign_code ?? "";
 
 	if (!email || !firstName || !lastName) {
 		return Response.json({ error: "Missing required fields" }, { status: 400 });
@@ -89,8 +85,16 @@ export async function POST(request: NextRequest) {
 		notes: "GiveButter",
 	});
 
-	// Check if this is a membership payment
-	const membershipType = determineMembershipType(amount);
+	// Determine if this is a membership payment by matching campaign code
+	const campaignCodes = await getGivebutterCampaignCodes();
+	let membershipType: "annual" | "lifetime" | null = null;
+
+	if (campaignCodes.annual && campaignCode === campaignCodes.annual) {
+		membershipType = "annual";
+	} else if (campaignCodes.lifetime && campaignCode === campaignCodes.lifetime) {
+		membershipType = "lifetime";
+	}
+
 	if (membershipType) {
 		const expiresAt =
 			membershipType === "annual" ? new Date(Date.now() + 365 * 24 * 60 * 60 * 1000) : null;

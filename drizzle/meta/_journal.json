@@ -64,6 +64,13 @@
       "when": 1774565982611,
       "tag": "0008_famous_shiva",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1774566797304,
+      "tag": "0009_volatile_moon_knight",
+      "breakpoints": true
     }
   ]
 }
