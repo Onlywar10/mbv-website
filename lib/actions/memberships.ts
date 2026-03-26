@@ -45,10 +45,7 @@ export async function revokeMembershipAction(
 ): Promise<ActionState> {
 	await requireAuth();
 
-	await db
-		.update(memberships)
-		.set({ status: "cancelled" })
-		.where(eq(memberships.id, membershipId));
+	await db.update(memberships).set({ status: "cancelled" }).where(eq(memberships.id, membershipId));
 
 	// Remove "member" role
 	await db

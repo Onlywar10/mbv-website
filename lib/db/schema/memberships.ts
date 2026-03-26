@@ -3,11 +3,7 @@ import { clients } from "./clients";
 
 export const membershipTypeEnum = pgEnum("membership_type", ["annual", "lifetime"]);
 
-export const membershipStatusEnum = pgEnum("membership_status", [
-	"active",
-	"expired",
-	"cancelled",
-]);
+export const membershipStatusEnum = pgEnum("membership_status", ["active", "expired", "cancelled"]);
 
 export const memberships = pgTable("memberships", {
 	id: uuid("id").defaultRandom().primaryKey(),

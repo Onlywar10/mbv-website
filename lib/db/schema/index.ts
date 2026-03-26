@@ -10,6 +10,6 @@ export {
 export { eventTemplates } from "./event-templates";
 export { eventCategoryEnum, events } from "./events";
 export { galleryImages } from "./gallery-images";
-export { memberships, membershipStatusEnum, membershipTypeEnum } from "./memberships";
+export { membershipStatusEnum, memberships, membershipTypeEnum } from "./memberships";
 export { sessions } from "./sessions";
 export { users } from "./users";
