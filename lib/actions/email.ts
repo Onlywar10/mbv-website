@@ -10,11 +10,9 @@ import { events } from "@/lib/db/schema/events";
 import {
 	sendDailyRegistrationReport,
 	sendEventCancellationEmail,
-	sendMembershipExpirationReminderEmail,
 	sendStatusUpdateEmail,
 } from "@/lib/email";
 import { getActiveAdminEmails, getWaitlistedRegistrations } from "@/lib/queries/email";
-import { getExpiringMemberships } from "@/lib/queries/memberships";
 import type { ActionState } from "@/lib/types";
 
 function getBaseUrl(): string {
@@ -153,30 +151,6 @@ export async function notifyRegistrationStatusChange(
 			}).catch(console.error);
 		}
 	}
-}
-
-export async function sendExpirationRemindersAction(_prevState: ActionState): Promise<ActionState> {
-	await requireAuth();
-
-	const expiring = await getExpiringMemberships(30);
-
-	if (expiring.length === 0) {
-		return { success: "No memberships expiring in the next 30 days." };
-	}
-
-	let sent = 0;
-	for (const m of expiring) {
-		if (m.clientEmail && m.expiresAt) {
-			sendMembershipExpirationReminderEmail({
-				to: m.clientEmail,
-				firstName: m.clientFirstName,
-				expiresAt: m.expiresAt,
-			}).catch(console.error);
-			sent++;
-		}
-	}
-
-	return { success: `Sent ${sent} expiration reminder${sent !== 1 ? "s" : ""}.` };
 }
 
 export async function notifyEventCancellation(eventId: string, reason?: string) {

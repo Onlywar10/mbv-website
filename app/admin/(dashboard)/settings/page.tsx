@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { getGivebutterCampaignCodes } from "@/lib/queries/settings";
 import { CampaignCodesForm } from "./campaign-codes-form";
-import { SendRemindersButton } from "./send-reminders-button";
 import { SendReportButton } from "./send-report-button";
 
 export const metadata: Metadata = {
@@ -51,20 +50,6 @@ export default async function SettingsPage() {
 				</CardContent>
 			</Card>
 
-			<Card className="mt-6">
-				<CardHeader>
-					<CardTitle className="font-heading text-sm uppercase tracking-wider text-muted-foreground">
-						Membership Reminders
-					</CardTitle>
-					<CardDescription>
-						Send expiration reminders to members whose annual membership expires within the next 30
-						days.
-					</CardDescription>
-				</CardHeader>
-				<CardContent>
-					<SendRemindersButton />
-				</CardContent>
-			</Card>
-		</div>
+			</div>
 	);
 }
