@@ -295,3 +295,95 @@ export async function sendEventCancellationEmail({
 		`,
 	});
 }
+
+export async function sendMembershipConfirmationEmail({
+	to,
+	firstName,
+	type,
+	expiresAt,
+}: {
+	to: string;
+	firstName: string;
+	type: "annual" | "lifetime";
+	expiresAt?: Date | null;
+}) {
+	const typeLabel = type === "lifetime" ? "Lifetime" : "Annual";
+	const expiryNote = expiresAt
+		? `<p style="margin: 4px 0 0; color: #4a5568;">Valid until ${expiresAt.toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}</p>`
+		: `<p style="margin: 4px 0 0; color: #4a5568;">Your membership never expires</p>`;
+
+	await resend.emails.send({
+		from: EMAIL_FROM,
+		to: [to],
+		subject: `Welcome, ${typeLabel} Member — Monterey Bay Veterans`,
+		html: `
+			<div style="font-family: sans-serif; max-width: 520px; margin: 0 auto; color: #1a202c;">
+				<h1 style="color: #1a365d; font-size: 24px; margin-bottom: 4px;">Monterey Bay Veterans</h1>
+				<hr style="border: none; border-top: 2px solid #c0392b; margin: 16px 0;" />
+
+				<p>Hi ${firstName},</p>
+
+				<p>Welcome to the Monterey Bay Veterans family! Your <strong>${typeLabel} Membership</strong> is now <strong style="color: #276749;">active</strong>.</p>
+
+				<div style="background: #f7fafc; border-left: 4px solid #276749; padding: 12px 16px; margin: 16px 0;">
+					<p style="margin: 0; font-weight: bold; font-size: 18px;">${typeLabel} Membership</p>
+					${expiryNote}
+				</div>
+
+				<p>As a member, you enjoy voting rights at annual meetings, quarterly newsletters, invitations to member-only events, and more.</p>
+
+				<p>Thank you for supporting our mission to serve disabled veterans.</p>
+
+				<p style="margin-top: 24px;">— The Monterey Bay Veterans Team</p>
+
+				<hr style="border: none; border-top: 1px solid #e2e8f0; margin: 24px 0;" />
+				<p style="color: #a0aec0; font-size: 12px;">You received this email because you became a member of Monterey Bay Veterans.</p>
+			</div>
+		`,
+	});
+}
+
+export async function sendMembershipExpirationReminderEmail({
+	to,
+	firstName,
+	expiresAt,
+}: {
+	to: string;
+	firstName: string;
+	expiresAt: Date;
+}) {
+	const expiryFormatted = expiresAt.toLocaleDateString("en-US", {
+		weekday: "long",
+		year: "numeric",
+		month: "long",
+		day: "numeric",
+	});
+
+	await resend.emails.send({
+		from: EMAIL_FROM,
+		to: [to],
+		subject: "Your MBV Membership is Expiring Soon",
+		html: `
+			<div style="font-family: sans-serif; max-width: 520px; margin: 0 auto; color: #1a202c;">
+				<h1 style="color: #1a365d; font-size: 24px; margin-bottom: 4px;">Monterey Bay Veterans</h1>
+				<hr style="border: none; border-top: 2px solid #c0392b; margin: 16px 0;" />
+
+				<p>Hi ${firstName},</p>
+
+				<p>Your annual membership with Monterey Bay Veterans is expiring on <strong>${expiryFormatted}</strong>.</p>
+
+				<div style="background: #fefcbf; border-left: 4px solid #d69e2e; padding: 12px 16px; margin: 16px 0;">
+					<p style="margin: 0; font-weight: bold; font-size: 16px; color: #975a16;">Membership Expiring Soon</p>
+					<p style="margin: 4px 0 0; color: #744210;">Renew to keep your member benefits active.</p>
+				</div>
+
+				<p>Visit our website to renew your membership and continue supporting our mission to serve disabled veterans.</p>
+
+				<p style="margin-top: 24px;">— The Monterey Bay Veterans Team</p>
+
+				<hr style="border: none; border-top: 1px solid #e2e8f0; margin: 24px 0;" />
+				<p style="color: #a0aec0; font-size: 12px;">You received this email because you are a member of Monterey Bay Veterans.</p>
+			</div>
+		`,
+	});
+}
