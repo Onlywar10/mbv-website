@@ -1,6 +1,14 @@
 "use client";
 
-import { Calendar, DollarSign, ImageIcon, LayoutDashboard, Settings, Users } from "lucide-react";
+import {
+	Calendar,
+	Crown,
+	DollarSign,
+	ImageIcon,
+	LayoutDashboard,
+	Settings,
+	Users,
+} from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -10,6 +18,7 @@ const navItems = [
 	{ href: "/admin/events", label: "Events", icon: Calendar },
 	{ href: "/admin/clients", label: "Clients", icon: Users },
 	{ href: "/admin/donations", label: "Donations", icon: DollarSign },
+	{ href: "/admin/members", label: "Members", icon: Crown },
 	{ href: "/admin/gallery", label: "Gallery", icon: ImageIcon },
 	{ href: "/admin/settings", label: "Settings", icon: Settings },
 ];
