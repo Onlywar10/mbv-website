@@ -6,15 +6,16 @@ interface PageHeroProps {
 	title: string;
 	subtitle?: string;
 	image: string;
+	imagePosition?: string;
 }
 
-export function PageHero({ title, subtitle, image }: PageHeroProps) {
+export function PageHero({ title, subtitle, image, imagePosition }: PageHeroProps) {
 	return (
 		<section className="relative flex h-[40vh] min-h-[320px] items-center justify-center overflow-hidden">
 			{/* Background */}
 			<div
 				className="absolute inset-0 bg-cover bg-center"
-				style={{ backgroundImage: `url(${image})` }}
+				style={{ backgroundImage: `url(${image})`, backgroundPosition: imagePosition }}
 			/>
 			<div className="absolute inset-0 hero-gradient" />
 

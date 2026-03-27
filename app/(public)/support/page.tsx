@@ -28,7 +28,8 @@ export default function SupportPage() {
 			<PageHero
 				title="Support Our Veterans"
 				subtitle="Donate, become a member, or volunteer your time to serve disabled veterans"
-				image="https://images.unsplash.com/photo-1559027615-cd4628902d4a?w=1920&h=600&fit=crop"
+				image="/images/support/support-image.jpg"
+				imagePosition="center 60%"
 			/>
 
 			{/* --- 2. Donate ---------------------------------- */}

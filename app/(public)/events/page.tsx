@@ -31,7 +31,8 @@ export default async function EventsPage() {
 			<PageHero
 				title="Events & Contact"
 				subtitle="Join us on the water or get in touch"
-				image="https://images.unsplash.com/photo-1504701954957-2010ec3bcec1?w=1920&h=600&fit=crop"
+				image="/images/events/event-image.png"
+				imagePosition="center 30%"
 			/>
 
 			{/* -- Events Section -------------------------------- */}

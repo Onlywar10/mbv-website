@@ -47,7 +47,7 @@ export default async function AboutPage() {
 			<PageHero
 				title="About Monterey Bay Veterans"
 				subtitle="Dedicated to serving the disabled veteran community since 1987"
-				image="https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=1920&h=600&fit=crop"
+				image="/images/about/About-Us-Hero.png"
 			/>
 
 			{/* -- 2. Mission & Vision ---------------------------- */}

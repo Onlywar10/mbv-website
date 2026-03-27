@@ -37,7 +37,7 @@ export default async function VolunteerEventsPage({ searchParams }: PageProps) {
 			<PageHero
 				title="Volunteer for Events"
 				subtitle={`Welcome, ${client.firstName}! Select the events you'd like to volunteer for.`}
-				image="https://images.unsplash.com/photo-1559027615-cd4628902d4a?w=1920&h=600&fit=crop"
+				image="/images/support/support-image.jpg"
 			/>
 
 			<section className="bg-cream py-20">
