@@ -6,7 +6,7 @@ import { EventFilter } from "@/components/sections/event-filter";
 import { ScrollReveal } from "@/components/shared/scroll-reveal";
 import { SectionHeading } from "@/components/shared/section-heading";
 import { Card, CardContent } from "@/components/ui/card";
-import { getParticipantCountsByEvent, getPublishedEvents } from "@/lib/queries/events";
+import { getRegistrationCountsByEvent, getPublishedEvents } from "@/lib/queries/events";
 
 export const metadata: Metadata = {
 	title: "Events & Contact",
@@ -15,14 +15,14 @@ export const metadata: Metadata = {
 };
 
 export default async function EventsPage() {
-	const [rawEvents, participantCounts] = await Promise.all([
+	const [rawEvents, registrationCounts] = await Promise.all([
 		getPublishedEvents(),
-		getParticipantCountsByEvent(),
+		getRegistrationCountsByEvent(),
 	]);
 
 	const events = rawEvents.map((e) => ({
 		...e,
-		spotsLeft: Math.max(0, e.participantCapacity - (participantCounts[e.id] ?? 0)),
+		spotsLeft: Math.max(0, e.participantCapacity - (registrationCounts[e.id]?.participants ?? 0)),
 	}));
 
 	return (

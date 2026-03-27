@@ -1,4 +1,4 @@
-import { and, asc, count, desc, eq } from "drizzle-orm";
+import { and, asc, count, desc, eq, lt, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { clients } from "@/lib/db/schema/clients";
 import { eventRegistrations } from "@/lib/db/schema/event-registrations";
@@ -6,7 +6,21 @@ import { eventTemplates } from "@/lib/db/schema/event-templates";
 import { events } from "@/lib/db/schema/events";
 
 export async function getEvents() {
-	return db.select().from(events).orderBy(desc(events.date));
+	// Auto-deactivate past events
+	const today = new Date().toISOString().split("T")[0];
+	await db
+		.update(events)
+		.set({ isPublished: false })
+		.where(and(lt(events.date, today), eq(events.isPublished, true)));
+
+	// Return events sorted: upcoming first (ascending), then past (descending)
+	return db
+		.select()
+		.from(events)
+		.orderBy(
+			sql`CASE WHEN ${events.date} >= ${today} THEN 0 ELSE 1 END`,
+			asc(events.date),
+		);
 }
 
 export async function getPublishedEvents() {
@@ -68,19 +82,29 @@ export async function getRegistrationCount(eventId: string) {
 	return result[0]?.value ?? 0;
 }
 
-export async function getParticipantCountsByEvent() {
+export async function getRegistrationCountsByEvent() {
 	const result = await db
 		.select({
 			eventId: eventRegistrations.eventId,
+			role: eventRegistrations.role,
 			value: count(),
 		})
 		.from(eventRegistrations)
-		.where(
-			and(eq(eventRegistrations.role, "participant"), eq(eventRegistrations.status, "registered")),
-		)
-		.groupBy(eventRegistrations.eventId);
+		.where(eq(eventRegistrations.status, "registered"))
+		.groupBy(eventRegistrations.eventId, eventRegistrations.role);
 
-	return Object.fromEntries(result.map((r) => [r.eventId, r.value]));
+	const counts: Record<string, { participants: number; volunteers: number }> = {};
+	for (const r of result) {
+		if (!counts[r.eventId]) {
+			counts[r.eventId] = { participants: 0, volunteers: 0 };
+		}
+		if (r.role === "participant") {
+			counts[r.eventId].participants = r.value;
+		} else if (r.role === "volunteer") {
+			counts[r.eventId].volunteers = r.value;
+		}
+	}
+	return counts;
 }
 
 export async function getWaitlistedCountsByEvent() {

@@ -1,6 +1,6 @@
 "use client";
 
-import { CalendarDays, Eye, EyeOff, MapPin, Pencil, Trash2, Users } from "lucide-react";
+import { CalendarDays, Eye, EyeOff, Hand, MapPin, Pencil, Trash2, Users } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { ReasonDialog } from "@/components/admin/reason-dialog";
@@ -27,12 +27,17 @@ type AdminEvent = {
 
 interface AdminEventCardProps {
 	event: AdminEvent;
+	participantCount: number;
+	volunteerCount: number;
 	waitlistedCount: number;
 }
 
-export function AdminEventCard({ event, waitlistedCount }: AdminEventCardProps) {
+export function AdminEventCard({ event, participantCount, volunteerCount, waitlistedCount }: AdminEventCardProps) {
+	const spotsLeft = Math.max(0, event.participantCapacity - participantCount);
+	const volunteersNeeded = Math.max(0, event.volunteerCapacity - volunteerCount);
+
 	return (
-		<Card className="h-full overflow-hidden rounded-sm bg-cream ring-1 ring-border transition-shadow hover:shadow-sharp">
+		<Card className="flex h-full flex-col overflow-hidden rounded-sm bg-cream pt-0 ring-1 ring-border transition-shadow hover:shadow-sharp">
 			<div className="relative aspect-[16/10] overflow-hidden">
 				<Image
 					src={event.imageUrl || "/images/hero/MBV-Boat.png"}
@@ -56,7 +61,7 @@ export function AdminEventCard({ event, waitlistedCount }: AdminEventCardProps) 
 				<CardTitle className="text-lg leading-snug text-primary">{event.title}</CardTitle>
 			</CardHeader>
 
-			<CardContent className="flex flex-col gap-3">
+			<CardContent className="flex flex-1 flex-col gap-3">
 				{event.location && (
 					<div className="flex items-center gap-2 text-sm text-muted-foreground">
 						<MapPin className="h-4 w-4 shrink-0 text-rust" />
@@ -66,17 +71,68 @@ export function AdminEventCard({ event, waitlistedCount }: AdminEventCardProps) 
 				{event.description && (
 					<p className="text-sm text-muted-foreground line-clamp-2">{event.description}</p>
 				)}
-				<div className="flex flex-wrap items-center gap-2">
-					<Badge variant="secondary" className="border-rust/20 bg-rust/10 text-rust">
-						<Users className="mr-1 h-3 w-3" />
-						{event.participantCapacity} participants
-					</Badge>
-					{waitlistedCount > 0 && (
-						<Badge variant="secondary" className="border-ochre/20 bg-ochre/10 text-ochre">
-							{waitlistedCount} pending
-						</Badge>
-					)}
+
+				{/* Participant capacity */}
+				<div>
+					<div className="flex items-center justify-between text-xs text-muted-foreground">
+						<span className="flex items-center gap-1">
+							<Users className="h-3 w-3" />
+							Participants
+						</span>
+						<span>
+							{participantCount} / {event.participantCapacity}
+							{spotsLeft > 0 && (
+								<span className="ml-1 text-green-700">({spotsLeft} left)</span>
+							)}
+							{spotsLeft === 0 && event.participantCapacity > 0 && (
+								<span className="ml-1 font-medium text-rust">(Full)</span>
+							)}
+						</span>
+					</div>
+					<div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-muted">
+						<div
+							className={`h-full rounded-full transition-all ${spotsLeft === 0 && event.participantCapacity > 0 ? "bg-rust" : "bg-primary"}`}
+							style={{
+								width: `${Math.min(100, event.participantCapacity > 0 ? (participantCount / event.participantCapacity) * 100 : 0)}%`,
+							}}
+						/>
+					</div>
 				</div>
+
+				{/* Volunteer capacity */}
+				{event.volunteerCapacity > 0 && (
+					<div>
+						<div className="flex items-center justify-between text-xs text-muted-foreground">
+							<span className="flex items-center gap-1">
+								<Hand className="h-3 w-3" />
+								Volunteers
+							</span>
+							<span>
+								{volunteerCount} / {event.volunteerCapacity}
+								{volunteersNeeded > 0 && (
+									<span className="ml-1 font-medium text-amber-700">({volunteersNeeded} needed)</span>
+								)}
+								{volunteersNeeded === 0 && (
+									<span className="ml-1 text-green-700">(Filled)</span>
+								)}
+							</span>
+						</div>
+						<div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-muted">
+							<div
+								className="h-full rounded-full bg-amber-500 transition-all"
+								style={{
+									width: `${Math.min(100, event.volunteerCapacity > 0 ? (volunteerCount / event.volunteerCapacity) * 100 : 0)}%`,
+								}}
+							/>
+						</div>
+					</div>
+				)}
+
+				{waitlistedCount > 0 && (
+					<Badge variant="secondary" className="w-fit border-ochre/20 bg-ochre/10 text-ochre">
+						{waitlistedCount} pending
+					</Badge>
+				)}
 			</CardContent>
 
 			<CardFooter className="flex gap-2">

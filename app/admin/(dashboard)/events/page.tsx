@@ -1,7 +1,7 @@
 import { Plus } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { getEvents, getEventTemplates, getWaitlistedCountsByEvent } from "@/lib/queries/events";
+import { getEvents, getEventTemplates, getRegistrationCountsByEvent, getWaitlistedCountsByEvent } from "@/lib/queries/events";
 import { EventFilterBar } from "./event-filter-bar";
 import { TemplatesDialog } from "./templates-dialog";
 
@@ -11,9 +11,10 @@ export const metadata: Metadata = {
 };
 
 export default async function EventsPage() {
-	const [events, templates, waitlistedCounts] = await Promise.all([
+	const [events, templates, registrationCounts, waitlistedCounts] = await Promise.all([
 		getEvents(),
 		getEventTemplates(),
+		getRegistrationCountsByEvent(),
 		getWaitlistedCountsByEvent(),
 	]);
 
@@ -37,7 +38,7 @@ export default async function EventsPage() {
 			</div>
 
 			<div className="mt-6">
-				<EventFilterBar events={events} waitlistedCounts={waitlistedCounts} />
+				<EventFilterBar events={events} registrationCounts={registrationCounts} waitlistedCounts={waitlistedCounts} />
 			</div>
 		</div>
 	);

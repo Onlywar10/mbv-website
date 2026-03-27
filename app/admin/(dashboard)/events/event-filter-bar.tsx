@@ -20,21 +20,40 @@ type Event = {
 
 interface EventFilterBarProps {
 	events: Event[];
+	registrationCounts: Record<string, { participants: number; volunteers: number }>;
 	waitlistedCounts: Record<string, number>;
 }
 
-export function EventFilterBar({ events, waitlistedCounts }: EventFilterBarProps) {
+export function EventFilterBar({ events, registrationCounts, waitlistedCounts }: EventFilterBarProps) {
 	const [filter, setFilter] = useState("all");
 
-	const filtered =
-		filter === "all"
-			? events
-			: events.filter((e) => (filter === "published" ? e.isPublished : !e.isPublished));
+	const today = new Date().toISOString().split("T")[0];
+
+	const filtered = events.filter((e) => {
+		const isPast = e.date < today;
+		switch (filter) {
+			case "published":
+				return e.isPublished;
+			case "draft":
+				return !e.isPublished && !isPast;
+			case "deactivated":
+				return !e.isPublished && isPast;
+			default:
+				return true;
+		}
+	});
+
+	const counts = {
+		all: events.length,
+		published: events.filter((e) => e.isPublished).length,
+		draft: events.filter((e) => !e.isPublished && e.date >= today).length,
+		deactivated: events.filter((e) => !e.isPublished && e.date < today).length,
+	};
 
 	return (
 		<div>
 			<div className="mb-6 flex gap-2">
-				{["all", "published", "draft"].map((f) => (
+				{(["all", "published", "draft", "deactivated"] as const).map((f) => (
 					<button
 						key={f}
 						type="button"
@@ -44,6 +63,7 @@ export function EventFilterBar({ events, waitlistedCounts }: EventFilterBarProps
 						}`}
 					>
 						{f}
+						<span className="ml-1.5 text-xs opacity-60">{counts[f]}</span>
 					</button>
 				))}
 			</div>
@@ -56,6 +76,8 @@ export function EventFilterBar({ events, waitlistedCounts }: EventFilterBarProps
 						<AdminEventCard
 							key={event.id}
 							event={event}
+							participantCount={registrationCounts[event.id]?.participants ?? 0}
+							volunteerCount={registrationCounts[event.id]?.volunteers ?? 0}
 							waitlistedCount={waitlistedCounts[event.id] ?? 0}
 						/>
 					))}

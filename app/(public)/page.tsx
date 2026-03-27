@@ -5,19 +5,19 @@ import { GalleryCarousel } from "@/components/sections/gallery-carousel";
 import { Hero } from "@/components/sections/hero";
 import { ImpactCounters } from "@/components/sections/impact-counters";
 import { MissionBar } from "@/components/sections/mission-bar";
-import { getParticipantCountsByEvent, getPublishedEvents } from "@/lib/queries/events";
+import { getRegistrationCountsByEvent, getPublishedEvents } from "@/lib/queries/events";
 import { getGalleryImages } from "@/lib/queries/gallery";
 
 export default async function Home() {
-	const [rawEvents, participantCounts, galleryImages] = await Promise.all([
+	const [rawEvents, registrationCounts, galleryImages] = await Promise.all([
 		getPublishedEvents(),
-		getParticipantCountsByEvent(),
+		getRegistrationCountsByEvent(),
 		getGalleryImages(),
 	]);
 
 	const events = rawEvents.map((e) => ({
 		...e,
-		spotsLeft: Math.max(0, e.participantCapacity - (participantCounts[e.id] ?? 0)),
+		spotsLeft: Math.max(0, e.participantCapacity - (registrationCounts[e.id]?.participants ?? 0)),
 	}));
 
 	return (
