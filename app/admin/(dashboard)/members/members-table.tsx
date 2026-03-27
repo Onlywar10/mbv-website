@@ -1,7 +1,6 @@
 "use client";
 
 import { Pencil } from "lucide-react";
-import Link from "next/link";
 import { useActionState, useState } from "react";
 import { DeleteDialog } from "@/components/admin/delete-dialog";
 import { Badge } from "@/components/ui/badge";
@@ -23,7 +22,6 @@ type Membership = {
 	firstName: string;
 	lastName: string;
 	email: string;
-	clientId: string | null;
 	type: "annual" | "lifetime";
 	status: "active" | "expired" | "cancelled";
 	startedAt: Date;
@@ -103,18 +101,7 @@ export function MembersTable({ memberships }: MembersTableProps) {
 							memberships.map((m) => (
 								<tr key={m.id} className="hover:bg-cream">
 									<td className="px-4 py-3 font-medium text-primary">
-										{m.clientId ? (
-											<Link
-												href={`/admin/clients/${m.clientId}`}
-												className="hover:text-rust hover:underline"
-											>
-												{m.firstName} {m.lastName}
-											</Link>
-										) : (
-											<span>
-												{m.firstName} {m.lastName}
-											</span>
-										)}
+										{m.firstName} {m.lastName}
 									</td>
 									<td className="px-4 py-3 text-muted-foreground">{m.email}</td>
 									<td className="px-4 py-3">
