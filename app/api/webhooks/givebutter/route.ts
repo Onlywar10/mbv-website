@@ -22,11 +22,13 @@ export async function POST(request: NextRequest) {
 	const rawBody = await request.text();
 	const signature = request.headers.get("x-givebutter-signature");
 
-	// Verify webhook authenticity if secret is configured
-	if (process.env.GIVEBUTTER_WEBHOOK_SECRET) {
-		if (!verifySignature(rawBody, signature)) {
-			return Response.json({ error: "Invalid signature" }, { status: 401 });
+	// Verify webhook authenticity — require secret in production
+	if (!process.env.GIVEBUTTER_WEBHOOK_SECRET) {
+		if (process.env.NODE_ENV === "production") {
+			return Response.json({ error: "Webhook secret not configured" }, { status: 500 });
 		}
+	} else if (!verifySignature(rawBody, signature)) {
+		return Response.json({ error: "Invalid signature" }, { status: 401 });
 	}
 
 	const payload = JSON.parse(rawBody);
