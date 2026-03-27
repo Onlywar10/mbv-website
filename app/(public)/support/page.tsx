@@ -45,7 +45,7 @@ export default function SupportPage() {
 					<ScrollReveal delay={0.1}>
 						<div className="mx-auto mb-12 max-w-2xl text-center">
 							<p className="text-muted-foreground leading-relaxed">
-								Monterey Bay Veterans is a 501(c)(19) nonprofit. Your generous contributions fund
+								Monterey Bay Veterans is a 501(c)(3) nonprofit. Your generous contributions fund
 								free fishing trips, whale watching expeditions, adaptive equipment, and community
 								events for disabled veterans throughout the Monterey Bay region.
 							</p>
@@ -66,7 +66,7 @@ export default function SupportPage() {
 
 					<ScrollReveal delay={0.3}>
 						<p className="mt-6 text-center text-xs text-muted-foreground">
-							All donations are tax-deductible. MBV is a registered 501(c)(19) veterans
+							All donations are tax-deductible. MBV is a registered 501(c)(3) veterans
 							organization.
 						</p>
 					</ScrollReveal>

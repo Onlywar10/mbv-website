@@ -8,9 +8,9 @@ import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 const VIDEOS = [
-	"/images/MBV-HomeVideo-1.mp4",
-	"/images/MBV-HomeVideo-2.mp4",
-	"/images/MBV-HomeVideo-3.mp4",
+	"https://gqfrf4opw8f9z551.public.blob.vercel-storage.com/videos/MBV-HomeVideo-1.mp4",
+	"https://gqfrf4opw8f9z551.public.blob.vercel-storage.com/videos/MBV-HomeVideo-2.mp4",
+	"https://gqfrf4opw8f9z551.public.blob.vercel-storage.com/videos/MBV-HomeVideo-3.mp4",
 ];
 
 const FADE_DURATION = 1000; // ms
