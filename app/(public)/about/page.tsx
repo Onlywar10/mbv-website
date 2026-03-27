@@ -51,7 +51,7 @@ export default async function AboutPage() {
 			/>
 
 			{/* -- 2. Mission & Vision ---------------------------- */}
-			<section className="bg-cream py-20">
+			<section className="bg-cream py-12 sm:py-20">
 				<div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
 					<SectionHeading title="Our Mission" subtitle="Why we do what we do" />
 
@@ -100,7 +100,7 @@ export default async function AboutPage() {
 			</section>
 
 			{/* -- 3. History Timeline ---------------------------- */}
-			<section className="bg-stone py-20">
+			<section className="bg-stone py-12 sm:py-20">
 				<div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
 					<SectionHeading
 						title="Our History"
@@ -111,7 +111,7 @@ export default async function AboutPage() {
 			</section>
 
 			{/* -- 4. Leadership Team ----------------------------- */}
-			<section className="bg-cream py-20">
+			<section className="bg-cream py-12 sm:py-20">
 				<div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
 					<SectionHeading
 						title="Our Leadership"
@@ -122,7 +122,7 @@ export default async function AboutPage() {
 			</section>
 
 			{/* -- 5. Our Fleet — The Pescador -------------------- */}
-			<section className="bg-stone py-20">
+			<section className="bg-stone py-12 sm:py-20">
 				<div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
 					<div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
 						<ScrollReveal direction="left">
@@ -179,7 +179,7 @@ export default async function AboutPage() {
 			</section>
 
 			{/* -- 6. Impact Dashboard ---------------------------- */}
-			<section className="section-gradient py-20">
+			<section className="section-gradient py-12 sm:py-20">
 				<div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
 					<SectionHeading
 						title="Our Impact"
@@ -203,7 +203,7 @@ export default async function AboutPage() {
 			</section>
 
 			{/* -- 7. Photo Gallery -------------------------------- */}
-			<section className="bg-stone py-20">
+			<section className="bg-stone py-12 sm:py-20">
 				<div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
 					<SectionHeading
 						title="Life on the Water"
@@ -217,15 +217,17 @@ export default async function AboutPage() {
 			</section>
 
 			{/* -- 9. CTA ----------------------------------------- */}
-			<section className="bg-stone py-20">
+			<section className="bg-stone py-12 sm:py-20">
 				<div className="mx-auto max-w-3xl px-4 text-center sm:px-6 lg:px-8">
 					<ScrollReveal>
-						<h2 className="text-3xl font-bold tracking-tight text-primary sm:text-4xl">
+						<h2 className="text-2xl font-bold tracking-tight text-primary sm:text-3xl lg:text-4xl">
 							Ready to get involved?
 						</h2>
-						<p className="mt-4 text-lg text-muted-foreground">
-							Whether you want to join us on the water, volunteer your time, or support our mission
-							through a donation, there are many ways to make a difference in a veteran&apos;s life.
+						<p className="mt-3 text-base text-muted-foreground sm:mt-4 sm:text-lg">
+							There are many ways to make a difference in a veteran&apos;s life.
+							<span className="hidden sm:inline">
+								{" "}Join us on the water, volunteer your time, or support our mission through a donation.
+							</span>
 						</p>
 						<div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
 							<Link

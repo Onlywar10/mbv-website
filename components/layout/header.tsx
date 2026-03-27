@@ -32,7 +32,7 @@ export function Header() {
 					{/* Logo — top-aligned to header, overflows downward */}
 					<Link
 						href="/"
-						className="absolute left-2 sm:left-6 lg:left-8 top-2 sm:-top-6 lg:-top-14 flex h-24 w-24 sm:h-40 sm:w-40 lg:h-56 lg:w-56 items-center justify-center rounded-full bg-cream"
+						className="absolute left-2 sm:left-6 lg:left-8 -top-2 sm:-top-6 lg:-top-14 flex h-28 w-28 sm:h-40 sm:w-40 lg:h-56 lg:w-56 items-center justify-center rounded-full bg-cream"
 						style={{ zIndex: 1 }}
 					>
 						<Image
@@ -40,7 +40,7 @@ export function Header() {
 							alt="Monterey Bay Veterans"
 							width={200}
 							height={200}
-							className="h-20 w-20 sm:h-36 sm:w-36 lg:h-52 lg:w-52 object-contain sm:translate-y-4 lg:translate-y-7"
+							className="h-40 w-40 sm:h-36 sm:w-36 lg:h-52 lg:w-52 object-contain translate-y-3 sm:translate-y-4 lg:translate-y-7"
 							priority
 							unoptimized
 						/>

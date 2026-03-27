@@ -18,8 +18,8 @@ export function EventPreview({ events }: EventPreviewProps) {
 	const upcomingEvents = events.slice(0, 3);
 
 	return (
-		<section className="bg-cream py-20 lg:py-28">
-			<div className="mx-auto max-w-6xl px-6">
+		<section className="bg-cream py-12 sm:py-20 lg:py-28">
+			<div className="mx-auto max-w-6xl px-4 sm:px-6">
 				<ScrollReveal>
 					<SectionHeading
 						title="Upcoming Events"
@@ -27,7 +27,7 @@ export function EventPreview({ events }: EventPreviewProps) {
 					/>
 				</ScrollReveal>
 
-				<div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+				<div className="grid gap-6 sm:gap-8 md:grid-cols-2 lg:grid-cols-3">
 					{upcomingEvents.map((event, index) => (
 						<motion.div
 							key={event.slug}

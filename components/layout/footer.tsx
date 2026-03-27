@@ -21,8 +21,8 @@ export function Footer() {
 	return (
 		<footer className="bg-ink text-primary-foreground">
 			{/* Main Footer */}
-			<div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
-				<div className="grid grid-cols-1 gap-12 sm:grid-cols-2 lg:grid-cols-4">
+			<div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-16 lg:px-8">
+				<div className="grid grid-cols-1 gap-8 sm:grid-cols-2 sm:gap-12 lg:grid-cols-4">
 					{/* Brand */}
 					<div className="sm:col-span-2 lg:col-span-1">
 						<Link href="/">

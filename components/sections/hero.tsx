@@ -76,12 +76,12 @@ export function Hero() {
 			</div>
 
 			{/* Hero content */}
-			<div className="relative z-10 mx-auto max-w-2xl rounded-lg bg-black/40 p-8 text-center backdrop-blur-sm sm:p-10">
+			<div className="relative z-10 mx-auto max-w-2xl rounded-lg bg-black/40 px-5 py-6 text-center backdrop-blur-sm sm:p-10">
 				<motion.h1
 					initial={{ opacity: 0, y: 30 }}
 					animate={{ opacity: 1, y: 0 }}
 					transition={{ duration: 0.8, delay: 0.15, ease: "easeOut" }}
-					className="font-heading uppercase text-balance text-4xl leading-tight tracking-[-0.03em] text-white sm:text-5xl md:text-6xl lg:text-7xl"
+					className="font-heading uppercase text-balance text-5xl leading-tight tracking-[-0.03em] text-white md:text-6xl lg:text-7xl"
 				>
 					Serving Those Who Served
 					<span className="mt-2 block text-rust">— On the Waters of Monterey Bay</span>
@@ -91,7 +91,7 @@ export function Hero() {
 					initial={{ opacity: 0, y: 30 }}
 					animate={{ opacity: 1, y: 0 }}
 					transition={{ duration: 0.8, delay: 0.3, ease: "easeOut" }}
-					className="mt-6 max-w-2xl text-lg leading-relaxed text-white/85 sm:text-xl"
+					className="mt-4 hidden text-lg leading-relaxed text-white/85 sm:block sm:mt-6 sm:text-xl"
 				>
 					Free recreational fishing, whale watching, and community events for disabled veterans
 					since 1987.
@@ -101,13 +101,13 @@ export function Hero() {
 					initial={{ opacity: 0, y: 30 }}
 					animate={{ opacity: 1, y: 0 }}
 					transition={{ duration: 0.8, delay: 0.45, ease: "easeOut" }}
-					className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row"
+					className="mt-6 flex flex-row items-center justify-center gap-3 sm:mt-10 sm:gap-4"
 				>
 					<Link
 						href="/events"
 						className={cn(
 							buttonVariants({ size: "lg" }),
-							"h-12 rounded-sm bg-rust px-8 text-base font-heading uppercase text-white hover:bg-rust-light",
+							"h-11 rounded-sm bg-rust px-6 text-sm font-heading uppercase text-white hover:bg-rust-light sm:h-12 sm:px-8 sm:text-base",
 						)}
 					>
 						View Events
@@ -116,7 +116,7 @@ export function Hero() {
 						href="/about"
 						className={cn(
 							buttonVariants({ variant: "outline", size: "lg" }),
-							"h-12 rounded-sm border-cream/30 bg-cream/10 px-8 text-base font-heading uppercase text-white backdrop-blur-sm hover:bg-white/20 hover:text-white",
+							"h-11 rounded-sm border-cream/30 bg-cream/10 px-6 text-sm font-heading uppercase text-white backdrop-blur-sm hover:bg-white/20 hover:text-white sm:h-12 sm:px-8 sm:text-base",
 						)}
 					>
 						Learn More
@@ -124,12 +124,12 @@ export function Hero() {
 				</motion.div>
 			</div>
 
-			{/* Scroll indicator */}
+			{/* Scroll indicator — hidden on mobile */}
 			<motion.div
 				initial={{ opacity: 0 }}
 				animate={{ opacity: 1 }}
 				transition={{ delay: 1.2, duration: 0.8 }}
-				className="absolute bottom-8 left-1/2 z-10 -translate-x-1/2"
+				className="absolute bottom-8 left-1/2 z-10 hidden -translate-x-1/2 sm:block"
 			>
 				<motion.div
 					animate={{ y: [0, 10, 0] }}
