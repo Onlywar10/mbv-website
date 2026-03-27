@@ -96,16 +96,47 @@ export async function POST(request: NextRequest) {
 	}
 
 	if (membershipType) {
-		const expiresAt =
-			membershipType === "annual" ? new Date(Date.now() + 365 * 24 * 60 * 60 * 1000) : null;
+		// Check for existing active membership to handle renewals
+		const existingMembership = await db
+			.select({ id: memberships.id, expiresAt: memberships.expiresAt })
+			.from(memberships)
+			.where(
+				and(
+					eq(memberships.clientId, clientId),
+					eq(memberships.type, membershipType),
+					eq(memberships.status, "active"),
+				),
+			)
+			.limit(1);
 
-		await db.insert(memberships).values({
-			clientId,
-			type: membershipType,
-			status: "active",
-			expiresAt,
-			givebutterId: transactionId,
-		});
+		let expiresAt: Date | null = null;
+
+		if (membershipType === "annual") {
+			if (existingMembership[0]?.expiresAt && existingMembership[0].expiresAt > new Date()) {
+				// Extend from current expiration
+				expiresAt = new Date(existingMembership[0].expiresAt.getTime() + 365 * 24 * 60 * 60 * 1000);
+			} else {
+				// New or expired — start from now
+				expiresAt = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
+			}
+		}
+
+		if (existingMembership[0]) {
+			// Renewal — update existing membership
+			await db
+				.update(memberships)
+				.set({ expiresAt, status: "active", givebutterId: transactionId })
+				.where(eq(memberships.id, existingMembership[0].id));
+		} else {
+			// New membership
+			await db.insert(memberships).values({
+				clientId,
+				type: membershipType,
+				status: "active",
+				expiresAt,
+				givebutterId: transactionId,
+			});
+		}
 
 		// Assign "member" role if not already assigned
 		const hasRole = await db
