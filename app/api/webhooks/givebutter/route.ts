@@ -3,7 +3,6 @@ import { and, eq } from "drizzle-orm";
 import type { NextRequest } from "next/server";
 
 import { db } from "@/lib/db";
-import { clientRoles } from "@/lib/db/schema/client-roles";
 import { clients } from "@/lib/db/schema/clients";
 import { donations } from "@/lib/db/schema/donations";
 import { memberships } from "@/lib/db/schema/memberships";
@@ -100,13 +99,13 @@ export async function POST(request: NextRequest) {
 	});
 
 	if (membershipType) {
-		// Check for existing active membership to handle renewals
+		// Check for existing active membership by email to handle renewals
 		const existingMembership = await db
 			.select({ id: memberships.id, expiresAt: memberships.expiresAt })
 			.from(memberships)
 			.where(
 				and(
-					eq(memberships.clientId, clientId),
+					eq(memberships.email, email.toLowerCase()),
 					eq(memberships.type, membershipType),
 					eq(memberships.status, "active"),
 				),
@@ -117,10 +116,8 @@ export async function POST(request: NextRequest) {
 
 		if (membershipType === "annual") {
 			if (existingMembership[0]?.expiresAt && existingMembership[0].expiresAt > new Date()) {
-				// Extend from current expiration
 				expiresAt = new Date(existingMembership[0].expiresAt.getTime() + 365 * 24 * 60 * 60 * 1000);
 			} else {
-				// New or expired — start from now
 				expiresAt = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
 			}
 		}
@@ -134,23 +131,15 @@ export async function POST(request: NextRequest) {
 		} else {
 			// New membership
 			await db.insert(memberships).values({
+				firstName,
+				lastName,
+				email: email.toLowerCase(),
 				clientId,
 				type: membershipType,
 				status: "active",
 				expiresAt,
 				givebutterId: transactionId,
 			});
-		}
-
-		// Assign "member" role if not already assigned
-		const hasRole = await db
-			.select({ id: clientRoles.id })
-			.from(clientRoles)
-			.where(and(eq(clientRoles.clientId, clientId), eq(clientRoles.role, "member")))
-			.limit(1);
-
-		if (hasRole.length === 0) {
-			await db.insert(clientRoles).values({ clientId, role: "member" });
 		}
 
 		// Send confirmation email

@@ -7,9 +7,10 @@ export const membershipStatusEnum = pgEnum("membership_status", ["active", "expi
 
 export const memberships = pgTable("memberships", {
 	id: uuid("id").defaultRandom().primaryKey(),
-	clientId: uuid("client_id")
-		.notNull()
-		.references(() => clients.id, { onDelete: "cascade" }),
+	firstName: text("first_name").notNull(),
+	lastName: text("last_name").notNull(),
+	email: text("email").notNull(),
+	clientId: uuid("client_id").references(() => clients.id, { onDelete: "set null" }),
 	type: membershipTypeEnum("type").notNull(),
 	status: membershipStatusEnum("status").notNull().default("active"),
 	startedAt: timestamp("started_at", { withTimezone: true }).defaultNow().notNull(),

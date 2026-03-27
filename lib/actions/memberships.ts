@@ -1,100 +1,75 @@
 "use server";
 
-import { and, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
 import { requireAuth } from "@/lib/auth/require-auth";
 import { db } from "@/lib/db";
-import { clientRoles } from "@/lib/db/schema/client-roles";
 import { memberships } from "@/lib/db/schema/memberships";
 import type { ActionState } from "@/lib/types";
 
-export async function assignMembershipAction(
-	clientId: string,
-	type: "annual" | "lifetime",
+export async function createMembershipAction(
+	_prevState: ActionState,
+	formData: FormData,
 ): Promise<ActionState> {
 	await requireAuth();
+
+	const firstName = (formData.get("firstName") as string)?.trim();
+	const lastName = (formData.get("lastName") as string)?.trim();
+	const email = (formData.get("email") as string)?.trim().toLowerCase();
+	const type = formData.get("type") as "annual" | "lifetime";
+
+	if (!firstName || !lastName || !email) {
+		return { error: "Name and email are required." };
+	}
 
 	const expiresAt = type === "annual" ? new Date(Date.now() + 365 * 24 * 60 * 60 * 1000) : null;
 
 	await db.insert(memberships).values({
-		clientId,
+		firstName,
+		lastName,
+		email,
 		type,
 		status: "active",
 		expiresAt,
 	});
 
-	// Assign "member" role if not already assigned
-	const hasRole = await db
-		.select({ id: clientRoles.id })
-		.from(clientRoles)
-		.where(and(eq(clientRoles.clientId, clientId), eq(clientRoles.role, "member")))
-		.limit(1);
-
-	if (hasRole.length === 0) {
-		await db.insert(clientRoles).values({ clientId, role: "member" });
-	}
-
-	revalidatePath(`/admin/clients/${clientId}`);
-	return { success: `${type === "annual" ? "Annual" : "Lifetime"} membership assigned.` };
+	revalidatePath("/admin/members");
+	return {
+		success: `${type === "annual" ? "Annual" : "Lifetime"} membership created for ${firstName} ${lastName}.`,
+	};
 }
 
-export async function revokeMembershipAction(
-	membershipId: string,
-	clientId: string,
+export async function updateMembershipAction(
+	_prevState: ActionState,
+	formData: FormData,
 ): Promise<ActionState> {
 	await requireAuth();
 
-	await db.update(memberships).set({ status: "cancelled" }).where(eq(memberships.id, membershipId));
+	const membershipId = formData.get("membershipId") as string;
+	const type = formData.get("type") as "annual" | "lifetime";
+	const status = formData.get("status") as "active" | "expired" | "cancelled";
+	const email = (formData.get("email") as string)?.trim().toLowerCase();
+	const expiresAtRaw = formData.get("expiresAt") as string;
+	const expiresAt = expiresAtRaw ? new Date(`${expiresAtRaw}T00:00:00`) : null;
 
-	// Remove "member" role
-	await db
-		.delete(clientRoles)
-		.where(and(eq(clientRoles.clientId, clientId), eq(clientRoles.role, "member")));
-
-	revalidatePath(`/admin/clients/${clientId}`);
-	return { success: "Membership revoked." };
-}
-
-export async function renewMembershipAction(
-	membershipId: string,
-	clientId: string,
-): Promise<ActionState> {
-	await requireAuth();
-
-	const existing = await db
-		.select({ expiresAt: memberships.expiresAt })
-		.from(memberships)
-		.where(eq(memberships.id, membershipId))
-		.limit(1);
-
-	if (!existing[0]) {
-		return { error: "Membership not found." };
-	}
-
-	// Extend from current expiration or from now if already expired
-	const base =
-		existing[0].expiresAt && existing[0].expiresAt > new Date()
-			? existing[0].expiresAt
-			: new Date();
-	const newExpiry = new Date(base.getTime() + 365 * 24 * 60 * 60 * 1000);
+	if (!membershipId) return { error: "Membership ID is required." };
+	if (!email) return { error: "Email is required." };
 
 	await db
 		.update(memberships)
-		.set({ status: "active", expiresAt: newExpiry })
+		.set({ type, status, email, expiresAt })
 		.where(eq(memberships.id, membershipId));
 
-	// Ensure "member" role is assigned
-	const hasRole = await db
-		.select({ id: clientRoles.id })
-		.from(clientRoles)
-		.where(and(eq(clientRoles.clientId, clientId), eq(clientRoles.role, "member")))
-		.limit(1);
+	revalidatePath("/admin/members");
+	return { success: "Membership updated." };
+}
 
-	if (hasRole.length === 0) {
-		await db.insert(clientRoles).values({ clientId, role: "member" });
-	}
+export async function deleteMembershipAction(membershipId: string): Promise<ActionState> {
+	await requireAuth();
 
-	revalidatePath(`/admin/clients/${clientId}`);
-	return { success: `Membership renewed until ${newExpiry.toLocaleDateString()}.` };
+	await db.delete(memberships).where(eq(memberships.id, membershipId));
+
+	revalidatePath("/admin/members");
+	return { success: "Membership removed." };
 }

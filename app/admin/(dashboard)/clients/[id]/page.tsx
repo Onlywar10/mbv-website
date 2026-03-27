@@ -7,8 +7,6 @@ import {
 	getClientEventHistory,
 	getClientWithRoles,
 } from "@/lib/queries/clients";
-import { getMembershipByClient } from "@/lib/queries/memberships";
-import { MembershipManager } from "./membership-manager";
 import { RoleManager } from "./role-manager";
 
 export const metadata: Metadata = {
@@ -26,10 +24,9 @@ export default async function ClientDetailPage({ params }: PageProps) {
 
 	if (!client) notFound();
 
-	const [eventHistory, donations, membership] = await Promise.all([
+	const [eventHistory, donations] = await Promise.all([
 		getClientEventHistory(id),
 		getClientDonations(id),
-		getMembershipByClient(id),
 	]);
 
 	return (
@@ -110,14 +107,6 @@ export default async function ClientDetailPage({ params }: PageProps) {
 					</h2>
 					<RoleManager clientId={id} currentRoles={client.roles} />
 				</div>
-			</div>
-
-			{/* Membership */}
-			<div className="mt-6 rounded-sm bg-cream p-6 ring-1 ring-border shadow-sharp">
-				<h2 className="mb-4 font-heading text-sm uppercase tracking-wider text-muted-foreground">
-					Membership
-				</h2>
-				<MembershipManager clientId={id} membership={membership} />
 			</div>
 
 			{/* Event History */}
