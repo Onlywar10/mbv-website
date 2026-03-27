@@ -40,11 +40,28 @@ export function Hero() {
 		}, FADE_DURATION);
 	}, [nextIndex]);
 
-	// Autoplay the first video on mount
+	// Autoplay the first video once it has enough data
 	useEffect(() => {
 		const firstVideo = videoRefs.current[0];
-		if (firstVideo) {
-			firstVideo.play();
+		if (!firstVideo) return;
+
+		const tryPlay = () => {
+			firstVideo.play().catch(() => {
+				// Browser blocked autoplay — retry on user interaction
+				const retry = () => {
+					firstVideo.play();
+					document.removeEventListener("touchstart", retry);
+					document.removeEventListener("click", retry);
+				};
+				document.addEventListener("touchstart", retry, { once: true });
+				document.addEventListener("click", retry, { once: true });
+			});
+		};
+
+		if (firstVideo.readyState >= 3) {
+			tryPlay();
+		} else {
+			firstVideo.addEventListener("canplay", tryPlay, { once: true });
 		}
 	}, []);
 
@@ -57,8 +74,10 @@ export function Hero() {
 						key={src}
 						ref={(el) => { videoRefs.current[i] = el; }}
 						src={src}
+						autoPlay={i === 0}
 						muted
 						playsInline
+						preload={i === 0 ? "auto" : "none"}
 						onEnded={i === activeIndex ? handleVideoEnd : undefined}
 						className={cn(
 							"absolute inset-0 h-full w-full object-cover object-center transition-opacity",
