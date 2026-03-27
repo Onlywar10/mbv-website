@@ -76,15 +76,6 @@ export async function POST(request: NextRequest) {
 		? (method as "venmo" | "paypal" | "check" | "cash" | "card" | "other")
 		: "other";
 
-	await db.insert(donations).values({
-		clientId,
-		amount: String(amount),
-		paymentMethod,
-		transactionId,
-		donatedAt: new Date(transaction.transacted_at ?? Date.now()),
-		notes: "GiveButter",
-	});
-
 	// Determine if this is a membership payment by matching campaign code
 	const campaignCodes = await getGivebutterCampaignCodes();
 	let membershipType: "annual" | "lifetime" | null = null;
@@ -94,6 +85,19 @@ export async function POST(request: NextRequest) {
 	} else if (campaignCodes.lifetime && campaignCode === campaignCodes.lifetime) {
 		membershipType = "lifetime";
 	}
+
+	const donationNote = membershipType
+		? `Membership — ${membershipType === "annual" ? "Annual" : "Lifetime"}`
+		: "Donation";
+
+	await db.insert(donations).values({
+		clientId,
+		amount: String(amount),
+		paymentMethod,
+		transactionId,
+		donatedAt: new Date(transaction.transacted_at ?? Date.now()),
+		notes: donationNote,
+	});
 
 	if (membershipType) {
 		// Check for existing active membership to handle renewals
