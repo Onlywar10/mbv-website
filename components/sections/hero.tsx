@@ -1,27 +1,82 @@
 "use client";
 
+import { useCallback, useEffect, useRef, useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { motion } from "motion/react";
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
+const VIDEOS = [
+	"/images/MBV-HomeVideo-1.mp4",
+	"/images/MBV-HomeVideo-2.mp4",
+	"/images/MBV-HomeVideo-3.mp4",
+];
+
+const FADE_DURATION = 1000; // ms
+
 export function Hero() {
+	const [activeIndex, setActiveIndex] = useState(0);
+	const [fading, setFading] = useState(false);
+	const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
+
+	const nextIndex = (activeIndex + 1) % VIDEOS.length;
+
+	const handleVideoEnd = useCallback(() => {
+		// Start fading out the current video
+		setFading(true);
+
+		// Preload and start the next video so it's visible underneath
+		const nextVideo = videoRefs.current[nextIndex];
+		if (nextVideo) {
+			nextVideo.currentTime = 0;
+			nextVideo.play();
+		}
+
+		// After the fade completes, swap the active index
+		setTimeout(() => {
+			setFading(false);
+			setActiveIndex(nextIndex);
+		}, FADE_DURATION);
+	}, [nextIndex]);
+
+	// Autoplay the first video on mount
+	useEffect(() => {
+		const firstVideo = videoRefs.current[0];
+		if (firstVideo) {
+			firstVideo.play();
+		}
+	}, []);
+
 	return (
 		<section className="relative -mt-14 flex min-h-screen items-center justify-center overflow-hidden bg-[#0b3d5e]">
-			{/* Background image */}
+			{/* Background videos */}
 			<div className="absolute inset-0">
-				<img
-					src="/images/hero/MBV-Boat.png"
-					alt="The Pescador — Monterey Bay Veterans boat on the water"
-					className="h-full w-full object-cover object-center"
-				/>
+				{VIDEOS.map((src, i) => (
+					<video
+						key={src}
+						ref={(el) => { videoRefs.current[i] = el; }}
+						src={src}
+						muted
+						playsInline
+						onEnded={i === activeIndex ? handleVideoEnd : undefined}
+						className={cn(
+							"absolute inset-0 h-full w-full object-cover object-center transition-opacity",
+							i === activeIndex && !fading && "z-[1] opacity-100",
+							i === activeIndex && fading && "z-[1] opacity-0",
+							i === nextIndex && fading && "z-0 opacity-100",
+							i !== activeIndex && i !== nextIndex && "z-0 opacity-0",
+							i !== activeIndex && !fading && "z-0 opacity-0",
+						)}
+						style={{ transitionDuration: `${FADE_DURATION}ms` }}
+					/>
+				))}
 				{/* Dark gradient overlay */}
-				<div className="absolute inset-0 hero-gradient" />
+				<div className="absolute inset-0 z-[2] hero-gradient" />
 			</div>
 
 			{/* Hero content */}
-			<div className="relative z-10 mx-auto max-w-4xl px-6 text-center">
+			<div className="relative z-10 mx-auto max-w-2xl rounded-lg bg-black/40 p-8 text-center backdrop-blur-sm sm:p-10">
 				<motion.h1
 					initial={{ opacity: 0, y: 30 }}
 					animate={{ opacity: 1, y: 0 }}
@@ -36,7 +91,7 @@ export function Hero() {
 					initial={{ opacity: 0, y: 30 }}
 					animate={{ opacity: 1, y: 0 }}
 					transition={{ duration: 0.8, delay: 0.3, ease: "easeOut" }}
-					className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-white/85 sm:text-xl"
+					className="mt-6 max-w-2xl text-lg leading-relaxed text-white/85 sm:text-xl"
 				>
 					Free recreational fishing, whale watching, and community events for disabled veterans
 					since 1987.
