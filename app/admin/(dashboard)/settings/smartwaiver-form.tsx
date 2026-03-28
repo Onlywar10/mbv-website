@@ -10,11 +10,10 @@ import type { ActionState } from "@/lib/types";
 const initialState: ActionState = {};
 
 interface SmartWaiverFormProps {
-	apiKey: string;
 	templateId: string;
 }
 
-export function SmartWaiverForm({ apiKey, templateId }: SmartWaiverFormProps) {
+export function SmartWaiverForm({ templateId }: SmartWaiverFormProps) {
 	const [state, formAction, isPending] = useActionState(
 		updateSmartWaiverSettingsAction,
 		initialState,
@@ -32,19 +31,6 @@ export function SmartWaiverForm({ apiKey, templateId }: SmartWaiverFormProps) {
 			)}
 
 			<div className="space-y-2">
-				<Label htmlFor="smartwaiver_api_key" className="font-heading text-xs uppercase tracking-wider">
-					SmartWaiver API Key
-				</Label>
-				<Input
-					id="smartwaiver_api_key"
-					name="smartwaiver_api_key"
-					defaultValue={apiKey}
-					placeholder="Your SmartWaiver API key"
-					type="password"
-				/>
-			</div>
-
-			<div className="space-y-2">
 				<Label htmlFor="smartwaiver_template_id" className="font-heading text-xs uppercase tracking-wider">
 					Waiver Template ID
 				</Label>
@@ -57,9 +43,9 @@ export function SmartWaiverForm({ apiKey, templateId }: SmartWaiverFormProps) {
 			</div>
 
 			<p className="text-xs text-muted-foreground">
-				The template ID is found in your SmartWaiver dashboard URL. The API key is used by the
-				webhook to verify signed waivers. Events with &quot;Require Waiver&quot; enabled will show
-				the signing widget and track completion.
+				The template ID is found in your SmartWaiver dashboard URL. Events with &quot;Require
+				Waiver&quot; enabled will show the signing widget and track completion. The API key is
+				configured via the SMARTWAIVER_API_KEY environment variable.
 			</p>
 
 			<Button

@@ -118,7 +118,7 @@ export default async function EventDetailPage({ params }: PageProps) {
 					</CardTitle>
 				</CardHeader>
 				<CardContent>
-					<PendingApprovals registrations={waitlisted} eventId={id} waiverRequired={event.waiverRequired} />
+					<PendingApprovals registrations={waitlisted} eventId={id} />
 				</CardContent>
 			</Card>
 
@@ -135,7 +135,7 @@ export default async function EventDetailPage({ params }: PageProps) {
 					</CardTitle>
 				</CardHeader>
 				<CardContent>
-					<RegisteredParticipants registrations={active} eventId={id} waiverRequired={event.waiverRequired} />
+					<RegisteredParticipants registrations={active} eventId={id} />
 				</CardContent>
 			</Card>
 

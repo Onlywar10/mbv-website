@@ -19,15 +19,15 @@ type Registration = {
 	registeredAt: Date;
 	notes: string | null;
 	waiverSignedAt: Date | null;
+	waiverExpiresAt: Date | null;
 };
 
 interface PendingApprovalsProps {
 	registrations: Registration[];
 	eventId: string;
-	waiverRequired: boolean;
 }
 
-export function PendingApprovals({ registrations, eventId, waiverRequired }: PendingApprovalsProps) {
+export function PendingApprovals({ registrations, eventId }: PendingApprovalsProps) {
 	const parents = registrations.filter((r) => !r.registeredBy);
 	const guestsByParent = new Map<string, Registration>();
 	for (const reg of registrations) {
@@ -62,7 +62,7 @@ export function PendingApprovals({ registrations, eventId, waiverRequired }: Pen
 									>
 										{reg.role}
 									</Badge>
-									{waiverRequired && <WaiverBadge signedAt={reg.waiverSignedAt} />}
+									<WaiverBadge expiresAt={reg.waiverExpiresAt} signedAt={reg.waiverSignedAt} />
 								</div>
 								<p className="text-sm text-muted-foreground">{reg.email}</p>
 								<p className="mt-1 text-xs text-muted-foreground">

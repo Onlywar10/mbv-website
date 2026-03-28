@@ -72,7 +72,6 @@ export default async function SettingsPage() {
 				</CardHeader>
 				<CardContent>
 					<SmartWaiverForm
-						apiKey={smartWaiverSettings.apiKey ?? ""}
 						templateId={smartWaiverSettings.templateId ?? ""}
 					/>
 				</CardContent>

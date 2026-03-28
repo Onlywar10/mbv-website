@@ -35,7 +35,6 @@ export const events = pgTable("events", {
 	volunteerDescription: text("volunteer_description"),
 	volunteerTime: text("volunteer_time"),
 	volunteerNotes: text("volunteer_notes"),
-	waiverRequired: boolean("waiver_required").notNull().default(false),
 	isPublished: boolean("is_published").notNull().default(false),
 	createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 	updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),

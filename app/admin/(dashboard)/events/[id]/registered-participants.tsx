@@ -17,15 +17,15 @@ type Registration = {
 	registeredAt: Date;
 	notes: string | null;
 	waiverSignedAt: Date | null;
+	waiverExpiresAt: Date | null;
 };
 
 interface RegisteredParticipantsProps {
 	registrations: Registration[];
 	eventId: string;
-	waiverRequired?: boolean;
 }
 
-export function RegisteredParticipants({ registrations, eventId, waiverRequired }: RegisteredParticipantsProps) {
+export function RegisteredParticipants({ registrations, eventId }: RegisteredParticipantsProps) {
 	const parents = registrations.filter((r) => !r.registeredBy);
 	const guestsByParent = new Map<string, Registration>();
 	for (const reg of registrations) {
@@ -61,7 +61,7 @@ export function RegisteredParticipants({ registrations, eventId, waiverRequired 
 										{reg.role}
 									</Badge>
 									<RegistrationStatusBadge status={reg.status} />
-									{waiverRequired && <WaiverBadge signedAt={reg.waiverSignedAt} />}
+									<WaiverBadge expiresAt={reg.waiverExpiresAt} signedAt={reg.waiverSignedAt} />
 								</div>
 								<p className="text-sm text-muted-foreground">{reg.email}</p>
 								<p className="mt-1 text-xs text-muted-foreground">

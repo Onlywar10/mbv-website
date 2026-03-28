@@ -48,11 +48,8 @@ export async function getNotificationSettings() {
 }
 
 export async function getSmartWaiverSettings() {
-	const [apiKey, templateId] = await Promise.all([
-		getSetting("smartwaiver_api_key"),
-		getSetting("smartwaiver_template_id"),
-	]);
-	return { apiKey, templateId };
+	const templateId = await getSetting("smartwaiver_template_id");
+	return { templateId };
 }
 
 export async function getGivebutterCampaignCodes() {

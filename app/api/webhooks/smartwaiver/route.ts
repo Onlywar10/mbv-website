@@ -4,7 +4,6 @@ import type { NextRequest } from "next/server";
 import { db } from "@/lib/db";
 import { clients } from "@/lib/db/schema/clients";
 import { eventRegistrations } from "@/lib/db/schema/event-registrations";
-import { getSetting } from "@/lib/queries/settings";
 import { getWaiverDetails } from "@/lib/smartwaiver";
 
 export async function POST(request: NextRequest) {
@@ -15,15 +14,10 @@ export async function POST(request: NextRequest) {
 		return Response.json({ error: "Missing waiver ID" }, { status: 400 });
 	}
 
-	const apiKey = await getSetting("smartwaiver_api_key");
-	if (!apiKey) {
-		return Response.json({ error: "SmartWaiver API key not configured" }, { status: 500 });
-	}
-
 	// Fetch full waiver details from SmartWaiver to get signer info
 	let waiverData: any;
 	try {
-		waiverData = await getWaiverDetails(waiverId, apiKey);
+		waiverData = await getWaiverDetails(waiverId);
 	} catch (err) {
 		console.error("Failed to fetch waiver details:", err);
 		return Response.json({ error: "Failed to fetch waiver" }, { status: 502 });
@@ -60,7 +54,7 @@ export async function POST(request: NextRequest) {
 		conditions.push(eq(eventRegistrations.eventId, tag));
 	}
 
-	const result = await db
+	await db
 		.update(eventRegistrations)
 		.set({ waiverSignedAt: new Date() })
 		.where(and(...conditions));

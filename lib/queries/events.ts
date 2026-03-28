@@ -67,7 +67,8 @@ export async function getEventRegistrations(eventId: string) {
 			registeredBy: eventRegistrations.registeredBy,
 			registeredAt: eventRegistrations.registeredAt,
 			notes: eventRegistrations.notes,
-			waiverSignedAt: eventRegistrations.waiverSignedAt,
+			waiverSignedAt: clients.waiverSignedAt,
+			waiverExpiresAt: clients.waiverExpiresAt,
 		})
 		.from(eventRegistrations)
 		.innerJoin(clients, eq(eventRegistrations.clientId, clients.id))

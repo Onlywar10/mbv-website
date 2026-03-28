@@ -21,10 +21,6 @@ export const eventSchema = z.object({
 	volunteerDescription: z.string().optional().default(""),
 	volunteerTime: z.string().optional().default(""),
 	volunteerNotes: z.string().optional().default(""),
-	waiverRequired: z
-		.string()
-		.optional()
-		.transform((v) => v === "on" || v === "true"),
 	isPublished: z
 		.string()
 		.optional()
