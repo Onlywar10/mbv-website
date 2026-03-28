@@ -6,7 +6,7 @@ import { db } from "@/lib/db";
 import { clients } from "@/lib/db/schema/clients";
 import { donations } from "@/lib/db/schema/donations";
 import { memberships } from "@/lib/db/schema/memberships";
-import { sendMembershipConfirmationEmail } from "@/lib/email";
+import { sendDonationThankYouEmail, sendMembershipConfirmationEmail } from "@/lib/email";
 import { findClientByEmail } from "@/lib/queries/clients";
 import { getGivebutterCampaignCodes } from "@/lib/queries/settings";
 
@@ -99,6 +99,15 @@ export async function POST(request: NextRequest) {
 		donatedAt: new Date(transaction.transacted_at ?? Date.now()),
 		notes: donationNote,
 	});
+
+	// Send donation thank-you for non-membership donations
+	if (!membershipType) {
+		sendDonationThankYouEmail({
+			to: email,
+			firstName,
+			amount: String(amount),
+		}).catch(console.error);
+	}
 
 	if (membershipType) {
 		// Check for existing active membership by email to handle renewals
