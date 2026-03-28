@@ -11,8 +11,13 @@ import {
 	sendDailyRegistrationReport,
 	sendEventCancellationEmail,
 	sendStatusUpdateEmail,
+	sendVolunteerRecruitmentEmail,
 } from "@/lib/email";
-import { getActiveAdminEmails, getWaitlistedRegistrations } from "@/lib/queries/email";
+import {
+	getActiveAdminEmails,
+	getPastVolunteersNotRegistered,
+	getWaitlistedRegistrations,
+} from "@/lib/queries/email";
 import type { ActionState } from "@/lib/types";
 
 function getBaseUrl(): string {
@@ -186,4 +191,64 @@ export async function notifyEventCancellation(eventId: string, reason?: string) 
 			}).catch(console.error);
 		}
 	}
+}
+
+export async function sendVolunteerRecruitmentAction(
+	_prevState: ActionState,
+	formData: FormData,
+): Promise<ActionState> {
+	await requireAuth();
+
+	const eventId = formData.get("eventId") as string;
+	const personalMessage = (formData.get("personalMessage") as string)?.trim() || undefined;
+
+	if (!eventId) {
+		return { error: "Event ID is required." };
+	}
+
+	// Fetch event details
+	const eventResult = await db
+		.select({
+			title: events.title,
+			date: events.date,
+			time: events.time,
+			location: events.location,
+		})
+		.from(events)
+		.where(eq(events.id, eventId))
+		.limit(1);
+
+	if (!eventResult[0]) {
+		return { error: "Event not found." };
+	}
+
+	const event = eventResult[0];
+
+	// Get past volunteers not registered for this event
+	const volunteers = await getPastVolunteersNotRegistered(eventId);
+
+	if (volunteers.length === 0) {
+		return { error: "No eligible volunteers found to contact." };
+	}
+
+	let sent = 0;
+	for (const v of volunteers) {
+		if (!v.email) continue;
+
+		sendVolunteerRecruitmentEmail({
+			to: v.email,
+			firstName: v.firstName,
+			eventTitle: event.title,
+			eventDate: event.date,
+			eventTime: event.time,
+			eventLocation: event.location,
+			personalMessage,
+		}).catch(console.error);
+
+		sent++;
+	}
+
+	return {
+		success: `Recruitment email sent to ${sent} volunteer${sent !== 1 ? "s" : ""}.`,
+	};
 }
