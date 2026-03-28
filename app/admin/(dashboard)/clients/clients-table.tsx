@@ -15,6 +15,8 @@ type Client = {
 	isActive: boolean;
 	emailOptIn: boolean;
 	totalEventsAttended: number;
+	waiverSignedAt: Date | null;
+	waiverExpiresAt: Date | null;
 	createdAt: Date;
 };
 
@@ -148,6 +150,9 @@ export function ClientsTable({ clients }: ClientsTableProps) {
 								Mailing List
 							</th>
 							<th className="px-4 py-3 font-heading text-xs uppercase tracking-wider text-muted-foreground">
+								Waiver
+							</th>
+							<th className="px-4 py-3 font-heading text-xs uppercase tracking-wider text-muted-foreground">
 								Actions
 							</th>
 						</tr>
@@ -155,7 +160,7 @@ export function ClientsTable({ clients }: ClientsTableProps) {
 					<tbody className="divide-y divide-border bg-cream/50">
 						{filtered.length === 0 ? (
 							<tr>
-								<td colSpan={7} className="px-4 py-8 text-center text-muted-foreground">
+								<td colSpan={8} className="px-4 py-8 text-center text-muted-foreground">
 									No clients found
 								</td>
 							</tr>
@@ -198,6 +203,23 @@ export function ClientsTable({ clients }: ClientsTableProps) {
 											}`}
 										>
 											{client.emailOptIn ? "Subscribed" : "Unsubscribed"}
+										</span>
+									</td>
+									<td className="px-4 py-3">
+										<span
+											className={`inline-flex rounded-sm px-2 py-0.5 text-xs font-medium ${
+												client.waiverSignedAt && client.waiverExpiresAt && new Date(client.waiverExpiresAt) > new Date()
+													? "bg-sage/10 text-sage"
+													: client.waiverSignedAt && client.waiverExpiresAt
+														? "bg-rust/10 text-rust"
+														: "bg-ochre/10 text-ochre"
+											}`}
+										>
+											{client.waiverSignedAt && client.waiverExpiresAt && new Date(client.waiverExpiresAt) > new Date()
+												? "Signed"
+												: client.waiverSignedAt && client.waiverExpiresAt
+													? "Expired"
+													: "Not Signed"}
 										</span>
 									</td>
 									<td className="px-4 py-3">

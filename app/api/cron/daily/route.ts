@@ -1,6 +1,7 @@
-import { eq } from "drizzle-orm";
+import { and, eq, isNotNull, lt } from "drizzle-orm";
 import { verifyCronRequest } from "@/lib/auth/verify-cron";
 import { db } from "@/lib/db";
+import { clients } from "@/lib/db/schema/clients";
 import { memberships } from "@/lib/db/schema/memberships";
 import {
 	sendDailyRegistrationReport,
@@ -14,7 +15,7 @@ import {
 	getWaitlistedRegistrations,
 	getYesterdayEventsWithVolunteers,
 } from "@/lib/queries/email";
-import { getNotificationEmails } from "@/lib/queries/settings";
+import { getNotificationEmails, getSetting } from "@/lib/queries/settings";
 
 function getBaseUrl(): string {
 	if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
@@ -31,6 +32,7 @@ export async function GET(request: Request) {
 		eventReminders: 0,
 		membershipExpiry: 0,
 		postEventThanks: 0,
+		waiverExpiry: 0,
 	};
 
 	// --- 1. Daily Registration Report ---
@@ -78,12 +80,16 @@ export async function GET(request: Request) {
 		console.error("Cron: daily report failed:", err);
 	}
 
-	// --- 2. Event Reminders (2 days out) ---
+	// --- 2. Event Reminders (2 days out) — include waiver link if needed ---
 	try {
 		const registrants = await getUpcomingEventsWithRegistrants(2);
+		const waiverUrl = await getSetting("smartwaiver_waiver_url");
 
 		for (const r of registrants) {
 			if (!r.clientEmail) continue;
+
+			// Check if this registrant needs a waiver
+			const needsWaiver = waiverUrl && (!r.waiverExpiresAt || new Date(r.waiverExpiresAt) <= new Date());
 
 			sendEventReminderEmail({
 				to: r.clientEmail,
@@ -93,6 +99,7 @@ export async function GET(request: Request) {
 				eventDate: r.eventDate,
 				eventTime: r.eventTime,
 				eventLocation: r.eventLocation,
+				waiverUrl: needsWaiver ? waiverUrl : undefined,
 			}).catch(console.error);
 
 			results.eventReminders++;
@@ -144,6 +151,26 @@ export async function GET(request: Request) {
 		}
 	} catch (err) {
 		console.error("Cron: post-event thanks failed:", err);
+	}
+
+	// --- 5. Waiver Expiry — clear expired waivers so clients must re-sign ---
+	try {
+		const now = new Date();
+
+		const result = await db
+			.update(clients)
+			.set({ waiverSignedAt: null, waiverExpiresAt: null })
+			.where(
+				and(
+					isNotNull(clients.waiverSignedAt),
+					lt(clients.waiverExpiresAt, now),
+				),
+			);
+
+		// Drizzle doesn't return count from update, so we log the action
+		console.log("Cron: waiver expiry check completed");
+	} catch (err) {
+		console.error("Cron: waiver expiry failed:", err);
 	}
 
 	return Response.json({ ok: true, ...results });

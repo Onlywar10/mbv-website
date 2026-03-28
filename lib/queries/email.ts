@@ -45,6 +45,7 @@ export async function getUpcomingEventsWithRegistrants(daysAhead: number) {
 			eventLocation: events.location,
 			clientEmail: clients.email,
 			clientFirstName: clients.firstName,
+			waiverExpiresAt: clients.waiverExpiresAt,
 			role: eventRegistrations.role,
 		})
 		.from(eventRegistrations)

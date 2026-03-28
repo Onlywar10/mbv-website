@@ -53,6 +53,7 @@ interface StatusUpdateParams {
 	eventTime: string | null;
 	eventLocation: string | null;
 	reason?: string;
+	waiverUrl?: string;
 }
 
 export async function sendStatusUpdateEmail(
@@ -82,10 +83,19 @@ export async function sendStatusUpdateEmail(
 			})
 		: "";
 
+	const waiverBlock = approved && params.waiverUrl
+		? `<div style="background: #fffbeb; border-left: 4px solid #d97706; padding: 12px 16px; margin: 16px 0;">
+			<p style="margin: 0; font-weight: bold; font-size: 14px;">Waiver Required</p>
+			<p style="margin: 4px 0 0; color: #4a5568;">Please sign our liability waiver before attending the event:</p>
+			<p style="margin: 8px 0 0;"><a href="${params.waiverUrl}" style="color: #c0392b; font-weight: bold;">Sign the Waiver</a></p>
+		</div>`
+		: "";
+
 	const body = `
 		<p>Hi ${params.firstName},</p>
 		${message}
-		${eventCard}`;
+		${eventCard}
+		${waiverBlock}`;
 
 	await sendEmail({
 		to: params.to,

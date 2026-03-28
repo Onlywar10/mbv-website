@@ -98,11 +98,12 @@ export async function notifyRegistrationStatusChange(
 	status: "registered" | "cancelled",
 	reason?: string,
 ) {
-	// Fetch primary registrant + event details
+	// Fetch primary registrant + event details + waiver status
 	const result = await db
 		.select({
 			clientEmail: clients.email,
 			clientFirstName: clients.firstName,
+			waiverExpiresAt: clients.waiverExpiresAt,
 			role: eventRegistrations.role,
 			eventTitle: events.title,
 			eventDate: events.date,
@@ -118,6 +119,17 @@ export async function notifyRegistrationStatusChange(
 	if (!result[0]?.clientEmail) return;
 
 	const r = result[0];
+
+	// Include waiver link in approval emails if client hasn't signed a valid waiver
+	let waiverUrl: string | undefined;
+	if (status === "registered") {
+		const needsWaiver = !r.waiverExpiresAt || new Date(r.waiverExpiresAt) <= new Date();
+		if (needsWaiver) {
+			const { getSetting } = await import("@/lib/queries/settings");
+			waiverUrl = (await getSetting("smartwaiver_waiver_url")) ?? undefined;
+		}
+	}
+
 	sendStatusUpdateEmail({
 		to: r.clientEmail,
 		firstName: r.clientFirstName,
@@ -128,6 +140,7 @@ export async function notifyRegistrationStatusChange(
 		eventTime: r.eventTime,
 		eventLocation: r.eventLocation,
 		reason,
+		waiverUrl,
 	}).catch(console.error);
 
 	// Notify guests registered by this person
@@ -135,6 +148,7 @@ export async function notifyRegistrationStatusChange(
 		.select({
 			clientEmail: clients.email,
 			clientFirstName: clients.firstName,
+			waiverExpiresAt: clients.waiverExpiresAt,
 			role: eventRegistrations.role,
 		})
 		.from(eventRegistrations)
@@ -143,6 +157,14 @@ export async function notifyRegistrationStatusChange(
 
 	for (const guest of guests) {
 		if (guest.clientEmail) {
+			let guestWaiverUrl: string | undefined;
+			if (status === "registered") {
+				const needsWaiver = !guest.waiverExpiresAt || new Date(guest.waiverExpiresAt) <= new Date();
+				if (needsWaiver) {
+					guestWaiverUrl = waiverUrl; // reuse already-fetched URL
+				}
+			}
+
 			sendStatusUpdateEmail({
 				to: guest.clientEmail,
 				firstName: guest.clientFirstName,
@@ -153,6 +175,7 @@ export async function notifyRegistrationStatusChange(
 				eventTime: r.eventTime,
 				eventLocation: r.eventLocation,
 				reason,
+				waiverUrl: guestWaiverUrl,
 			}).catch(console.error);
 		}
 	}
