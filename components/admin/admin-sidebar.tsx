@@ -6,6 +6,7 @@ import {
 	DollarSign,
 	ImageIcon,
 	LayoutDashboard,
+	Mail,
 	Settings,
 	Users,
 } from "lucide-react";
@@ -19,6 +20,7 @@ const navItems = [
 	{ href: "/admin/clients", label: "Clients", icon: Users },
 	{ href: "/admin/donations", label: "Donations", icon: DollarSign },
 	{ href: "/admin/members", label: "Members", icon: Crown },
+	{ href: "/admin/mailing-list", label: "Mailing List", icon: Mail },
 	{ href: "/admin/gallery", label: "Gallery", icon: ImageIcon },
 	{ href: "/admin/settings", label: "Settings", icon: Settings },
 ];

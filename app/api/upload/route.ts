@@ -23,7 +23,15 @@ export async function POST(request: NextRequest): Promise<Response> {
 			}
 
 			return {
-				allowedContentTypes: ["image/jpeg", "image/png", "image/webp", "image/gif"],
+				allowedContentTypes: [
+					"image/jpeg",
+					"image/png",
+					"image/webp",
+					"image/gif",
+					"application/pdf",
+					"application/msword",
+					"application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+				],
 				maximumSizeInBytes: 10 * 1024 * 1024,
 			};
 		},
