@@ -1,7 +1,7 @@
 "use client";
 
 import { DeleteDialog } from "@/components/admin/delete-dialog";
-import { RegistrationStatusBadge } from "@/components/admin/status-badge";
+import { RegistrationStatusBadge, WaiverBadge } from "@/components/admin/status-badge";
 import { Badge } from "@/components/ui/badge";
 import { deleteRegistrationAction } from "@/lib/actions/events";
 
@@ -16,14 +16,16 @@ type Registration = {
 	registeredBy: string | null;
 	registeredAt: Date;
 	notes: string | null;
+	waiverSignedAt: Date | null;
 };
 
 interface RegisteredParticipantsProps {
 	registrations: Registration[];
 	eventId: string;
+	waiverRequired?: boolean;
 }
 
-export function RegisteredParticipants({ registrations, eventId }: RegisteredParticipantsProps) {
+export function RegisteredParticipants({ registrations, eventId, waiverRequired }: RegisteredParticipantsProps) {
 	const parents = registrations.filter((r) => !r.registeredBy);
 	const guestsByParent = new Map<string, Registration>();
 	for (const reg of registrations) {
@@ -59,6 +61,7 @@ export function RegisteredParticipants({ registrations, eventId }: RegisteredPar
 										{reg.role}
 									</Badge>
 									<RegistrationStatusBadge status={reg.status} />
+									{waiverRequired && <WaiverBadge signedAt={reg.waiverSignedAt} />}
 								</div>
 								<p className="text-sm text-muted-foreground">{reg.email}</p>
 								<p className="mt-1 text-xs text-muted-foreground">

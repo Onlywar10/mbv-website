@@ -67,3 +67,32 @@ export async function updateNotificationRoutingAction(
 	revalidatePath("/admin/settings");
 	return { success: "Notification routing updated." };
 }
+
+export async function updateSmartWaiverSettingsAction(
+	_prevState: ActionState,
+	formData: FormData,
+): Promise<ActionState> {
+	await requireAuth();
+
+	const entries: [string, string][] = [
+		["smartwaiver_api_key", (formData.get("smartwaiver_api_key") as string)?.trim() || ""],
+		["smartwaiver_template_id", (formData.get("smartwaiver_template_id") as string)?.trim() || ""],
+	];
+
+	for (const [key, value] of entries) {
+		if (value) {
+			await db
+				.insert(siteSettings)
+				.values({ key, value, updatedAt: new Date() })
+				.onConflictDoUpdate({
+					target: siteSettings.key,
+					set: { value, updatedAt: new Date() },
+				});
+		} else {
+			await db.delete(siteSettings).where(eq(siteSettings.key, key));
+		}
+	}
+
+	revalidatePath("/admin/settings");
+	return { success: "SmartWaiver settings updated." };
+}

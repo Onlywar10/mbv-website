@@ -2,6 +2,7 @@ import { Accessibility, CalendarDays, ChevronLeft, Clock, MapPin, Users } from "
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import Script from "next/script";
 import { notFound } from "next/navigation";
 import { EventSignupDialog } from "@/components/sections/event-signup-dialog";
 import { ScrollReveal } from "@/components/shared/scroll-reveal";
@@ -9,6 +10,7 @@ import { SectionHeading } from "@/components/shared/section-heading";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { getEventBySlug, getPublishedEvents, getRegistrationCount } from "@/lib/queries/events";
+import { getSetting } from "@/lib/queries/settings";
 import type { PublicEvent } from "@/lib/types";
 
 // -- Dynamic metadata ---------------------------------------
@@ -66,9 +68,10 @@ export default async function EventDetailPage({ params }: PageProps) {
 		notFound();
 	}
 
-	const [allEvents, regCount] = await Promise.all([
+	const [allEvents, regCount, smartwaiverTemplateId] = await Promise.all([
 		getPublishedEvents(),
 		getRegistrationCount(event.id),
+		event.waiverRequired ? getSetting("smartwaiver_template_id") : Promise.resolve(null),
 	]);
 
 	const spotsLeft = Math.max(0, event.participantCapacity - regCount);
@@ -356,6 +359,13 @@ export default async function EventDetailPage({ params }: PageProps) {
 					</div>
 				</div>
 			</section>
+			{/* SmartWaiver widget — only for events that require a waiver */}
+			{event.waiverRequired && smartwaiverTemplateId && (
+				<Script
+					src={`https://www.smartwaiver.com/m/webpl/f.js?webpl_waiver=${smartwaiverTemplateId}`}
+					strategy="lazyOnload"
+				/>
+			)}
 		</>
 	);
 }

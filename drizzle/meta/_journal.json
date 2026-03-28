@@ -71,6 +71,13 @@
       "when": 1774566797304,
       "tag": "0009_volatile_moon_knight",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1774728390972,
+      "tag": "0010_freezing_johnny_blaze",
+      "breakpoints": true
     }
   ]
 }

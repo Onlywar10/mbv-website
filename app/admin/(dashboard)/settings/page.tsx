@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { getGivebutterCampaignCodes, getNotificationSettings } from "@/lib/queries/settings";
+import { getGivebutterCampaignCodes, getNotificationSettings, getSmartWaiverSettings } from "@/lib/queries/settings";
 import { CampaignCodesForm } from "./campaign-codes-form";
 import { NotificationRoutingForm } from "./notification-routing-form";
 import { SendReportButton } from "./send-report-button";
+import { SmartWaiverForm } from "./smartwaiver-form";
 
 export const metadata: Metadata = {
 	title: "Settings",
@@ -11,9 +12,10 @@ export const metadata: Metadata = {
 };
 
 export default async function SettingsPage() {
-	const [campaignCodes, notificationSettings] = await Promise.all([
+	const [campaignCodes, notificationSettings, smartWaiverSettings] = await Promise.all([
 		getGivebutterCampaignCodes(),
 		getNotificationSettings(),
+		getSmartWaiverSettings(),
 	]);
 
 	return (
@@ -54,6 +56,24 @@ export default async function SettingsPage() {
 					<CampaignCodesForm
 						annualCode={campaignCodes.annual ?? ""}
 						lifetimeCode={campaignCodes.lifetime ?? ""}
+					/>
+				</CardContent>
+			</Card>
+
+			<Card className="mt-6">
+				<CardHeader>
+					<CardTitle className="font-heading text-sm uppercase tracking-wider text-muted-foreground">
+						SmartWaiver Integration
+					</CardTitle>
+					<CardDescription>
+						Configure SmartWaiver for event liability waivers. Events with waivers enabled will
+						show the signing widget and track completion status.
+					</CardDescription>
+				</CardHeader>
+				<CardContent>
+					<SmartWaiverForm
+						apiKey={smartWaiverSettings.apiKey ?? ""}
+						templateId={smartWaiverSettings.templateId ?? ""}
 					/>
 				</CardContent>
 			</Card>

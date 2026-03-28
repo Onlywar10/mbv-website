@@ -26,6 +26,7 @@ export const eventRegistrations = pgTable(
 		registeredBy: uuid("registered_by"),
 		registeredAt: timestamp("registered_at", { withTimezone: true }).defaultNow().notNull(),
 		notes: text("notes"),
+		waiverSignedAt: timestamp("waiver_signed_at", { withTimezone: true }),
 	},
 	(table) => [
 		unique("event_registrations_event_id_client_id_role_unique").on(

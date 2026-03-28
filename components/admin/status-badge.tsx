@@ -61,6 +61,21 @@ export function RegistrationStatusBadge({ status }: { status: string }) {
 	);
 }
 
+export function WaiverBadge({ signedAt }: { signedAt: Date | null }) {
+	if (signedAt) {
+		return (
+			<Badge variant="outline" className="bg-sage/10 text-sage border-sage/20">
+				waiver signed
+			</Badge>
+		);
+	}
+	return (
+		<Badge variant="outline" className="bg-ochre/10 text-ochre border-ochre/20">
+			waiver pending
+		</Badge>
+	);
+}
+
 export function PaymentMethodBadge({ method }: { method: string }) {
 	return (
 		<Badge variant="outline" className="bg-ink/5 text-muted-foreground border-ink/10">

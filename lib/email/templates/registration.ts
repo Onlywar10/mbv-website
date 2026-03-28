@@ -14,6 +14,7 @@ interface RegistrationConfirmationParams {
 	eventDate: string;
 	eventTime: string | null;
 	eventLocation: string | null;
+	waiverUrl?: string;
 }
 
 export async function sendRegistrationConfirmation(
@@ -21,11 +22,20 @@ export async function sendRegistrationConfirmation(
 ): Promise<void> {
 	const roleLabel = params.role === "volunteer" ? "volunteer" : "participant";
 
+	const waiverBlock = params.waiverUrl
+		? `<div style="background: #fffbeb; border-left: 4px solid #d97706; padding: 12px 16px; margin: 16px 0;">
+			<p style="margin: 0; font-weight: bold; font-size: 14px;">Waiver Required</p>
+			<p style="margin: 4px 0 0; color: #4a5568;">This event requires a signed liability waiver. Please complete it before the event:</p>
+			<p style="margin: 8px 0 0;"><a href="${params.waiverUrl}" style="color: #c0392b; font-weight: bold;">Sign the Waiver</a></p>
+		</div>`
+		: "";
+
 	const body = `
 		<p>Hi ${params.firstName},</p>
 		<p>Thank you for signing up as a <strong>${roleLabel}</strong> for:</p>
 		${eventDetailCard({ title: params.eventTitle, date: params.eventDate, time: params.eventTime, location: params.eventLocation })}
 		<p>Your registration has been received and is <strong>pending review</strong>. You should expect to hear back from us soon with full confirmation details.</p>
+		${waiverBlock}
 		<p>If you have any questions in the meantime, feel free to reach out to us.</p>`;
 
 	await sendEmail({

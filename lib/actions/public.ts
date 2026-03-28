@@ -11,6 +11,8 @@ import { eventRegistrations } from "@/lib/db/schema/event-registrations";
 import { events } from "@/lib/db/schema/events";
 import { sendRegistrationConfirmation } from "@/lib/email";
 import { findClientByEmail } from "@/lib/queries/clients";
+import { getSetting } from "@/lib/queries/settings";
+import { buildPrefillUrl } from "@/lib/smartwaiver";
 import type { ActionState } from "@/lib/types";
 import { eventSignupSchema, volunteerSignupSchema } from "@/lib/validations/public";
 
@@ -197,6 +199,7 @@ export async function publicEventSignupAction(
 			date: events.date,
 			time: events.time,
 			location: events.location,
+			waiverRequired: events.waiverRequired,
 		})
 		.from(events)
 		.where(eq(events.id, data.eventId))
@@ -204,6 +207,21 @@ export async function publicEventSignupAction(
 
 	if (eventDetails[0]) {
 		const ev = eventDetails[0];
+
+		// Build waiver URL if event requires it
+		let waiverUrl: string | undefined;
+		if (ev.waiverRequired) {
+			const templateId = await getSetting("smartwaiver_template_id");
+			if (templateId) {
+				waiverUrl = buildPrefillUrl({
+					templateId,
+					firstName: data.firstName,
+					lastName: data.lastName,
+					email: data.email,
+					tag: data.eventId,
+				});
+			}
+		}
 
 		// Send confirmation to primary registrant
 		sendRegistrationConfirmation({
@@ -214,10 +232,21 @@ export async function publicEventSignupAction(
 			eventDate: ev.date,
 			eventTime: ev.time,
 			eventLocation: ev.location,
+			waiverUrl,
 		}).catch(console.error);
 
 		// Send confirmation to guest if applicable
 		if (data.hasGuest && data.guestEmail && data.guestFirstName) {
+			const guestWaiverUrl = ev.waiverRequired && waiverUrl
+				? buildPrefillUrl({
+					templateId: (await getSetting("smartwaiver_template_id"))!,
+					firstName: data.guestFirstName,
+					lastName: data.guestLastName,
+					email: data.guestEmail,
+					tag: data.eventId,
+				})
+				: undefined;
+
 			sendRegistrationConfirmation({
 				to: data.guestEmail,
 				firstName: data.guestFirstName,
@@ -226,6 +255,7 @@ export async function publicEventSignupAction(
 				eventDate: ev.date,
 				eventTime: ev.time,
 				eventLocation: ev.location,
+				waiverUrl: guestWaiverUrl,
 			}).catch(console.error);
 		}
 	}
@@ -302,7 +332,7 @@ export async function volunteerForEventAction(
 	// Fetch client and event details for confirmation email
 	const [clientResult, eventResult] = await Promise.all([
 		db
-			.select({ firstName: clients.firstName, email: clients.email })
+			.select({ firstName: clients.firstName, lastName: clients.lastName, email: clients.email })
 			.from(clients)
 			.where(eq(clients.id, clientId))
 			.limit(1),
@@ -312,6 +342,7 @@ export async function volunteerForEventAction(
 				date: events.date,
 				time: events.time,
 				location: events.location,
+				waiverRequired: events.waiverRequired,
 			})
 			.from(events)
 			.where(eq(events.id, eventId))
@@ -319,6 +350,20 @@ export async function volunteerForEventAction(
 	]);
 
 	if (clientResult[0]?.email && eventResult[0]) {
+		let waiverUrl: string | undefined;
+		if (eventResult[0].waiverRequired) {
+			const templateId = await getSetting("smartwaiver_template_id");
+			if (templateId) {
+				waiverUrl = buildPrefillUrl({
+					templateId,
+					firstName: clientResult[0].firstName,
+					lastName: clientResult[0].lastName,
+					email: clientResult[0].email,
+					tag: eventId,
+				});
+			}
+		}
+
 		sendRegistrationConfirmation({
 			to: clientResult[0].email,
 			firstName: clientResult[0].firstName,
@@ -327,6 +372,7 @@ export async function volunteerForEventAction(
 			eventDate: eventResult[0].date,
 			eventTime: eventResult[0].time,
 			eventLocation: eventResult[0].location,
+			waiverUrl,
 		}).catch(console.error);
 	}
 

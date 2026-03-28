@@ -33,6 +33,7 @@ interface EventFormProps {
 		volunteerDescription?: string;
 		volunteerTime?: string;
 		volunteerNotes?: string;
+		waiverRequired?: boolean;
 		isPublished?: boolean;
 	};
 	submitLabel?: string;
@@ -188,6 +189,24 @@ export function EventForm({ action, defaultValues, submitLabel = "Create Event" 
 						/>
 					</div>
 				)}
+			</div>
+
+			{/* Waiver Section */}
+			<div className="flex items-center gap-3">
+				<input
+					type="checkbox"
+					id="field-waiverRequired"
+					name="waiverRequired"
+					value="on"
+					defaultChecked={defaultValues?.waiverRequired}
+					className="h-4 w-4 rounded-sm border-border"
+				/>
+				<Label
+					htmlFor="field-waiverRequired"
+					className="font-heading text-xs uppercase tracking-wider"
+				>
+					Require Waiver (SmartWaiver)
+				</Label>
 			</div>
 
 			<div className="flex items-center gap-3">

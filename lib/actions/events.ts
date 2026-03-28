@@ -51,6 +51,7 @@ export async function createEventAction(
 		volunteerDescription: data.volunteerDescription || null,
 		volunteerTime: data.volunteerTime || null,
 		volunteerNotes: data.volunteerNotes || null,
+		waiverRequired: data.waiverRequired,
 		isPublished: data.isPublished,
 	});
 
