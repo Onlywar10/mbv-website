@@ -1,7 +1,7 @@
 "use server";
 
 import { sendContactNotification } from "@/lib/email";
-import { getActiveAdminEmails } from "@/lib/queries/email";
+import { getNotificationEmails } from "@/lib/queries/settings";
 import type { ActionState } from "@/lib/types";
 import { contactFormSchema } from "@/lib/validations/contact";
 
@@ -16,9 +16,8 @@ export async function submitContactFormAction(
 
 	const data = parsed.data;
 
-	// Get admin emails to notify
-	const admins = await getActiveAdminEmails();
-	const adminEmails = admins.map((a) => a.email);
+	// Get admin emails to notify (falls back to all admins if not configured)
+	const adminEmails = await getNotificationEmails("notify_contact");
 
 	if (adminEmails.length === 0) {
 		return { error: "Unable to process your message at this time. Please try again later." };
