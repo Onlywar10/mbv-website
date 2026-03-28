@@ -200,10 +200,16 @@ export async function sendVolunteerRecruitmentAction(
 	await requireAuth();
 
 	const eventId = formData.get("eventId") as string;
+	const clientIdsStr = (formData.get("clientIds") as string)?.trim() || "";
 	const personalMessage = (formData.get("personalMessage") as string)?.trim() || undefined;
 
 	if (!eventId) {
 		return { error: "Event ID is required." };
+	}
+
+	const selectedIds = clientIdsStr.split(",").filter(Boolean);
+	if (selectedIds.length === 0) {
+		return { error: "No volunteers selected." };
 	}
 
 	// Fetch event details
@@ -224,8 +230,10 @@ export async function sendVolunteerRecruitmentAction(
 
 	const event = eventResult[0];
 
-	// Get past volunteers not registered for this event
-	const volunteers = await getPastVolunteersNotRegistered(eventId);
+	// Get past volunteers not registered for this event, then filter to selected
+	const allVolunteers = await getPastVolunteersNotRegistered(eventId);
+	const selectedSet = new Set(selectedIds);
+	const volunteers = allVolunteers.filter((v) => selectedSet.has(v.id));
 
 	if (volunteers.length === 0) {
 		return { error: "No eligible volunteers found to contact." };
@@ -243,6 +251,7 @@ export async function sendVolunteerRecruitmentAction(
 			eventTime: event.time,
 			eventLocation: event.location,
 			personalMessage,
+			volunteerUrl: `${getBaseUrl()}/support#volunteer-form`,
 		}).catch(console.error);
 
 		sent++;

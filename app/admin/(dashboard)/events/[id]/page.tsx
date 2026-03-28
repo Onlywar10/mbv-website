@@ -63,7 +63,7 @@ export default async function EventDetailPage({ params }: PageProps) {
 					{event.volunteerEnabled && (
 						<VolunteerRecruitmentDialog
 							eventId={id}
-							volunteerCount={pastVolunteers.length}
+							volunteers={pastVolunteers}
 						/>
 					)}
 					<Link

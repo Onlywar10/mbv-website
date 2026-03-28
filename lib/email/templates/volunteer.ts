@@ -14,6 +14,7 @@ interface VolunteerRecruitmentParams {
 	eventTime: string | null;
 	eventLocation: string | null;
 	personalMessage?: string;
+	volunteerUrl: string;
 }
 
 export async function sendVolunteerRecruitmentEmail(
@@ -30,7 +31,10 @@ export async function sendVolunteerRecruitmentEmail(
 		<p>We need your help! An upcoming event is looking for <strong>volunteers</strong>, and we thought of you based on your past support:</p>
 		${eventDetailCard({ title: params.eventTitle, date: params.eventDate, time: params.eventTime, location: params.eventLocation })}
 		${messageBlock}
-		<p>If you're available and interested, please visit our website to sign up. Every volunteer makes a difference!</p>`;
+		<p>If you're available and interested, every volunteer makes a difference!</p>
+		<div style="margin: 20px 0;">
+			<a href="${params.volunteerUrl}" style="display: inline-block; background: #c0392b; color: #ffffff; padding: 12px 24px; border-radius: 4px; text-decoration: none; font-weight: bold;">Sign Up to Volunteer</a>
+		</div>`;
 
 	await sendEmail({
 		to: params.to,
