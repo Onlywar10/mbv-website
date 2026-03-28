@@ -1,0 +1,8 @@
+{
+	"crons": [
+		{ "path": "/api/cron/daily-report", "schedule": "0 13 * * *" },
+		{ "path": "/api/cron/event-reminders", "schedule": "0 14 * * *" },
+		{ "path": "/api/cron/membership-expiry", "schedule": "0 15 * * *" },
+		{ "path": "/api/cron/post-event-thanks", "schedule": "0 16 * * *" }
+	]
+}
