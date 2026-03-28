@@ -6,6 +6,10 @@ export const eventSignupSchema = z.object({
 	lastName: z.string().min(1, "Last name is required"),
 	email: z.string().email("Invalid email address"),
 	phone: z.string().min(1, "Phone number is required"),
+	emailOptIn: z
+		.string()
+		.optional()
+		.transform((v) => v === "on"),
 	hasGuest: z
 		.string()
 		.optional()
@@ -21,4 +25,8 @@ export const volunteerSignupSchema = z.object({
 	lastName: z.string().min(1, "Last name is required"),
 	email: z.string().email("Invalid email address"),
 	phone: z.string().min(1, "Phone number is required"),
+	emailOptIn: z
+		.string()
+		.optional()
+		.transform((v) => v === "on"),
 });

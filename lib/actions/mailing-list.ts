@@ -1,5 +1,6 @@
 "use server";
 
+import { del } from "@vercel/blob";
 import { requireAuth } from "@/lib/auth/require-auth";
 import { sendMailingListEmail } from "@/lib/email";
 import { getMailingListClients } from "@/lib/queries/email";
@@ -17,7 +18,7 @@ export async function sendMailingListBlastAction(
 		return { error: parsed.error.issues[0].message };
 	}
 
-	const { subject, body, attachmentUrls, attachmentNames } = parsed.data;
+	const { subject, body, attachmentUrls, attachmentNames, imageUrls, imageNames } = parsed.data;
 
 	const recipients = await getMailingListClients();
 
@@ -38,11 +39,34 @@ export async function sendMailingListBlastAction(
 		}
 	}
 
+	// Parse embedded images from comma-separated URLs and names
+	const embeddedImages: { url: string; name: string }[] = [];
+	if (imageUrls) {
+		const urls = imageUrls.split(",").filter(Boolean);
+		const names = (imageNames || "").split(",").filter(Boolean);
+		for (let i = 0; i < urls.length; i++) {
+			embeddedImages.push({
+				url: urls[i],
+				name: names[i] || `image-${i + 1}`,
+			});
+		}
+	}
+
 	// Convert plain text body to HTML paragraphs
-	const htmlBody = body
+	const paragraphs = body
 		.split("\n\n")
 		.map((p) => `<p>${p.replace(/\n/g, "<br />")}</p>`)
 		.join("");
+
+	// Append embedded images as inline <img> tags
+	const imageHtml = embeddedImages
+		.map(
+			(img) =>
+				`<div style="margin: 16px 0;"><img src="${img.url}" alt="${img.name}" style="max-width: 100%; height: auto; border-radius: 4px;" /></div>`,
+		)
+		.join("");
+
+	const htmlBody = paragraphs + imageHtml;
 
 	let sent = 0;
 	const errors: string[] = [];
@@ -74,6 +98,14 @@ export async function sendMailingListBlastAction(
 		if (i + batchSize < recipients.length) {
 			await new Promise((resolve) => setTimeout(resolve, 1000));
 		}
+	}
+
+	// Clean up attachment blobs — Resend fetches the file at send time,
+	// so the blob is no longer needed. Embedded images stay alive since
+	// they're referenced as <img src> in recipients' inboxes.
+	if (attachments.length > 0) {
+		const attachmentBlobUrls = attachments.map((a) => a.path);
+		del(attachmentBlobUrls).catch(console.error);
 	}
 
 	if (errors.length > 0) {

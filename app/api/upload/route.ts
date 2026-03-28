@@ -33,6 +33,7 @@ export async function POST(request: NextRequest): Promise<Response> {
 					"application/vnd.openxmlformats-officedocument.wordprocessingml.document",
 				],
 				maximumSizeInBytes: 10 * 1024 * 1024,
+				addRandomSuffix: true,
 			};
 		},
 		onUploadCompleted: async () => {},

@@ -5,4 +5,6 @@ export const mailingListSchema = z.object({
 	body: z.string().min(1, "Message body is required"),
 	attachmentUrls: z.string().optional(),
 	attachmentNames: z.string().optional(),
+	imageUrls: z.string().optional(),
+	imageNames: z.string().optional(),
 });

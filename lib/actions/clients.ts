@@ -1,6 +1,6 @@
 "use server";
 
-import { and, eq } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
 import { requireAuth } from "@/lib/auth/require-auth";
@@ -188,6 +188,20 @@ export async function deleteClientAction(id: string): Promise<ActionState> {
 	revalidatePath("/admin/clients");
 
 	return { success: "Client deleted" };
+}
+
+export async function deleteClientsAction(ids: string[]): Promise<ActionState> {
+	await requireAuth();
+
+	if (ids.length === 0) {
+		return { error: "No clients selected" };
+	}
+
+	await db.delete(clients).where(inArray(clients.id, ids));
+
+	revalidatePath("/admin/clients");
+
+	return { success: `${ids.length} client${ids.length !== 1 ? "s" : ""} deleted` };
 }
 
 export async function deleteDonationAction(id: string): Promise<ActionState> {

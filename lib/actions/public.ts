@@ -19,9 +19,19 @@ async function findOrCreateClient(data: {
 	lastName: string;
 	email: string;
 	phone: string;
+	emailOptIn?: boolean;
 }): Promise<string> {
 	const existing = await findClientByEmail(data.email);
-	if (existing) return existing.id;
+	if (existing) {
+		// If they opted in, update their preference
+		if (data.emailOptIn && !existing.emailOptIn) {
+			await db
+				.update(clients)
+				.set({ emailOptIn: true })
+				.where(eq(clients.id, existing.id));
+		}
+		return existing.id;
+	}
 
 	const result = await db
 		.insert(clients)
@@ -31,7 +41,7 @@ async function findOrCreateClient(data: {
 			email: data.email.toLowerCase(),
 			phone: data.phone,
 			isActive: true,
-			emailOptIn: true,
+			emailOptIn: data.emailOptIn ?? false,
 		})
 		.returning({ id: clients.id });
 
@@ -90,6 +100,7 @@ export async function publicEventSignupAction(
 		lastName: data.lastName,
 		email: data.email,
 		phone: data.phone,
+		emailOptIn: data.emailOptIn,
 	});
 
 	// Check if already registered as participant
@@ -241,6 +252,7 @@ export async function publicVolunteerSignupAction(
 		lastName: data.lastName,
 		email: data.email,
 		phone: data.phone,
+		emailOptIn: data.emailOptIn,
 	});
 
 	// Add volunteer role if not already assigned

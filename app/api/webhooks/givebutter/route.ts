@@ -6,9 +6,14 @@ import { db } from "@/lib/db";
 import { clients } from "@/lib/db/schema/clients";
 import { donations } from "@/lib/db/schema/donations";
 import { memberships } from "@/lib/db/schema/memberships";
-import { sendDonationThankYouEmail, sendMembershipConfirmationEmail } from "@/lib/email";
+import {
+	sendAdminDonationNotification,
+	sendAdminMembershipNotification,
+	sendDonationThankYouEmail,
+	sendMembershipConfirmationEmail,
+} from "@/lib/email";
 import { findClientByEmail } from "@/lib/queries/clients";
-import { getGivebutterCampaignCodes } from "@/lib/queries/settings";
+import { getGivebutterCampaignCodes, getNotificationEmails } from "@/lib/queries/settings";
 
 function verifySignature(payload: string, signature: string | null): boolean {
 	const secret = process.env.GIVEBUTTER_WEBHOOK_SECRET;
@@ -100,8 +105,21 @@ export async function POST(request: NextRequest) {
 		notes: donationNote,
 	});
 
-	// Send donation thank-you for non-membership donations
+	// Send donation thank-you and admin notification for non-membership donations
 	if (!membershipType) {
+		// Notify admins
+		getNotificationEmails("notify_membership_donation").then((adminEmails) => {
+			if (adminEmails.length === 0) return;
+
+			sendAdminDonationNotification({
+				adminEmails,
+				donorName: `${firstName} ${lastName}`,
+				donorEmail: email,
+				amount: String(amount),
+				paymentMethod,
+			}).catch(console.error);
+		}).catch(console.error);
+
 		sendDonationThankYouEmail({
 			to: email,
 			firstName,
@@ -153,12 +171,27 @@ export async function POST(request: NextRequest) {
 			});
 		}
 
-		// Send confirmation email
+		// Send confirmation email to member
 		sendMembershipConfirmationEmail({
 			to: email,
 			firstName,
 			type: membershipType,
 			expiresAt,
+		}).catch(console.error);
+
+		// Notify admins of new/renewed membership
+		getNotificationEmails("notify_membership_donation").then((adminEmails) => {
+			if (adminEmails.length === 0) return;
+
+			sendAdminMembershipNotification({
+				adminEmails,
+				memberName: `${firstName} ${lastName}`,
+				memberEmail: email,
+				type: membershipType!,
+				isRenewal: !!existingMembership[0],
+				expiresAt,
+				amount: String(amount),
+			}).catch(console.error);
 		}).catch(console.error);
 	}
 
