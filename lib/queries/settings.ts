@@ -48,8 +48,8 @@ export async function getNotificationSettings() {
 }
 
 export async function getSmartWaiverSettings() {
-	const templateId = await getSetting("smartwaiver_template_id");
-	return { templateId };
+	const waiverUrl = await getSetting("smartwaiver_waiver_url");
+	return { waiverUrl };
 }
 
 export async function getGivebutterCampaignCodes() {

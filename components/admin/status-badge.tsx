@@ -61,11 +61,18 @@ export function RegistrationStatusBadge({ status }: { status: string }) {
 	);
 }
 
-export function WaiverBadge({ signedAt }: { signedAt: Date | null }) {
-	if (signedAt) {
+export function WaiverBadge({ signedAt, expiresAt }: { signedAt: Date | null; expiresAt: Date | null }) {
+	if (signedAt && expiresAt && new Date(expiresAt) > new Date()) {
 		return (
 			<Badge variant="outline" className="bg-sage/10 text-sage border-sage/20">
 				waiver signed
+			</Badge>
+		);
+	}
+	if (signedAt && expiresAt && new Date(expiresAt) <= new Date()) {
+		return (
+			<Badge variant="outline" className="bg-rust/10 text-rust border-rust/20">
+				waiver expired
 			</Badge>
 		);
 	}

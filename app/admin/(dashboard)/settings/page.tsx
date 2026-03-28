@@ -72,7 +72,7 @@ export default async function SettingsPage() {
 				</CardHeader>
 				<CardContent>
 					<SmartWaiverForm
-						templateId={smartWaiverSettings.templateId ?? ""}
+						waiverUrl={smartWaiverSettings.waiverUrl ?? ""}
 					/>
 				</CardContent>
 			</Card>

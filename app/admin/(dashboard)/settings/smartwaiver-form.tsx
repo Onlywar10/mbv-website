@@ -10,10 +10,10 @@ import type { ActionState } from "@/lib/types";
 const initialState: ActionState = {};
 
 interface SmartWaiverFormProps {
-	templateId: string;
+	waiverUrl: string;
 }
 
-export function SmartWaiverForm({ templateId }: SmartWaiverFormProps) {
+export function SmartWaiverForm({ waiverUrl }: SmartWaiverFormProps) {
 	const [state, formAction, isPending] = useActionState(
 		updateSmartWaiverSettingsAction,
 		initialState,
@@ -31,21 +31,21 @@ export function SmartWaiverForm({ templateId }: SmartWaiverFormProps) {
 			)}
 
 			<div className="space-y-2">
-				<Label htmlFor="smartwaiver_template_id" className="font-heading text-xs uppercase tracking-wider">
-					Waiver Template ID
+				<Label htmlFor="smartwaiver_waiver_url" className="font-heading text-xs uppercase tracking-wider">
+					Waiver URL
 				</Label>
 				<Input
-					id="smartwaiver_template_id"
-					name="smartwaiver_template_id"
-					defaultValue={templateId}
-					placeholder="e.g. hnmshblqdfrghyy8be2zav"
+					id="smartwaiver_waiver_url"
+					name="smartwaiver_waiver_url"
+					defaultValue={waiverUrl}
+					placeholder="https://waiver.smartwaiver.com/w/.../web/"
 				/>
 			</div>
 
 			<p className="text-xs text-muted-foreground">
-				The template ID is found in your SmartWaiver dashboard URL. Events with &quot;Require
-				Waiver&quot; enabled will show the signing widget and track completion. The API key is
-				configured via the SMARTWAIVER_API_KEY environment variable.
+				The direct link to your SmartWaiver form. This URL is included in approval and reminder
+				emails for clients who haven&apos;t signed yet. Update this yearly when the waiver template
+				changes.
 			</p>
 
 			<Button
@@ -53,7 +53,7 @@ export function SmartWaiverForm({ templateId }: SmartWaiverFormProps) {
 				disabled={isPending}
 				className="bg-rust font-heading uppercase text-cream hover:bg-rust-light"
 			>
-				{isPending ? "Saving..." : "Save SmartWaiver Settings"}
+				{isPending ? "Saving..." : "Save Waiver URL"}
 			</Button>
 		</form>
 	);

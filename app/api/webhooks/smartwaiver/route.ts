@@ -1,9 +1,8 @@
-import { and, eq, isNull } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import type { NextRequest } from "next/server";
 
 import { db } from "@/lib/db";
 import { clients } from "@/lib/db/schema/clients";
-import { eventRegistrations } from "@/lib/db/schema/event-registrations";
 import { getWaiverDetails } from "@/lib/smartwaiver";
 
 export async function POST(request: NextRequest) {
@@ -23,10 +22,9 @@ export async function POST(request: NextRequest) {
 		return Response.json({ error: "Failed to fetch waiver" }, { status: 502 });
 	}
 
-	// Extract signer email and event tag
+	// Extract signer email
 	const participant = waiverData?.waiver?.participants?.[0];
 	const email = (participant?.email || waiverData?.waiver?.email || "").toLowerCase().trim();
-	const tag = waiverData?.waiver?.tags?.[0] || "";
 
 	if (!email) {
 		return Response.json({ error: "No email in waiver" }, { status: 400 });
@@ -43,21 +41,14 @@ export async function POST(request: NextRequest) {
 		return Response.json({ ok: true, matched: false });
 	}
 
-	// Update matching registrations that haven't been signed yet
-	const conditions = [
-		eq(eventRegistrations.clientId, clientResult[0].id),
-		isNull(eventRegistrations.waiverSignedAt),
-	];
-
-	// If tag contains an eventId, scope to that specific event
-	if (tag) {
-		conditions.push(eq(eventRegistrations.eventId, tag));
-	}
+	// Update client waiver status — expires 1 year from now
+	const now = new Date();
+	const expiresAt = new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000);
 
 	await db
-		.update(eventRegistrations)
-		.set({ waiverSignedAt: new Date() })
-		.where(and(...conditions));
+		.update(clients)
+		.set({ waiverSignedAt: now, waiverExpiresAt: expiresAt })
+		.where(eq(clients.id, clientResult[0].id));
 
 	return Response.json({ ok: true, matched: true });
 }
