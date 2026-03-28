@@ -2,7 +2,6 @@
 
 import { Calendar, Heart, Home, Info } from "lucide-react";
 import { motion } from "motion/react";
-import Image from "next/image";
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -36,21 +35,9 @@ export function MobileNav({ onClose }: MobileNavProps) {
 				animate={{ x: 0 }}
 				exit={{ x: "100%" }}
 				transition={{ type: "spring", damping: 30, stiffness: 300 }}
-				className="absolute right-0 top-0 h-full w-80 bg-cream shadow-sharp"
+				className="absolute right-0 top-14 bottom-0 w-80 bg-cream shadow-sharp"
 			>
 				<div className="flex flex-col h-full">
-					{/* Header */}
-					<div className="flex items-center border-b border-border px-6 py-4">
-						<Image
-							src="/images/MBV-Logo.png"
-							alt="Monterey Bay Veterans"
-							width={160}
-							height={80}
-							className="h-14 w-auto object-contain"
-							unoptimized
-						/>
-					</div>
-
 					{/* Links */}
 					<div className="flex-1 px-4 py-6 space-y-1">
 						{navLinks.map((link, i) => {
