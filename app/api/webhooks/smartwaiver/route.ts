@@ -2,29 +2,36 @@ import { eq } from "drizzle-orm";
 import type { NextRequest } from "next/server";
 
 import { db } from "@/lib/db";
+import { logger } from "@/lib/logger";
 import { clients } from "@/lib/db/schema/clients";
 import { getWaiverDetails } from "@/lib/smartwaiver";
 
 export async function POST(request: NextRequest) {
 	const body = await request.json();
 
-	const waiverId = body.unique_id;
-	if (!waiverId) {
-		return Response.json({ error: "Missing waiver ID" }, { status: 400 });
-	}
+	let email: string;
 
-	// Fetch full waiver details from SmartWaiver to get signer info
-	let waiverData: any;
-	try {
-		waiverData = await getWaiverDetails(waiverId);
-	} catch (err) {
-		console.error("Failed to fetch waiver details:", err);
-		return Response.json({ error: "Failed to fetch waiver" }, { status: 502 });
-	}
+	if (body._test_email && process.env.NODE_ENV !== "production") {
+		// Dev-only: accept email directly for local testing without a real waiver
+		email = body._test_email.toLowerCase().trim();
+	} else {
+		// Production path: fetch waiver details from SmartWaiver API
+		const waiverId = body.unique_id;
+		if (!waiverId) {
+			return Response.json({ error: "Missing waiver ID" }, { status: 400 });
+		}
 
-	// Extract signer email
-	const participant = waiverData?.waiver?.participants?.[0];
-	const email = (participant?.email || waiverData?.waiver?.email || "").toLowerCase().trim();
+		let waiverData: any;
+		try {
+			waiverData = await getWaiverDetails(waiverId);
+		} catch (err) {
+			logger.error("smartwaiver", "Failed to fetch waiver details", { waiverId, error: String(err) });
+			return Response.json({ error: "Failed to fetch waiver" }, { status: 502 });
+		}
+
+		const participant = waiverData?.waiver?.participants?.[0];
+		email = (participant?.email || waiverData?.waiver?.email || "").toLowerCase().trim();
+	}
 
 	if (!email) {
 		return Response.json({ error: "No email in waiver" }, { status: 400 });

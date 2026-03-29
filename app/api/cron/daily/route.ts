@@ -1,5 +1,6 @@
 import { and, eq, isNotNull, lt } from "drizzle-orm";
 import { verifyCronRequest } from "@/lib/auth/verify-cron";
+import { logger } from "@/lib/logger";
 import { db } from "@/lib/db";
 import { clients } from "@/lib/db/schema/clients";
 import { memberships } from "@/lib/db/schema/memberships";
@@ -77,7 +78,7 @@ export async function GET(request: Request) {
 			results.dailyReport = adminEmails.length;
 		}
 	} catch (err) {
-		console.error("Cron: daily report failed:", err);
+		logger.error("cron", "Daily report failed", { error: String(err) });
 	}
 
 	// --- 2. Event Reminders (2 days out) — include waiver link if needed ---
@@ -100,12 +101,12 @@ export async function GET(request: Request) {
 				eventTime: r.eventTime,
 				eventLocation: r.eventLocation,
 				waiverUrl: needsWaiver ? waiverUrl : undefined,
-			}).catch(console.error);
+			}).catch((err) => logger.error("cron", "Failed to send event reminder", { to: r.clientEmail, error: String(err) }));
 
 			results.eventReminders++;
 		}
 	} catch (err) {
-		console.error("Cron: event reminders failed:", err);
+		logger.error("cron", "Event reminders failed", { error: String(err) });
 	}
 
 	// --- 3. Membership Expiry (7 days after) ---
@@ -125,12 +126,12 @@ export async function GET(request: Request) {
 				firstName: m.firstName,
 				type: m.type as "annual" | "lifetime",
 				expiresAt: m.expiresAt,
-			}).catch(console.error);
+			}).catch((err) => logger.error("cron", "Failed to send membership expiry email", { to: m.email, error: String(err) }));
 
 			results.membershipExpiry++;
 		}
 	} catch (err) {
-		console.error("Cron: membership expiry failed:", err);
+		logger.error("cron", "Membership expiry failed", { error: String(err) });
 	}
 
 	// --- 4. Post-Event Volunteer Thank You (yesterday's events) ---
@@ -145,19 +146,19 @@ export async function GET(request: Request) {
 				firstName: v.clientFirstName,
 				eventTitle: v.eventTitle,
 				eventDate: v.eventDate,
-			}).catch(console.error);
+			}).catch((err) => logger.error("cron", "Failed to send post-event thanks", { to: v.clientEmail, error: String(err) }));
 
 			results.postEventThanks++;
 		}
 	} catch (err) {
-		console.error("Cron: post-event thanks failed:", err);
+		logger.error("cron", "Post-event thanks failed", { error: String(err) });
 	}
 
 	// --- 5. Waiver Expiry — clear expired waivers so clients must re-sign ---
 	try {
 		const now = new Date();
 
-		const result = await db
+		await db
 			.update(clients)
 			.set({ waiverSignedAt: null, waiverExpiresAt: null })
 			.where(
@@ -168,9 +169,9 @@ export async function GET(request: Request) {
 			);
 
 		// Drizzle doesn't return count from update, so we log the action
-		console.log("Cron: waiver expiry check completed");
+		logger.info("cron", "Waiver expiry check completed");
 	} catch (err) {
-		console.error("Cron: waiver expiry failed:", err);
+		logger.error("cron", "Waiver expiry failed", { error: String(err) });
 	}
 
 	return Response.json({ ok: true, ...results });

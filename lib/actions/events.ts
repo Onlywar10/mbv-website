@@ -10,6 +10,7 @@ import { db } from "@/lib/db";
 import { eventRegistrations } from "@/lib/db/schema/event-registrations";
 import { eventTemplates } from "@/lib/db/schema/event-templates";
 import { events } from "@/lib/db/schema/events";
+import { logger } from "@/lib/logger";
 import type { ActionState } from "@/lib/types";
 import { slugify } from "@/lib/utils";
 import { eventSchema, templateSchema } from "@/lib/validations/events";
@@ -34,25 +35,30 @@ export async function createEventAction(
 		slug = `${slug}-${Date.now()}`;
 	}
 
-	await db.insert(events).values({
-		title: data.title,
-		slug,
-		date: data.date,
-		time: data.time || null,
-		location: data.location || null,
-		category: data.category,
-		description: data.description || null,
-		longDescription: data.longDescription || null,
-		imageUrl: data.imageUrl || null,
-		accessibility: data.accessibility || null,
-		participantCapacity: data.participantCapacity,
-		volunteerCapacity: data.volunteerCapacity,
-		volunteerEnabled: data.volunteerEnabled,
-		volunteerDescription: data.volunteerDescription || null,
-		volunteerTime: data.volunteerTime || null,
-		volunteerNotes: data.volunteerNotes || null,
-		isPublished: data.isPublished,
-	});
+	try {
+		await db.insert(events).values({
+			title: data.title,
+			slug,
+			date: data.date,
+			time: data.time || null,
+			location: data.location || null,
+			category: data.category,
+			description: data.description || null,
+			longDescription: data.longDescription || null,
+			imageUrl: data.imageUrl || null,
+			accessibility: data.accessibility || null,
+			participantCapacity: data.participantCapacity,
+			volunteerCapacity: data.volunteerCapacity,
+			volunteerEnabled: data.volunteerEnabled,
+			volunteerDescription: data.volunteerDescription || null,
+			volunteerTime: data.volunteerTime || null,
+			volunteerNotes: data.volunteerNotes || null,
+			isPublished: data.isPublished,
+		});
+	} catch (err) {
+		logger.error("events", "Failed to create event", { error: String(err) });
+		return { error: "Failed to create event. Please try again." };
+	}
 
 	revalidatePath("/admin/events");
 	revalidatePath("/events");
@@ -97,32 +103,41 @@ export async function updateEventAction(
 		oldImageUrl !== newImageUrl &&
 		oldImageUrl.includes("blob.vercel-storage.com")
 	) {
-		await del(oldImageUrl);
+		try {
+			await del(oldImageUrl);
+		} catch (err) {
+			logger.warn("events", "Failed to delete old image blob", { error: String(err) });
+		}
 	}
 
-	await db
-		.update(events)
-		.set({
-			title: data.title,
-			slug,
-			date: data.date,
-			time: data.time || null,
-			location: data.location || null,
-			category: data.category,
-			description: data.description || null,
-			longDescription: data.longDescription || null,
-			imageUrl: data.imageUrl || null,
-			accessibility: data.accessibility || null,
-			participantCapacity: data.participantCapacity,
-			volunteerCapacity: data.volunteerCapacity,
-			volunteerEnabled: data.volunteerEnabled,
-			volunteerDescription: data.volunteerDescription || null,
-			volunteerTime: data.volunteerTime || null,
-			volunteerNotes: data.volunteerNotes || null,
-			isPublished: data.isPublished,
-			updatedAt: new Date(),
-		})
-		.where(eq(events.id, id));
+	try {
+		await db
+			.update(events)
+			.set({
+				title: data.title,
+				slug,
+				date: data.date,
+				time: data.time || null,
+				location: data.location || null,
+				category: data.category,
+				description: data.description || null,
+				longDescription: data.longDescription || null,
+				imageUrl: data.imageUrl || null,
+				accessibility: data.accessibility || null,
+				participantCapacity: data.participantCapacity,
+				volunteerCapacity: data.volunteerCapacity,
+				volunteerEnabled: data.volunteerEnabled,
+				volunteerDescription: data.volunteerDescription || null,
+				volunteerTime: data.volunteerTime || null,
+				volunteerNotes: data.volunteerNotes || null,
+				isPublished: data.isPublished,
+				updatedAt: new Date(),
+			})
+			.where(eq(events.id, id));
+	} catch (err) {
+		logger.error("events", "Failed to update event", { id, error: String(err) });
+		return { error: "Failed to update event. Please try again." };
+	}
 
 	revalidatePath("/admin/events");
 	revalidatePath(`/events/${slug}`);
@@ -136,18 +151,32 @@ export async function deleteEventAction(id: string, reason?: string): Promise<Ac
 	await requireAuth();
 
 	// Notify all registrants before deleting
-	await notifyEventCancellation(id, reason).catch(console.error);
+	try {
+		await notifyEventCancellation(id, reason);
+	} catch (err) {
+		logger.error("events", "Failed to notify registrants of event cancellation", { id, error: String(err) });
+	}
 
 	const event = await db
 		.select({ imageUrl: events.imageUrl })
 		.from(events)
 		.where(eq(events.id, id))
 		.limit(1);
+
 	if (event[0]?.imageUrl?.includes("blob.vercel-storage.com")) {
-		await del(event[0].imageUrl);
+		try {
+			await del(event[0].imageUrl);
+		} catch (err) {
+			logger.warn("events", "Failed to delete event image blob", { error: String(err) });
+		}
 	}
 
-	await db.delete(events).where(eq(events.id, id));
+	try {
+		await db.delete(events).where(eq(events.id, id));
+	} catch (err) {
+		logger.error("events", "Failed to delete event", { id, error: String(err) });
+		return { error: "Failed to delete event. Please try again." };
+	}
 
 	revalidatePath("/admin/events");
 	revalidatePath("/events");
@@ -164,13 +193,18 @@ export async function togglePublishAction(id: string): Promise<ActionState> {
 		return { error: "Event not found" };
 	}
 
-	await db
-		.update(events)
-		.set({
-			isPublished: !current[0].isPublished,
-			updatedAt: new Date(),
-		})
-		.where(eq(events.id, id));
+	try {
+		await db
+			.update(events)
+			.set({
+				isPublished: !current[0].isPublished,
+				updatedAt: new Date(),
+			})
+			.where(eq(events.id, id));
+	} catch (err) {
+		logger.error("events", "Failed to toggle publish status", { id, error: String(err) });
+		return { error: "Failed to update publish status. Please try again." };
+	}
 
 	revalidatePath("/admin/events");
 	revalidatePath("/events");
@@ -188,20 +222,27 @@ export async function updateRegistrationStatusAction(
 ): Promise<ActionState> {
 	await requireAuth();
 
-	await db
-		.update(eventRegistrations)
-		.set({ status })
-		.where(eq(eventRegistrations.id, registrationId));
+	try {
+		await db
+			.update(eventRegistrations)
+			.set({ status })
+			.where(eq(eventRegistrations.id, registrationId));
 
-	// Also update any guest registered by this person
-	await db
-		.update(eventRegistrations)
-		.set({ status })
-		.where(eq(eventRegistrations.registeredBy, registrationId));
+		// Also update any guest registered by this person
+		await db
+			.update(eventRegistrations)
+			.set({ status })
+			.where(eq(eventRegistrations.registeredBy, registrationId));
+	} catch (err) {
+		logger.error("registrations", "Failed to update registration status", { registrationId, error: String(err) });
+		return { error: "Failed to update registration status. Please try again." };
+	}
 
-	// Send approval email
+	// Send approval email (fire-and-forget — don't block the status update)
 	if (status === "registered") {
-		notifyRegistrationStatusChange(registrationId, status).catch(console.error);
+		notifyRegistrationStatusChange(registrationId, status).catch((err) =>
+			logger.error("registrations", "Failed to send approval email", { registrationId, error: String(err) }),
+		);
 	}
 
 	revalidatePath(`/admin/events/${eventId}`);
@@ -216,11 +257,20 @@ export async function deleteRegistrationAction(
 	await requireAuth();
 
 	// Send denial email before deleting the record
-	await notifyRegistrationStatusChange(registrationId, "cancelled", reason).catch(console.error);
+	try {
+		await notifyRegistrationStatusChange(registrationId, "cancelled", reason);
+	} catch (err) {
+		logger.error("registrations", "Failed to send denial email", { registrationId, error: String(err) });
+	}
 
-	// Delete guest registrations linked to this parent
-	await db.delete(eventRegistrations).where(eq(eventRegistrations.registeredBy, registrationId));
-	await db.delete(eventRegistrations).where(eq(eventRegistrations.id, registrationId));
+	try {
+		// Delete guest registrations linked to this parent
+		await db.delete(eventRegistrations).where(eq(eventRegistrations.registeredBy, registrationId));
+		await db.delete(eventRegistrations).where(eq(eventRegistrations.id, registrationId));
+	} catch (err) {
+		logger.error("registrations", "Failed to delete registration", { registrationId, error: String(err) });
+		return { error: "Failed to remove registration. Please try again." };
+	}
 
 	revalidatePath(`/admin/events/${eventId}`);
 	return { success: "Registration removed" };
@@ -241,17 +291,22 @@ export async function createTemplateAction(
 
 	const data = parsed.data;
 
-	await db.insert(eventTemplates).values({
-		name: data.name,
-		title: data.title,
-		location: data.location || null,
-		category: data.category,
-		description: data.description || null,
-		longDescription: data.longDescription || null,
-		imageUrl: data.imageUrl || null,
-		accessibility: data.accessibility || null,
-		defaultSpots: data.defaultSpots,
-	});
+	try {
+		await db.insert(eventTemplates).values({
+			name: data.name,
+			title: data.title,
+			location: data.location || null,
+			category: data.category,
+			description: data.description || null,
+			longDescription: data.longDescription || null,
+			imageUrl: data.imageUrl || null,
+			accessibility: data.accessibility || null,
+			defaultSpots: data.defaultSpots,
+		});
+	} catch (err) {
+		logger.error("templates", "Failed to create template", { error: String(err) });
+		return { error: "Failed to create template. Please try again." };
+	}
 
 	revalidatePath("/admin/events");
 	return { success: "Template created" };
@@ -265,11 +320,21 @@ export async function deleteTemplateAction(id: string): Promise<ActionState> {
 		.from(eventTemplates)
 		.where(eq(eventTemplates.id, id))
 		.limit(1);
+
 	if (template[0]?.imageUrl?.includes("blob.vercel-storage.com")) {
-		await del(template[0].imageUrl);
+		try {
+			await del(template[0].imageUrl);
+		} catch (err) {
+			logger.warn("templates", "Failed to delete template image blob", { error: String(err) });
+		}
 	}
 
-	await db.delete(eventTemplates).where(eq(eventTemplates.id, id));
+	try {
+		await db.delete(eventTemplates).where(eq(eventTemplates.id, id));
+	} catch (err) {
+		logger.error("templates", "Failed to delete template", { error: String(err) });
+		return { error: "Failed to delete template. Please try again." };
+	}
 
 	revalidatePath("/admin/events");
 	return { success: "Template deleted" };

@@ -13,6 +13,7 @@ import {
 	sendStatusUpdateEmail,
 	sendVolunteerRecruitmentEmail,
 } from "@/lib/email";
+import { logger } from "@/lib/logger";
 import {
 	getActiveAdminEmails,
 	getPastVolunteersNotRegistered,
@@ -84,7 +85,7 @@ export async function sendRegistrationReportAction(_prevState: ActionState): Pro
 			baseUrl: getBaseUrl(),
 		});
 	} catch (err) {
-		console.error("Failed to send registration report:", err);
+		logger.error("email", "Failed to send registration report", { error: String(err) });
 		return { error: "Failed to send report email. Please try again." };
 	}
 
@@ -141,7 +142,7 @@ export async function notifyRegistrationStatusChange(
 		eventLocation: r.eventLocation,
 		reason,
 		waiverUrl,
-	}).catch(console.error);
+	}).catch((err) => logger.error("email", "Failed to send status update email", { to: r.clientEmail, registrationId, error: String(err) }));
 
 	// Notify guests registered by this person
 	const guests = await db
@@ -176,7 +177,7 @@ export async function notifyRegistrationStatusChange(
 				eventLocation: r.eventLocation,
 				reason,
 				waiverUrl: guestWaiverUrl,
-			}).catch(console.error);
+			}).catch((err) => logger.error("email", "Failed to send guest status update email", { to: guest.clientEmail, error: String(err) }));
 		}
 	}
 }
@@ -211,7 +212,7 @@ export async function notifyEventCancellation(eventId: string, reason?: string) 
 				eventTitle: event.title,
 				eventDate: event.date,
 				reason,
-			}).catch(console.error);
+			}).catch((err) => logger.error("email", "Failed to send cancellation email", { to: registrant.email, eventId, error: String(err) }));
 		}
 	}
 }
@@ -266,18 +267,21 @@ export async function sendVolunteerRecruitmentAction(
 	for (const v of volunteers) {
 		if (!v.email) continue;
 
-		sendVolunteerRecruitmentEmail({
-			to: v.email,
-			firstName: v.firstName,
-			eventTitle: event.title,
-			eventDate: event.date,
-			eventTime: event.time,
-			eventLocation: event.location,
-			personalMessage,
-			volunteerUrl: `${getBaseUrl()}/support#volunteer-form`,
-		}).catch(console.error);
-
-		sent++;
+		try {
+			await sendVolunteerRecruitmentEmail({
+				to: v.email,
+				firstName: v.firstName,
+				eventTitle: event.title,
+				eventDate: event.date,
+				eventTime: event.time,
+				eventLocation: event.location,
+				personalMessage,
+				volunteerUrl: `${getBaseUrl()}/support#volunteer-form`,
+			});
+			sent++;
+		} catch (err) {
+			logger.error("email", "Failed to send recruitment email", { to: v.email, error: String(err) });
+		}
 	}
 
 	return {

@@ -12,6 +12,7 @@ import {
 	sendDonationThankYouEmail,
 	sendMembershipConfirmationEmail,
 } from "@/lib/email";
+import { logger } from "@/lib/logger";
 import { findClientByEmail } from "@/lib/queries/clients";
 import { getGivebutterCampaignCodes, getNotificationEmails } from "@/lib/queries/settings";
 
@@ -36,7 +37,13 @@ export async function POST(request: NextRequest) {
 		return Response.json({ error: "Invalid signature" }, { status: 401 });
 	}
 
-	const payload = JSON.parse(rawBody);
+	let payload: any;
+	try {
+		payload = JSON.parse(rawBody);
+	} catch {
+		return Response.json({ error: "Invalid JSON payload" }, { status: 400 });
+	}
+
 	const transaction = payload.data ?? payload;
 
 	// Only process succeeded transactions
@@ -56,23 +63,36 @@ export async function POST(request: NextRequest) {
 		return Response.json({ error: "Missing required fields" }, { status: 400 });
 	}
 
+	if (!Number.isFinite(amount) || amount <= 0) {
+		return Response.json({ error: "Invalid donation amount" }, { status: 400 });
+	}
+
 	// Find or create client
 	let clientId: string;
-	const existing = await findClientByEmail(email);
-	if (existing) {
-		clientId = existing.id;
-	} else {
-		const result = await db
-			.insert(clients)
-			.values({
-				firstName,
-				lastName,
-				email: email.toLowerCase(),
-				isActive: true,
-				emailOptIn: true,
-			})
-			.returning({ id: clients.id });
-		clientId = result[0].id;
+	try {
+		const existing = await findClientByEmail(email);
+		if (existing) {
+			clientId = existing.id;
+		} else {
+			const result = await db
+				.insert(clients)
+				.values({
+					firstName,
+					lastName,
+					email: email.toLowerCase(),
+					isActive: true,
+					emailOptIn: true,
+				})
+				.returning({ id: clients.id });
+
+			if (!result[0]?.id) {
+				return Response.json({ error: "Failed to create client" }, { status: 500 });
+			}
+			clientId = result[0].id;
+		}
+	} catch (err) {
+		logger.error("givebutter", "Failed to find or create client", { email, error: String(err) });
+		return Response.json({ error: "Failed to process client" }, { status: 500 });
 	}
 
 	// Record donation
@@ -96,14 +116,21 @@ export async function POST(request: NextRequest) {
 		? `Membership — ${membershipType === "annual" ? "Annual" : "Lifetime"}`
 		: "Donation";
 
-	await db.insert(donations).values({
-		clientId,
-		amount: String(amount),
-		paymentMethod,
-		transactionId,
-		donatedAt: new Date(transaction.transacted_at ?? Date.now()),
-		notes: donationNote,
-	});
+	const donatedAt = transaction.transacted_at ? new Date(transaction.transacted_at) : new Date();
+
+	try {
+		await db.insert(donations).values({
+			clientId,
+			amount: String(amount),
+			paymentMethod,
+			transactionId,
+			donatedAt,
+			notes: donationNote,
+		});
+	} catch (err) {
+		logger.error("givebutter", "Failed to record donation", { email, amount: String(amount), error: String(err) });
+		return Response.json({ error: "Failed to record donation" }, { status: 500 });
+	}
 
 	// Send donation thank-you and admin notification for non-membership donations
 	if (!membershipType) {
@@ -117,14 +144,14 @@ export async function POST(request: NextRequest) {
 				donorEmail: email,
 				amount: String(amount),
 				paymentMethod,
-			}).catch(console.error);
-		}).catch(console.error);
+			}).catch((err) => logger.error("givebutter", "Failed to send admin donation notification", { email, error: String(err) }));
+		}).catch((err) => logger.error("givebutter", "Failed to get notification emails for donation", { error: String(err) }));
 
 		sendDonationThankYouEmail({
 			to: email,
 			firstName,
 			amount: String(amount),
-		}).catch(console.error);
+		}).catch((err) => logger.error("givebutter", "Failed to send donation thank-you", { to: email, error: String(err) }));
 	}
 
 	if (membershipType) {
@@ -177,7 +204,7 @@ export async function POST(request: NextRequest) {
 			firstName,
 			type: membershipType,
 			expiresAt,
-		}).catch(console.error);
+		}).catch((err) => logger.error("givebutter", "Failed to send membership confirmation", { to: email, error: String(err) }));
 
 		// Notify admins of new/renewed membership
 		getNotificationEmails("notify_membership_donation").then((adminEmails) => {
@@ -191,8 +218,8 @@ export async function POST(request: NextRequest) {
 				isRenewal: !!existingMembership[0],
 				expiresAt,
 				amount: String(amount),
-			}).catch(console.error);
-		}).catch(console.error);
+			}).catch((err) => logger.error("givebutter", "Failed to send admin membership notification", { email, error: String(err) }));
+		}).catch((err) => logger.error("givebutter", "Failed to get notification emails for membership", { error: String(err) }));
 	}
 
 	return Response.json({ ok: true });

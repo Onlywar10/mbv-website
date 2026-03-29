@@ -3,6 +3,7 @@
 import { del } from "@vercel/blob";
 import { requireAuth } from "@/lib/auth/require-auth";
 import { sendMailingListEmail } from "@/lib/email";
+import { logger } from "@/lib/logger";
 import { getMailingListClients } from "@/lib/queries/email";
 import type { ActionState } from "@/lib/types";
 import { mailingListSchema } from "@/lib/validations/mailing-list";
@@ -89,7 +90,7 @@ export async function sendMailingListBlastAction(
 					sent++;
 				} catch (err) {
 					errors.push(r.email);
-					console.error(`Failed to send to ${r.email}:`, err);
+					logger.error("mailing-list", "Failed to send blast email", { to: r.email, error: String(err) });
 				}
 			}),
 		);
@@ -105,7 +106,7 @@ export async function sendMailingListBlastAction(
 	// they're referenced as <img src> in recipients' inboxes.
 	if (attachments.length > 0) {
 		const attachmentBlobUrls = attachments.map((a) => a.path);
-		del(attachmentBlobUrls).catch(console.error);
+		del(attachmentBlobUrls).catch((err) => logger.warn("mailing-list", "Failed to clean up attachment blobs", { error: String(err) }));
 	}
 
 	if (errors.length > 0) {

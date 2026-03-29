@@ -1,6 +1,7 @@
 "use server";
 
 import { sendContactNotification } from "@/lib/email";
+import { logger } from "@/lib/logger";
 import { getNotificationEmails } from "@/lib/queries/settings";
 import type { ActionState } from "@/lib/types";
 import { contactFormSchema } from "@/lib/validations/contact";
@@ -33,7 +34,7 @@ export async function submitContactFormAction(
 			message: data.message,
 		});
 	} catch (err) {
-		console.error("Failed to send contact form notification:", err);
+		logger.error("contact", "Failed to send contact form notification", { senderEmail: data.email, error: String(err) });
 		return { error: "Failed to send your message. Please try again." };
 	}
 
