@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { getGivebutterCampaignCodes } from "@/lib/queries/settings";
+import { getGivebutterCampaignCodes, getNotificationSettings, getSmartWaiverSettings } from "@/lib/queries/settings";
 import { CampaignCodesForm } from "./campaign-codes-form";
+import { NotificationRoutingForm } from "./notification-routing-form";
 import { SendReportButton } from "./send-report-button";
+import { SmartWaiverForm } from "./smartwaiver-form";
 
 export const metadata: Metadata = {
 	title: "Settings",
@@ -10,7 +12,11 @@ export const metadata: Metadata = {
 };
 
 export default async function SettingsPage() {
-	const campaignCodes = await getGivebutterCampaignCodes();
+	const [campaignCodes, notificationSettings, smartWaiverSettings] = await Promise.all([
+		getGivebutterCampaignCodes(),
+		getNotificationSettings(),
+		getSmartWaiverSettings(),
+	]);
 
 	return (
 		<div>
@@ -18,6 +24,25 @@ export default async function SettingsPage() {
 			<p className="mt-1 text-sm text-muted-foreground">System configuration and testing</p>
 
 			<Card className="mt-8">
+				<CardHeader>
+					<CardTitle className="font-heading text-sm uppercase tracking-wider text-muted-foreground">
+						Notification Routing
+					</CardTitle>
+					<CardDescription>
+						Configure which email addresses receive notifications for different categories. Leave
+						blank to send to all active admin users.
+					</CardDescription>
+				</CardHeader>
+				<CardContent>
+					<NotificationRoutingForm
+						contactEmails={notificationSettings.contact}
+						eventEmails={notificationSettings.events}
+						membershipDonationEmails={notificationSettings.membershipDonation}
+					/>
+				</CardContent>
+			</Card>
+
+			<Card className="mt-6">
 				<CardHeader>
 					<CardTitle className="font-heading text-sm uppercase tracking-wider text-muted-foreground">
 						GiveButter Campaign Codes
@@ -38,6 +63,23 @@ export default async function SettingsPage() {
 			<Card className="mt-6">
 				<CardHeader>
 					<CardTitle className="font-heading text-sm uppercase tracking-wider text-muted-foreground">
+						SmartWaiver Integration
+					</CardTitle>
+					<CardDescription>
+						Configure SmartWaiver for event liability waivers. Events with waivers enabled will
+						show the signing widget and track completion status.
+					</CardDescription>
+				</CardHeader>
+				<CardContent>
+					<SmartWaiverForm
+						waiverUrl={smartWaiverSettings.waiverUrl ?? ""}
+					/>
+				</CardContent>
+			</Card>
+
+			<Card className="mt-6">
+				<CardHeader>
+					<CardTitle className="font-heading text-sm uppercase tracking-wider text-muted-foreground">
 						Email Reports
 					</CardTitle>
 					<CardDescription>
@@ -49,7 +91,6 @@ export default async function SettingsPage() {
 					<SendReportButton />
 				</CardContent>
 			</Card>
-
-			</div>
+		</div>
 	);
 }

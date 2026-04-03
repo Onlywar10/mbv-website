@@ -2,6 +2,7 @@
 
 import { ArrowRight, Calendar, MapPin } from "lucide-react";
 import { motion } from "motion/react";
+import Image from "next/image";
 import Link from "next/link";
 import { ScrollReveal } from "@/components/shared/scroll-reveal";
 import { SectionHeading } from "@/components/shared/section-heading";
@@ -43,10 +44,12 @@ export function EventPreview({ events }: EventPreviewProps) {
 							<Card className="group h-full overflow-hidden rounded-sm border border-border bg-cream transition-shadow duration-300 hover:shadow-sharp">
 								{/* Event image */}
 								<div className="relative aspect-[16/10] overflow-hidden">
-									<img
-										src={event.imageUrl || ""}
+									<Image
+										src={event.imageUrl || "/images/hero/MBV-Boat.png"}
 										alt={event.title}
-										className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+										fill
+										className="object-cover transition-transform duration-500 group-hover:scale-105"
+										sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
 									/>
 									{/* Date badge */}
 									<div className="absolute top-3 left-3 rounded-sm bg-rust px-3 py-1.5 text-xs font-bold text-white">

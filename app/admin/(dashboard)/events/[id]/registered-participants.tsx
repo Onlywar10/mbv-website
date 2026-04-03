@@ -1,7 +1,7 @@
 "use client";
 
 import { DeleteDialog } from "@/components/admin/delete-dialog";
-import { RegistrationStatusBadge } from "@/components/admin/status-badge";
+import { RegistrationStatusBadge, WaiverBadge } from "@/components/admin/status-badge";
 import { Badge } from "@/components/ui/badge";
 import { deleteRegistrationAction } from "@/lib/actions/events";
 
@@ -16,6 +16,8 @@ type Registration = {
 	registeredBy: string | null;
 	registeredAt: Date;
 	notes: string | null;
+	waiverSignedAt: Date | null;
+	waiverExpiresAt: Date | null;
 };
 
 interface RegisteredParticipantsProps {
@@ -59,6 +61,7 @@ export function RegisteredParticipants({ registrations, eventId }: RegisteredPar
 										{reg.role}
 									</Badge>
 									<RegistrationStatusBadge status={reg.status} />
+									<WaiverBadge expiresAt={reg.waiverExpiresAt} signedAt={reg.waiverSignedAt} />
 								</div>
 								<p className="text-sm text-muted-foreground">{reg.email}</p>
 								<p className="mt-1 text-xs text-muted-foreground">

@@ -2,6 +2,7 @@
 
 import { Check, X } from "lucide-react";
 import { ReasonDialog } from "@/components/admin/reason-dialog";
+import { WaiverBadge } from "@/components/admin/status-badge";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { deleteRegistrationAction, updateRegistrationStatusAction } from "@/lib/actions/events";
@@ -17,6 +18,8 @@ type Registration = {
 	registeredBy: string | null;
 	registeredAt: Date;
 	notes: string | null;
+	waiverSignedAt: Date | null;
+	waiverExpiresAt: Date | null;
 };
 
 interface PendingApprovalsProps {
@@ -59,6 +62,7 @@ export function PendingApprovals({ registrations, eventId }: PendingApprovalsPro
 									>
 										{reg.role}
 									</Badge>
+									<WaiverBadge expiresAt={reg.waiverExpiresAt} signedAt={reg.waiverSignedAt} />
 								</div>
 								<p className="text-sm text-muted-foreground">{reg.email}</p>
 								<p className="mt-1 text-xs text-muted-foreground">

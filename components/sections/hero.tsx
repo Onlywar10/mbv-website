@@ -95,12 +95,12 @@ export function Hero() {
 			</div>
 
 			{/* Hero content */}
-			<div className="relative z-10 mx-auto max-w-2xl rounded-lg bg-black/40 px-5 py-6 text-center backdrop-blur-sm sm:p-10">
+			<div className="relative z-10 mx-auto max-w-2xl px-5 py-6 text-center sm:rounded-lg sm:bg-black/40 sm:p-10 sm:backdrop-blur-sm">
 				<motion.h1
 					initial={{ opacity: 0, y: 30 }}
 					animate={{ opacity: 1, y: 0 }}
 					transition={{ duration: 0.8, delay: 0.15, ease: "easeOut" }}
-					className="font-heading uppercase text-balance text-5xl leading-tight tracking-[-0.03em] text-white md:text-6xl lg:text-7xl"
+					className="font-heading font-extrabold uppercase text-balance text-5xl leading-tight tracking-[-0.03em] text-white [-webkit-text-stroke:_1px_rgb(0_0_0_/_60%)] [text-shadow:_0_2px_12px_rgb(0_0_0_/_80%)] sm:font-bold sm:[-webkit-text-stroke:_0] sm:[text-shadow:_none] md:text-6xl lg:text-7xl"
 				>
 					Serving Those Who Served
 					<span className="mt-2 block text-rust">— On the Waters of Monterey Bay</span>

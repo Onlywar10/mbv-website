@@ -2,86 +2,24 @@
 
 import { CheckCircle, Send } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
-import { type FormEvent, useState } from "react";
+import { useActionState, useState } from "react";
+import { submitContactFormAction } from "@/lib/actions/contact";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-
-interface FormData {
-	name: string;
-	email: string;
-	phone: string;
-	subject: string;
-	message: string;
-}
-
-interface FormErrors {
-	name?: string;
-	email?: string;
-	subject?: string;
-	message?: string;
-}
+import type { ActionState } from "@/lib/types";
 
 export function ContactForm() {
-	const [formData, setFormData] = useState<FormData>({
-		name: "",
-		email: "",
-		phone: "",
-		subject: "",
-		message: "",
-	});
-	const [errors, setErrors] = useState<FormErrors>({});
+	const [state, formAction, isPending] = useActionState<ActionState, FormData>(
+		submitContactFormAction,
+		{},
+	);
 	const [isSubmitted, setIsSubmitted] = useState(false);
-	const [isSubmitting, setIsSubmitting] = useState(false);
 
-	function validate(): boolean {
-		const newErrors: FormErrors = {};
-
-		if (!formData.name.trim()) {
-			newErrors.name = "Name is required";
-		}
-
-		if (!formData.email.trim()) {
-			newErrors.email = "Email is required";
-		} else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-			newErrors.email = "Please enter a valid email address";
-		}
-
-		if (!formData.subject.trim()) {
-			newErrors.subject = "Subject is required";
-		}
-
-		if (!formData.message.trim()) {
-			newErrors.message = "Message is required";
-		} else if (formData.message.trim().length < 10) {
-			newErrors.message = "Message must be at least 10 characters";
-		}
-
-		setErrors(newErrors);
-		return Object.keys(newErrors).length === 0;
-	}
-
-	async function handleSubmit(e: FormEvent) {
-		e.preventDefault();
-
-		if (!validate()) return;
-
-		setIsSubmitting(true);
-
-		// Simulate form submission delay
-		await new Promise((resolve) => setTimeout(resolve, 1000));
-
-		setIsSubmitting(false);
+	// Show success state when action succeeds
+	if (state.success && !isSubmitted) {
 		setIsSubmitted(true);
-	}
-
-	function handleChange(field: keyof FormData, value: string) {
-		setFormData((prev) => ({ ...prev, [field]: value }));
-		// Clear error for this field when user starts typing
-		if (errors[field as keyof FormErrors]) {
-			setErrors((prev) => ({ ...prev, [field]: undefined }));
-		}
 	}
 
 	return (
@@ -105,16 +43,7 @@ export function ContactForm() {
 					</p>
 					<Button
 						variant="outline"
-						onClick={() => {
-							setIsSubmitted(false);
-							setFormData({
-								name: "",
-								email: "",
-								phone: "",
-								subject: "",
-								message: "",
-							});
-						}}
+						onClick={() => setIsSubmitted(false)}
 						className="mt-2"
 					>
 						Send Another Message
@@ -126,10 +55,16 @@ export function ContactForm() {
 					initial={{ opacity: 0 }}
 					animate={{ opacity: 1 }}
 					exit={{ opacity: 0 }}
-					onSubmit={handleSubmit}
+					action={formAction}
 					noValidate
 					className="space-y-5"
 				>
+					{state.error && (
+						<div className="rounded-sm bg-destructive/10 px-4 py-3 text-sm text-destructive">
+							{state.error}
+						</div>
+					)}
+
 					{/* Name */}
 					<div className="space-y-2">
 						<Label htmlFor="contact-name">
@@ -137,19 +72,12 @@ export function ContactForm() {
 						</Label>
 						<Input
 							id="contact-name"
+							name="name"
 							type="text"
 							placeholder="Your full name"
-							value={formData.name}
-							onChange={(e) => handleChange("name", e.target.value)}
-							aria-invalid={!!errors.name}
-							aria-describedby={errors.name ? "name-error" : undefined}
+							required
 							className="h-10"
 						/>
-						{errors.name && (
-							<p id="name-error" className="text-sm text-destructive" role="alert">
-								{errors.name}
-							</p>
-						)}
 					</div>
 
 					{/* Email */}
@@ -159,19 +87,12 @@ export function ContactForm() {
 						</Label>
 						<Input
 							id="contact-email"
+							name="email"
 							type="email"
 							placeholder="you@example.com"
-							value={formData.email}
-							onChange={(e) => handleChange("email", e.target.value)}
-							aria-invalid={!!errors.email}
-							aria-describedby={errors.email ? "email-error" : undefined}
+							required
 							className="h-10"
 						/>
-						{errors.email && (
-							<p id="email-error" className="text-sm text-destructive" role="alert">
-								{errors.email}
-							</p>
-						)}
 					</div>
 
 					{/* Phone (optional) */}
@@ -181,10 +102,9 @@ export function ContactForm() {
 						</Label>
 						<Input
 							id="contact-phone"
+							name="phone"
 							type="tel"
 							placeholder="(831) 555-0000"
-							value={formData.phone}
-							onChange={(e) => handleChange("phone", e.target.value)}
 							className="h-10"
 						/>
 					</div>
@@ -196,19 +116,12 @@ export function ContactForm() {
 						</Label>
 						<Input
 							id="contact-subject"
+							name="subject"
 							type="text"
 							placeholder="e.g., Event Sign-Up, Volunteer Inquiry, General Question"
-							value={formData.subject}
-							onChange={(e) => handleChange("subject", e.target.value)}
-							aria-invalid={!!errors.subject}
-							aria-describedby={errors.subject ? "subject-error" : undefined}
+							required
 							className="h-10"
 						/>
-						{errors.subject && (
-							<p id="subject-error" className="text-sm text-destructive" role="alert">
-								{errors.subject}
-							</p>
-						)}
 					</div>
 
 					{/* Message */}
@@ -218,28 +131,21 @@ export function ContactForm() {
 						</Label>
 						<Textarea
 							id="contact-message"
+							name="message"
 							placeholder="Tell us how we can help..."
 							rows={5}
-							value={formData.message}
-							onChange={(e) => handleChange("message", e.target.value)}
-							aria-invalid={!!errors.message}
-							aria-describedby={errors.message ? "message-error" : undefined}
+							required
 						/>
-						{errors.message && (
-							<p id="message-error" className="text-sm text-destructive" role="alert">
-								{errors.message}
-							</p>
-						)}
 					</div>
 
 					{/* Submit */}
 					<Button
 						type="submit"
 						size="lg"
-						disabled={isSubmitting}
+						disabled={isPending}
 						className="w-full rounded-sm bg-rust font-heading uppercase tracking-wider text-cream hover:bg-rust-light"
 					>
-						{isSubmitting ? (
+						{isPending ? (
 							<>
 								<span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
 								Sending...

@@ -61,6 +61,28 @@ export function RegistrationStatusBadge({ status }: { status: string }) {
 	);
 }
 
+export function WaiverBadge({ signedAt, expiresAt }: { signedAt: Date | null; expiresAt: Date | null }) {
+	if (signedAt && expiresAt && new Date(expiresAt) > new Date()) {
+		return (
+			<Badge variant="outline" className="bg-sage/10 text-sage border-sage/20">
+				waiver signed
+			</Badge>
+		);
+	}
+	if (signedAt && expiresAt && new Date(expiresAt) <= new Date()) {
+		return (
+			<Badge variant="outline" className="bg-rust/10 text-rust border-rust/20">
+				waiver expired
+			</Badge>
+		);
+	}
+	return (
+		<Badge variant="outline" className="bg-ochre/10 text-ochre border-ochre/20">
+			waiver pending
+		</Badge>
+	);
+}
+
 export function PaymentMethodBadge({ method }: { method: string }) {
 	return (
 		<Badge variant="outline" className="bg-ink/5 text-muted-foreground border-ink/10">

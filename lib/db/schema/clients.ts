@@ -14,6 +14,8 @@ export const clients = pgTable("clients", {
 	isActive: boolean("is_active").notNull().default(true),
 	emailOptIn: boolean("email_opt_in").notNull().default(true),
 	totalEventsAttended: integer("total_events_attended").notNull().default(0),
+	waiverSignedAt: timestamp("waiver_signed_at", { withTimezone: true }),
+	waiverExpiresAt: timestamp("waiver_expires_at", { withTimezone: true }),
 	createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 	updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });

@@ -1,11 +1,11 @@
 "use client";
 
-import { Eye, Pencil } from "lucide-react";
+import { Eye, Pencil, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { DeleteDialog } from "@/components/admin/delete-dialog";
 import { Button } from "@/components/ui/button";
-import { deleteClientAction } from "@/lib/actions/clients";
+import { deleteClientAction, deleteClientsAction } from "@/lib/actions/clients";
 
 type Client = {
 	id: string;
@@ -13,7 +13,10 @@ type Client = {
 	lastName: string;
 	email: string;
 	isActive: boolean;
+	emailOptIn: boolean;
 	totalEventsAttended: number;
+	waiverSignedAt: Date | null;
+	waiverExpiresAt: Date | null;
 	createdAt: Date;
 };
 
@@ -23,6 +26,9 @@ interface ClientsTableProps {
 
 export function ClientsTable({ clients }: ClientsTableProps) {
 	const [search, setSearch] = useState("");
+	const [selected, setSelected] = useState<Set<string>>(new Set());
+	const [deleting, setDeleting] = useState(false);
+	const [showConfirm, setShowConfirm] = useState(false);
 
 	const filtered = search
 		? clients.filter(
@@ -33,9 +39,42 @@ export function ClientsTable({ clients }: ClientsTableProps) {
 			)
 		: clients;
 
+	const allFilteredSelected =
+		filtered.length > 0 && filtered.every((c) => selected.has(c.id));
+
+	function toggleAll() {
+		if (allFilteredSelected) {
+			const newSelected = new Set(selected);
+			for (const c of filtered) newSelected.delete(c.id);
+			setSelected(newSelected);
+		} else {
+			const newSelected = new Set(selected);
+			for (const c of filtered) newSelected.add(c.id);
+			setSelected(newSelected);
+		}
+	}
+
+	function toggleOne(id: string) {
+		const newSelected = new Set(selected);
+		if (newSelected.has(id)) {
+			newSelected.delete(id);
+		} else {
+			newSelected.add(id);
+		}
+		setSelected(newSelected);
+	}
+
+	async function handleBulkDelete() {
+		setDeleting(true);
+		await deleteClientsAction(Array.from(selected));
+		setSelected(new Set());
+		setDeleting(false);
+		setShowConfirm(false);
+	}
+
 	return (
 		<div>
-			<div className="mb-4">
+			<div className="mb-4 flex items-center gap-3">
 				<input
 					type="text"
 					placeholder="Search clients..."
@@ -43,12 +82,58 @@ export function ClientsTable({ clients }: ClientsTableProps) {
 					onChange={(e) => setSearch(e.target.value)}
 					className="w-full max-w-sm rounded-sm border border-input bg-background px-3 py-2 text-sm"
 				/>
+
+				{selected.size > 0 && (
+					<>
+						{showConfirm ? (
+							<div className="flex items-center gap-2 rounded-sm border border-rust/30 bg-rust/10 px-3 py-1.5 text-sm">
+								<span>
+									Delete {selected.size} client{selected.size !== 1 ? "s" : ""}?
+								</span>
+								<Button
+									size="sm"
+									variant="outline"
+									onClick={() => setShowConfirm(false)}
+									disabled={deleting}
+								>
+									Cancel
+								</Button>
+								<Button
+									size="sm"
+									onClick={handleBulkDelete}
+									disabled={deleting}
+									className="bg-rust text-cream hover:bg-rust-light"
+								>
+									{deleting ? "Deleting..." : "Confirm"}
+								</Button>
+							</div>
+						) : (
+							<Button
+								size="sm"
+								variant="outline"
+								onClick={() => setShowConfirm(true)}
+								className="gap-1.5 text-rust hover:bg-rust/10 hover:text-rust"
+							>
+								<Trash2 className="h-3.5 w-3.5" />
+								Delete {selected.size} selected
+							</Button>
+						)}
+					</>
+				)}
 			</div>
 
 			<div className="overflow-x-auto rounded-sm ring-1 ring-border">
 				<table className="w-full text-sm">
 					<thead className="bg-cream text-left">
 						<tr>
+							<th className="px-4 py-3">
+								<input
+									type="checkbox"
+									checked={allFilteredSelected}
+									onChange={toggleAll}
+									className="h-4 w-4 rounded border-border accent-rust"
+								/>
+							</th>
 							<th className="px-4 py-3 font-heading text-xs uppercase tracking-wider text-muted-foreground">
 								Name
 							</th>
@@ -62,6 +147,12 @@ export function ClientsTable({ clients }: ClientsTableProps) {
 								Status
 							</th>
 							<th className="px-4 py-3 font-heading text-xs uppercase tracking-wider text-muted-foreground">
+								Mailing List
+							</th>
+							<th className="px-4 py-3 font-heading text-xs uppercase tracking-wider text-muted-foreground">
+								Waiver
+							</th>
+							<th className="px-4 py-3 font-heading text-xs uppercase tracking-wider text-muted-foreground">
 								Actions
 							</th>
 						</tr>
@@ -69,13 +160,24 @@ export function ClientsTable({ clients }: ClientsTableProps) {
 					<tbody className="divide-y divide-border bg-cream/50">
 						{filtered.length === 0 ? (
 							<tr>
-								<td colSpan={5} className="px-4 py-8 text-center text-muted-foreground">
+								<td colSpan={8} className="px-4 py-8 text-center text-muted-foreground">
 									No clients found
 								</td>
 							</tr>
 						) : (
 							filtered.map((client) => (
-								<tr key={client.id} className="hover:bg-cream">
+								<tr
+									key={client.id}
+									className={`hover:bg-cream ${selected.has(client.id) ? "bg-rust/5" : ""}`}
+								>
+									<td className="px-4 py-3">
+										<input
+											type="checkbox"
+											checked={selected.has(client.id)}
+											onChange={() => toggleOne(client.id)}
+											className="h-4 w-4 rounded border-border accent-rust"
+										/>
+									</td>
 									<td className="px-4 py-3 font-medium text-primary">
 										{client.firstName} {client.lastName}
 									</td>
@@ -90,6 +192,34 @@ export function ClientsTable({ clients }: ClientsTableProps) {
 											}`}
 										>
 											{client.isActive ? "Active" : "Inactive"}
+										</span>
+									</td>
+									<td className="px-4 py-3">
+										<span
+											className={`inline-flex rounded-sm px-2 py-0.5 text-xs font-medium ${
+												client.emailOptIn
+													? "bg-blue-100 text-blue-800"
+													: "bg-mid-gray/10 text-muted-foreground"
+											}`}
+										>
+											{client.emailOptIn ? "Subscribed" : "Unsubscribed"}
+										</span>
+									</td>
+									<td className="px-4 py-3">
+										<span
+											className={`inline-flex rounded-sm px-2 py-0.5 text-xs font-medium ${
+												client.waiverSignedAt && client.waiverExpiresAt && new Date(client.waiverExpiresAt) > new Date()
+													? "bg-sage/10 text-sage"
+													: client.waiverSignedAt && client.waiverExpiresAt
+														? "bg-rust/10 text-rust"
+														: "bg-ochre/10 text-ochre"
+											}`}
+										>
+											{client.waiverSignedAt && client.waiverExpiresAt && new Date(client.waiverExpiresAt) > new Date()
+												? "Signed"
+												: client.waiverSignedAt && client.waiverExpiresAt
+													? "Expired"
+													: "Not Signed"}
 										</span>
 									</td>
 									<td className="px-4 py-3">

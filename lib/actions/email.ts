@@ -11,8 +11,14 @@ import {
 	sendDailyRegistrationReport,
 	sendEventCancellationEmail,
 	sendStatusUpdateEmail,
+	sendVolunteerRecruitmentEmail,
 } from "@/lib/email";
-import { getActiveAdminEmails, getWaitlistedRegistrations } from "@/lib/queries/email";
+import { logger } from "@/lib/logger";
+import {
+	getActiveAdminEmails,
+	getPastVolunteersNotRegistered,
+	getWaitlistedRegistrations,
+} from "@/lib/queries/email";
 import type { ActionState } from "@/lib/types";
 
 function getBaseUrl(): string {
@@ -79,7 +85,7 @@ export async function sendRegistrationReportAction(_prevState: ActionState): Pro
 			baseUrl: getBaseUrl(),
 		});
 	} catch (err) {
-		console.error("Failed to send registration report:", err);
+		logger.error("email", "Failed to send registration report", { error: String(err) });
 		return { error: "Failed to send report email. Please try again." };
 	}
 
@@ -93,11 +99,12 @@ export async function notifyRegistrationStatusChange(
 	status: "registered" | "cancelled",
 	reason?: string,
 ) {
-	// Fetch primary registrant + event details
+	// Fetch primary registrant + event details + waiver status
 	const result = await db
 		.select({
 			clientEmail: clients.email,
 			clientFirstName: clients.firstName,
+			waiverExpiresAt: clients.waiverExpiresAt,
 			role: eventRegistrations.role,
 			eventTitle: events.title,
 			eventDate: events.date,
@@ -113,6 +120,17 @@ export async function notifyRegistrationStatusChange(
 	if (!result[0]?.clientEmail) return;
 
 	const r = result[0];
+
+	// Include waiver link in approval emails if client hasn't signed a valid waiver
+	let waiverUrl: string | undefined;
+	if (status === "registered") {
+		const needsWaiver = !r.waiverExpiresAt || new Date(r.waiverExpiresAt) <= new Date();
+		if (needsWaiver) {
+			const { getSetting } = await import("@/lib/queries/settings");
+			waiverUrl = (await getSetting("smartwaiver_waiver_url")) ?? undefined;
+		}
+	}
+
 	sendStatusUpdateEmail({
 		to: r.clientEmail,
 		firstName: r.clientFirstName,
@@ -123,13 +141,15 @@ export async function notifyRegistrationStatusChange(
 		eventTime: r.eventTime,
 		eventLocation: r.eventLocation,
 		reason,
-	}).catch(console.error);
+		waiverUrl,
+	}).catch((err) => logger.error("email", "Failed to send status update email", { to: r.clientEmail, registrationId, error: String(err) }));
 
 	// Notify guests registered by this person
 	const guests = await db
 		.select({
 			clientEmail: clients.email,
 			clientFirstName: clients.firstName,
+			waiverExpiresAt: clients.waiverExpiresAt,
 			role: eventRegistrations.role,
 		})
 		.from(eventRegistrations)
@@ -138,6 +158,14 @@ export async function notifyRegistrationStatusChange(
 
 	for (const guest of guests) {
 		if (guest.clientEmail) {
+			let guestWaiverUrl: string | undefined;
+			if (status === "registered") {
+				const needsWaiver = !guest.waiverExpiresAt || new Date(guest.waiverExpiresAt) <= new Date();
+				if (needsWaiver) {
+					guestWaiverUrl = waiverUrl; // reuse already-fetched URL
+				}
+			}
+
 			sendStatusUpdateEmail({
 				to: guest.clientEmail,
 				firstName: guest.clientFirstName,
@@ -148,7 +176,8 @@ export async function notifyRegistrationStatusChange(
 				eventTime: r.eventTime,
 				eventLocation: r.eventLocation,
 				reason,
-			}).catch(console.error);
+				waiverUrl: guestWaiverUrl,
+			}).catch((err) => logger.error("email", "Failed to send guest status update email", { to: guest.clientEmail, error: String(err) }));
 		}
 	}
 }
@@ -183,7 +212,79 @@ export async function notifyEventCancellation(eventId: string, reason?: string) 
 				eventTitle: event.title,
 				eventDate: event.date,
 				reason,
-			}).catch(console.error);
+			}).catch((err) => logger.error("email", "Failed to send cancellation email", { to: registrant.email, eventId, error: String(err) }));
 		}
 	}
+}
+
+export async function sendVolunteerRecruitmentAction(
+	_prevState: ActionState,
+	formData: FormData,
+): Promise<ActionState> {
+	await requireAuth();
+
+	const eventId = formData.get("eventId") as string;
+	const clientIdsStr = (formData.get("clientIds") as string)?.trim() || "";
+	const personalMessage = (formData.get("personalMessage") as string)?.trim() || undefined;
+
+	if (!eventId) {
+		return { error: "Event ID is required." };
+	}
+
+	const selectedIds = clientIdsStr.split(",").filter(Boolean);
+	if (selectedIds.length === 0) {
+		return { error: "No volunteers selected." };
+	}
+
+	// Fetch event details
+	const eventResult = await db
+		.select({
+			title: events.title,
+			date: events.date,
+			time: events.time,
+			location: events.location,
+		})
+		.from(events)
+		.where(eq(events.id, eventId))
+		.limit(1);
+
+	if (!eventResult[0]) {
+		return { error: "Event not found." };
+	}
+
+	const event = eventResult[0];
+
+	// Get past volunteers not registered for this event, then filter to selected
+	const allVolunteers = await getPastVolunteersNotRegistered(eventId);
+	const selectedSet = new Set(selectedIds);
+	const volunteers = allVolunteers.filter((v) => selectedSet.has(v.id));
+
+	if (volunteers.length === 0) {
+		return { error: "No eligible volunteers found to contact." };
+	}
+
+	let sent = 0;
+	for (const v of volunteers) {
+		if (!v.email) continue;
+
+		try {
+			await sendVolunteerRecruitmentEmail({
+				to: v.email,
+				firstName: v.firstName,
+				eventTitle: event.title,
+				eventDate: event.date,
+				eventTime: event.time,
+				eventLocation: event.location,
+				personalMessage,
+				volunteerUrl: `${getBaseUrl()}/support#volunteer-form`,
+			});
+			sent++;
+		} catch (err) {
+			logger.error("email", "Failed to send recruitment email", { to: v.email, error: String(err) });
+		}
+	}
+
+	return {
+		success: `Recruitment email sent to ${sent} volunteer${sent !== 1 ? "s" : ""}.`,
+	};
 }

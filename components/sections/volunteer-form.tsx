@@ -97,6 +97,19 @@ export function VolunteerForm() {
 							</div>
 						</div>
 
+						{/* Mailing list opt-in */}
+						<label className="flex items-start gap-2 text-sm">
+							<input
+								type="checkbox"
+								name="emailOptIn"
+								defaultChecked
+								className="mt-0.5 h-4 w-4 rounded border-gray-300"
+							/>
+							<span className="text-muted-foreground">
+								I agree to receive emails from the MBV mailing list
+							</span>
+						</label>
+
 						<Button
 							type="submit"
 							size="lg"

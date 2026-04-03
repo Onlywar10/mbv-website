@@ -4,9 +4,11 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { CategoryBadge, PublishBadge } from "@/components/admin/status-badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { getPastVolunteersNotRegistered } from "@/lib/queries/email";
 import { getEventById, getEventRegistrations, getRegistrationCount } from "@/lib/queries/events";
 import { PendingApprovals } from "./pending-approvals";
 import { RegisteredParticipants } from "./registered-participants";
+import { VolunteerRecruitmentDialog } from "./volunteer-recruitment-dialog";
 
 export const metadata: Metadata = {
 	title: "Event Detail",
@@ -23,9 +25,10 @@ export default async function EventDetailPage({ params }: PageProps) {
 
 	if (!event) notFound();
 
-	const [registrations, regCount] = await Promise.all([
+	const [registrations, regCount, pastVolunteers] = await Promise.all([
 		getEventRegistrations(id),
 		getRegistrationCount(id),
+		event.volunteerEnabled ? getPastVolunteersNotRegistered(id) : Promise.resolve([]),
 	]);
 
 	const waitlisted = registrations.filter((r) => r.status === "waitlisted");
@@ -56,13 +59,21 @@ export default async function EventDetailPage({ params }: PageProps) {
 						</span>
 					</div>
 				</div>
-				<Link
-					href={`/admin/events/${id}/edit`}
-					className="inline-flex items-center gap-2 rounded-sm bg-ink px-4 py-2 font-heading text-sm uppercase tracking-wider text-cream transition-colors hover:bg-ink-soft"
-				>
-					<Pencil className="h-4 w-4" />
-					Edit Event
-				</Link>
+				<div className="flex items-center gap-3">
+					{event.volunteerEnabled && (
+						<VolunteerRecruitmentDialog
+							eventId={id}
+							volunteers={pastVolunteers}
+						/>
+					)}
+					<Link
+						href={`/admin/events/${id}/edit`}
+						className="inline-flex items-center gap-2 rounded-sm bg-ink px-4 py-2 font-heading text-sm uppercase tracking-wider text-cream transition-colors hover:bg-ink-soft"
+					>
+						<Pencil className="h-4 w-4" />
+						Edit Event
+					</Link>
+				</div>
 			</div>
 
 			{/* Event Info Card */}

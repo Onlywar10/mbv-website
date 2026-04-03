@@ -10,6 +10,7 @@ import { clients } from "@/lib/db/schema/clients";
 import { eventRegistrations } from "@/lib/db/schema/event-registrations";
 import { events } from "@/lib/db/schema/events";
 import { sendRegistrationConfirmation } from "@/lib/email";
+import { logger } from "@/lib/logger";
 import { findClientByEmail } from "@/lib/queries/clients";
 import type { ActionState } from "@/lib/types";
 import { eventSignupSchema, volunteerSignupSchema } from "@/lib/validations/public";
@@ -19,9 +20,19 @@ async function findOrCreateClient(data: {
 	lastName: string;
 	email: string;
 	phone: string;
+	emailOptIn?: boolean;
 }): Promise<string> {
 	const existing = await findClientByEmail(data.email);
-	if (existing) return existing.id;
+	if (existing) {
+		// If they opted in, update their preference
+		if (data.emailOptIn && !existing.emailOptIn) {
+			await db
+				.update(clients)
+				.set({ emailOptIn: true })
+				.where(eq(clients.id, existing.id));
+		}
+		return existing.id;
+	}
 
 	const result = await db
 		.insert(clients)
@@ -31,9 +42,13 @@ async function findOrCreateClient(data: {
 			email: data.email.toLowerCase(),
 			phone: data.phone,
 			isActive: true,
-			emailOptIn: true,
+			emailOptIn: data.emailOptIn ?? false,
 		})
 		.returning({ id: clients.id });
+
+	if (!result[0]?.id) {
+		throw new Error("Failed to create client record");
+	}
 
 	return result[0].id;
 }
@@ -85,12 +100,19 @@ export async function publicEventSignupAction(
 		return { error: "Not enough spots available for this event" };
 	}
 
-	const clientId = await findOrCreateClient({
-		firstName: data.firstName,
-		lastName: data.lastName,
-		email: data.email,
-		phone: data.phone,
-	});
+	let clientId: string;
+	try {
+		clientId = await findOrCreateClient({
+			firstName: data.firstName,
+			lastName: data.lastName,
+			email: data.email,
+			phone: data.phone,
+			emailOptIn: data.emailOptIn,
+		});
+	} catch (err) {
+		logger.error("registration", "Failed to find or create client", { email: data.email, error: String(err) });
+		return { error: "Failed to process your registration. Please try again." };
+	}
 
 	// Check if already registered as participant
 	const existing = await db
@@ -110,17 +132,26 @@ export async function publicEventSignupAction(
 	}
 
 	// Create parent registration
-	const parentResult = await db
-		.insert(eventRegistrations)
-		.values({
-			eventId: data.eventId,
-			clientId,
-			role: "participant",
-			status: "waitlisted",
-		})
-		.returning({ id: eventRegistrations.id });
+	let parentId: string;
+	try {
+		const parentResult = await db
+			.insert(eventRegistrations)
+			.values({
+				eventId: data.eventId,
+				clientId,
+				role: "participant",
+				status: "waitlisted",
+			})
+			.returning({ id: eventRegistrations.id });
 
-	const parentId = parentResult[0].id;
+		if (!parentResult[0]?.id) {
+			throw new Error("No registration ID returned");
+		}
+		parentId = parentResult[0].id;
+	} catch (err) {
+		logger.error("registration", "Failed to create registration", { email: data.email, eventId: data.eventId, error: String(err) });
+		return { error: "Failed to submit your registration. Please try again." };
+	}
 
 	// Add participant role if not already assigned
 	const hasRole = await db
@@ -203,7 +234,7 @@ export async function publicEventSignupAction(
 			eventDate: ev.date,
 			eventTime: ev.time,
 			eventLocation: ev.location,
-		}).catch(console.error);
+		}).catch((err) => logger.error("email", "Failed to send registration confirmation", { to: data.email, error: String(err) }));
 
 		// Send confirmation to guest if applicable
 		if (data.hasGuest && data.guestEmail && data.guestFirstName) {
@@ -215,7 +246,7 @@ export async function publicEventSignupAction(
 				eventDate: ev.date,
 				eventTime: ev.time,
 				eventLocation: ev.location,
-			}).catch(console.error);
+			}).catch((err) => logger.error("email", "Failed to send guest confirmation", { to: data.guestEmail, error: String(err) }));
 		}
 	}
 
@@ -236,12 +267,19 @@ export async function publicVolunteerSignupAction(
 
 	const data = parsed.data;
 
-	const clientId = await findOrCreateClient({
-		firstName: data.firstName,
-		lastName: data.lastName,
-		email: data.email,
-		phone: data.phone,
-	});
+	let clientId: string;
+	try {
+		clientId = await findOrCreateClient({
+			firstName: data.firstName,
+			lastName: data.lastName,
+			email: data.email,
+			phone: data.phone,
+			emailOptIn: data.emailOptIn,
+		});
+	} catch (err) {
+		logger.error("registration", "Failed to find or create volunteer client", { email: data.email, error: String(err) });
+		return { error: "Failed to process your signup. Please try again." };
+	}
 
 	// Add volunteer role if not already assigned
 	const hasRole = await db
@@ -280,12 +318,17 @@ export async function volunteerForEventAction(
 		return { error: "You are already signed up to volunteer for this event" };
 	}
 
-	await db.insert(eventRegistrations).values({
-		eventId,
-		clientId,
-		role: "volunteer",
-		status: "waitlisted",
-	});
+	try {
+		await db.insert(eventRegistrations).values({
+			eventId,
+			clientId,
+			role: "volunteer",
+			status: "waitlisted",
+		});
+	} catch (err) {
+		logger.error("registration", "Failed to create volunteer registration", { clientId, eventId, error: String(err) });
+		return { error: "Failed to submit your volunteer signup. Please try again." };
+	}
 
 	// Fetch client and event details for confirmation email
 	const [clientResult, eventResult] = await Promise.all([
@@ -315,7 +358,7 @@ export async function volunteerForEventAction(
 			eventDate: eventResult[0].date,
 			eventTime: eventResult[0].time,
 			eventLocation: eventResult[0].location,
-		}).catch(console.error);
+		}).catch((err) => logger.error("email", "Failed to send volunteer confirmation", { to: clientResult[0].email, error: String(err) }));
 	}
 
 	revalidatePath("/support/volunteer");

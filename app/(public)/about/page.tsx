@@ -217,7 +217,7 @@ export default async function AboutPage() {
 			</section>
 
 			{/* -- 9. CTA ----------------------------------------- */}
-			<section className="bg-stone py-12 sm:py-20">
+			<section className="bg-stone pb-12 sm:pb-20">
 				<div className="mx-auto max-w-3xl px-4 text-center sm:px-6 lg:px-8">
 					<ScrollReveal>
 						<h2 className="text-2xl font-bold tracking-tight text-primary sm:text-3xl lg:text-4xl">
