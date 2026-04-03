@@ -1,6 +1,7 @@
 import { and, eq, gte, lte, notInArray } from "drizzle-orm";
 
 import { db } from "@/lib/db";
+import { clientRoles } from "@/lib/db/schema/client-roles";
 import { clients } from "@/lib/db/schema/clients";
 import { eventRegistrations } from "@/lib/db/schema/event-registrations";
 import { events } from "@/lib/db/schema/events";
@@ -117,28 +118,33 @@ export async function getMailingListClients() {
 		.orderBy(clients.lastName);
 }
 
-/** Get past volunteers who are NOT registered for a specific event. */
+/** Get clients with the volunteer role who are NOT already registered as a volunteer for a specific event. */
 export async function getPastVolunteersNotRegistered(eventId: string) {
-	// Get IDs of clients already registered for this event
+	// Get IDs of clients already registered as volunteers for this event
 	const registered = await db
 		.select({ clientId: eventRegistrations.clientId })
 		.from(eventRegistrations)
-		.where(eq(eventRegistrations.eventId, eventId));
+		.where(
+			and(
+				eq(eventRegistrations.eventId, eventId),
+				eq(eventRegistrations.role, "volunteer"),
+			),
+		);
 
 	const registeredIds = registered.map((r) => r.clientId);
 
-	const query = db
+	return db
 		.selectDistinct({
 			id: clients.id,
 			email: clients.email,
 			firstName: clients.firstName,
 			lastName: clients.lastName,
 		})
-		.from(eventRegistrations)
-		.innerJoin(clients, eq(eventRegistrations.clientId, clients.id))
+		.from(clientRoles)
+		.innerJoin(clients, eq(clientRoles.clientId, clients.id))
 		.where(
 			and(
-				eq(eventRegistrations.role, "volunteer"),
+				eq(clientRoles.role, "volunteer"),
 				eq(clients.isActive, true),
 				eq(clients.emailOptIn, true),
 				...(registeredIds.length > 0
@@ -146,6 +152,4 @@ export async function getPastVolunteersNotRegistered(eventId: string) {
 					: []),
 			),
 		);
-
-	return query;
 }
