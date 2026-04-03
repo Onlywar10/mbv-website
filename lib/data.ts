@@ -21,50 +21,43 @@ export const team: TeamMember[] = [
 		name: "Jefferson Ward",
 		title: "Executive Director",
 		bio: "Jefferson leads MBV's mission with a passion for serving those who served. Under his leadership, the organization has expanded its programs to impact over 5,000 veterans annually.",
-		image:
-			"https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop&crop=face",
+		image: "/images/team/JeffWard.jpg",
 	},
 	{
 		name: "Tiffany Bass-Breazile",
 		title: "Board President",
 		bio: "Tiffany brings extensive nonprofit leadership experience to MBV, guiding strategic direction and community partnerships that strengthen our veteran programs.",
-		image:
-			"https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=300&h=300&fit=crop&crop=face",
+		image: "/images/team/Tiffany.jpg",
 	},
 	{
 		name: "James Bogan",
 		title: "Vice President",
 		bio: "James is a dedicated advocate for disabled veterans and plays a key role in program development and community outreach for MBV.",
-		image:
-			"https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=300&h=300&fit=crop&crop=face",
+		image: "/images/team/JamesBogan.png",
 	},
 	{
 		name: "Kirk Johnson",
 		title: "Treasurer & Secretary",
 		bio: "Kirk ensures MBV's financial stewardship and organizational excellence, managing resources to maximize impact for the veteran community.",
-		image:
-			"https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300&h=300&fit=crop&crop=face",
+		image: "/images/team/KirkJohnson.jpg",
 	},
 	{
 		name: "Gina Ward",
 		title: "Director of Volunteer Operations",
 		bio: "Gina coordinates hundreds of volunteers across all MBV events, from fishing trips to community fundraisers, ensuring every event runs smoothly.",
-		image:
-			"https://images.unsplash.com/photo-1580489944761-15a19d654956?w=300&h=300&fit=crop&crop=face",
+		image: "/images/team/GinaWard.jpg",
 	},
 	{
 		name: "Patricia Hendrix",
 		title: "Board Member",
 		bio: "Patricia contributes her expertise in community health and veteran services to guide MBV's programs and partnerships.",
-		image:
-			"https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=300&h=300&fit=crop&crop=face",
+		image: "/images/team/Patricia.jpg",
 	},
 	{
 		name: "Ed Corliss",
 		title: "Board Member",
 		bio: "Ed brings decades of marine and boating experience to MBV, supporting fleet operations and on-water safety for all veteran programs.",
-		image:
-			"https://images.unsplash.com/photo-1519345182560-3f2917c472ef?w=300&h=300&fit=crop&crop=face",
+		image: "/images/team/EdCorliss.png",
 	},
 ];
 

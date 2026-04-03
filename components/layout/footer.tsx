@@ -41,7 +41,7 @@ export function Footer() {
 						</p>
 						<div className="mt-6 flex gap-3">
 							<a
-								href="https://facebook.com"
+								href="https://www.facebook.com/MBVINC/"
 								target="_blank"
 								rel="noopener noreferrer"
 								className="flex h-10 w-10 items-center justify-center rounded-sm bg-white/10 text-white transition-colors hover:bg-rust"
