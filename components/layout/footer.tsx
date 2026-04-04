@@ -9,20 +9,12 @@ const quickLinks = [
 	{ href: "/support", label: "Get Involved" },
 ];
 
-const programLinks = [
-	{ label: "Fishing Trips" },
-	{ label: "Whale Watching" },
-	{ label: "Salmon Derbies" },
-	{ label: "ADA Shuttles" },
-	{ label: "Volunteer Events" },
-];
-
 export function Footer() {
 	return (
 		<footer className="bg-ink text-primary-foreground">
 			{/* Main Footer */}
 			<div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-16 lg:px-8">
-				<div className="grid grid-cols-1 gap-8 sm:grid-cols-2 sm:gap-12 lg:grid-cols-4">
+				<div className="grid grid-cols-1 gap-8 sm:grid-cols-2 sm:gap-12 lg:grid-cols-3">
 					{/* Brand */}
 					<div className="sm:col-span-2 lg:col-span-1">
 						<Link href="/">
@@ -31,7 +23,7 @@ export function Footer() {
 								alt="Monterey Bay Veterans"
 								width={160}
 								height={80}
-								className="h-14 w-auto object-contain brightness-0 invert"
+								className="h-14 w-auto object-contain"
 								unoptimized
 							/>
 						</Link>
@@ -80,19 +72,7 @@ export function Footer() {
 						</ul>
 					</div>
 
-					{/* Programs */}
-					<div>
-						<h3 className="text-sm font-heading uppercase tracking-widest text-rust">Programs</h3>
-						<ul className="mt-4 space-y-3">
-							{programLinks.map((link) => (
-								<li key={link.label}>
-									<span className="text-sm text-white/70">{link.label}</span>
-								</li>
-							))}
-						</ul>
-					</div>
-
-					{/* Contact */}
+{/* Contact */}
 					<div>
 						<h3 className="text-sm font-heading uppercase tracking-widest text-rust">Contact Us</h3>
 						<ul className="mt-4 space-y-3">

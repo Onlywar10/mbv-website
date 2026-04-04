@@ -83,6 +83,52 @@ export async function sendEventReminderEmail(
 }
 
 // ---------------------------------------------------------------------------
+// Event Day-Of Reminder (morning of the event)
+// ---------------------------------------------------------------------------
+
+interface EventDayOfReminderParams {
+	to: string;
+	firstName: string;
+	role: string;
+	eventTitle: string;
+	eventDate: string;
+	eventTime: string | null;
+	eventLocation: string | null;
+	waiverUrl?: string;
+}
+
+export async function sendEventDayOfReminderEmail(
+	params: EventDayOfReminderParams,
+): Promise<void> {
+	const roleLabel = params.role === "volunteer" ? "volunteer" : "participant";
+
+	const waiverBlock = params.waiverUrl
+		? `<div style="background: #fffbeb; border-left: 4px solid #d97706; padding: 12px 16px; margin: 16px 0;">
+			<p style="margin: 0; font-weight: bold; font-size: 14px;">Waiver Required</p>
+			<p style="margin: 4px 0 0; color: #4a5568;">Please sign our liability waiver before arriving:</p>
+			<p style="margin: 8px 0 0;"><a href="${params.waiverUrl}" style="color: #c0392b; font-weight: bold;">Sign the Waiver</a></p>
+		</div>`
+		: "";
+
+	const body = `
+		<p>Hi ${params.firstName},</p>
+		<p>Today's the day! You're signed up as a <strong>${roleLabel}</strong> for today's event:</p>
+		${eventDetailCard({ title: params.eventTitle, date: params.eventDate, time: params.eventTime, location: params.eventLocation, borderColor: "#276749" })}
+		${waiverBlock}
+		<p>We can't wait to see you — have a great time on the water!</p>`;
+
+	await sendEmail({
+		to: params.to,
+		subject: `Today: ${params.eventTitle}`,
+		html: emailLayout({
+			body,
+			disclaimer:
+				"You received this email because you are registered for an event today at Monterey Bay Veterans.",
+		}),
+	});
+}
+
+// ---------------------------------------------------------------------------
 // Post-Event Volunteer Thank You
 // ---------------------------------------------------------------------------
 

@@ -159,21 +159,30 @@ export function AdminEventCard({ event, participantCount, volunteerCount, waitli
 						{event.isPublished ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
 					</Button>
 				</form>
-				<ReasonDialog
-					title="Cancel Event"
-					description={`"${event.title}" will be deleted and all registered participants and volunteers will be notified by email.`}
-					confirmLabel="Cancel Event"
-					pendingLabel="Cancelling..."
-					placeholder="e.g. Weather conditions, venue unavailable, insufficient signups..."
-					trigger={
-						<Button variant="ghost" size="sm">
-							<Trash2 className="h-4 w-4" />
-						</Button>
-					}
-					onConfirm={async (reason) => {
-						await deleteEventAction(event.id, reason);
-					}}
-				/>
+				{(() => {
+					const isDeactivated = !event.isPublished && event.date < new Date().toISOString().split("T")[0];
+					return (
+						<ReasonDialog
+							title={isDeactivated ? "Delete Event" : "Cancel Event"}
+							description={
+								isDeactivated
+									? `"${event.title}" will be permanently deleted. No emails will be sent.`
+									: `"${event.title}" will be deleted and all registered participants and volunteers will be notified by email.`
+							}
+							confirmLabel={isDeactivated ? "Delete Event" : "Cancel Event"}
+							pendingLabel={isDeactivated ? "Deleting..." : "Cancelling..."}
+							placeholder="e.g. Weather conditions, venue unavailable, insufficient signups..."
+							trigger={
+								<Button variant="ghost" size="sm">
+									<Trash2 className="h-4 w-4" />
+								</Button>
+							}
+							onConfirm={async (reason) => {
+								await deleteEventAction(event.id, reason);
+							}}
+						/>
+					);
+				})()}
 			</CardFooter>
 		</Card>
 	);

@@ -2,7 +2,7 @@
 // Callers can import from "@/lib/email" and get the same functions as before.
 
 export { sendRegistrationConfirmation, sendStatusUpdateEmail } from "./templates/registration";
-export { sendEventCancellationEmail, sendEventReminderEmail, sendPostEventThanksEmail } from "./templates/event";
+export { sendEventCancellationEmail, sendEventDayOfReminderEmail, sendEventReminderEmail, sendPostEventThanksEmail } from "./templates/event";
 export { sendMembershipConfirmationEmail, sendMembershipExpiredEmail } from "./templates/membership";
 export { sendDailyRegistrationReport } from "./templates/report";
 export { sendDonationThankYouEmail } from "./templates/donation";

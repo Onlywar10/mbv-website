@@ -6,6 +6,7 @@ import { clients } from "@/lib/db/schema/clients";
 import { memberships } from "@/lib/db/schema/memberships";
 import {
 	sendDailyRegistrationReport,
+	sendEventDayOfReminderEmail,
 	sendEventReminderEmail,
 	sendMembershipExpiredEmail,
 	sendPostEventThanksEmail,
@@ -30,6 +31,7 @@ export async function GET(request: Request) {
 
 	const results = {
 		dailyReport: 0,
+		eventDayOfReminders: 0,
 		eventReminders: 0,
 		membershipExpiry: 0,
 		postEventThanks: 0,
@@ -109,7 +111,34 @@ export async function GET(request: Request) {
 		logger.error("cron", "Event reminders failed", { error: String(err) });
 	}
 
-	// --- 3. Membership Expiry (7 days after) ---
+	// --- 3. Day-Of Event Reminder (morning of) ---
+	try {
+		const todayRegistrants = await getUpcomingEventsWithRegistrants(0);
+		const dayOfWaiverUrl = await getSetting("smartwaiver_waiver_url");
+
+		for (const r of todayRegistrants) {
+			if (!r.clientEmail) continue;
+
+			const needsWaiver = dayOfWaiverUrl && (!r.waiverExpiresAt || new Date(r.waiverExpiresAt) <= new Date());
+
+			sendEventDayOfReminderEmail({
+				to: r.clientEmail,
+				firstName: r.clientFirstName,
+				role: r.role,
+				eventTitle: r.eventTitle,
+				eventDate: r.eventDate,
+				eventTime: r.eventTime,
+				eventLocation: r.eventLocation,
+				waiverUrl: needsWaiver ? dayOfWaiverUrl : undefined,
+			}).catch((err) => logger.error("cron", "Failed to send day-of reminder", { to: r.clientEmail, error: String(err) }));
+
+			results.eventDayOfReminders++;
+		}
+	} catch (err) {
+		logger.error("cron", "Day-of event reminders failed", { error: String(err) });
+	}
+
+	// --- 4. Membership Expiry (7 days after) ---
 	try {
 		const expired = await getRecentlyExpiredMemberships();
 
@@ -134,7 +163,7 @@ export async function GET(request: Request) {
 		logger.error("cron", "Membership expiry failed", { error: String(err) });
 	}
 
-	// --- 4. Post-Event Volunteer Thank You (yesterday's events) ---
+	// --- 5. Post-Event Volunteer Thank You (yesterday's events) ---
 	try {
 		const volunteers = await getYesterdayEventsWithVolunteers();
 
@@ -154,7 +183,7 @@ export async function GET(request: Request) {
 		logger.error("cron", "Post-event thanks failed", { error: String(err) });
 	}
 
-	// --- 5. Waiver Expiry — clear expired waivers so clients must re-sign ---
+	// --- 6. Waiver Expiry — clear expired waivers so clients must re-sign ---
 	try {
 		const now = new Date();
 

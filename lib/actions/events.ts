@@ -150,18 +150,21 @@ export async function updateEventAction(
 export async function deleteEventAction(id: string, reason?: string): Promise<ActionState> {
 	await requireAuth();
 
-	// Notify all registrants before deleting
-	try {
-		await notifyEventCancellation(id, reason);
-	} catch (err) {
-		logger.error("events", "Failed to notify registrants of event cancellation", { id, error: String(err) });
-	}
-
 	const event = await db
-		.select({ imageUrl: events.imageUrl })
+		.select({ imageUrl: events.imageUrl, date: events.date, isPublished: events.isPublished })
 		.from(events)
 		.where(eq(events.id, id))
 		.limit(1);
+
+	// Only send cancellation emails for active/upcoming events, not deactivated ones
+	const isDeactivated = event[0] && !event[0].isPublished && event[0].date < new Date().toISOString().split("T")[0];
+	if (!isDeactivated) {
+		try {
+			await notifyEventCancellation(id, reason);
+		} catch (err) {
+			logger.error("events", "Failed to notify registrants of event cancellation", { id, error: String(err) });
+		}
+	}
 
 	if (event[0]?.imageUrl?.includes("blob.vercel-storage.com")) {
 		try {
