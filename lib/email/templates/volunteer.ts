@@ -1,5 +1,6 @@
 import { eventDetailCard } from "../format";
 import { emailLayout } from "../layout";
+import { escapeHtml } from "../sanitize";
 import { sendEmail } from "../send";
 
 // ---------------------------------------------------------------------------
@@ -22,7 +23,7 @@ export async function sendVolunteerRecruitmentEmail(
 ): Promise<void> {
 	const messageBlock = params.personalMessage
 		? `<div style="background: #f7fafc; padding: 12px 16px; margin: 16px 0; border-radius: 4px; font-style: italic;">
-				<p style="margin: 0;">"${params.personalMessage}"</p>
+				<p style="margin: 0;">"${escapeHtml(params.personalMessage)}"</p>
 			</div>`
 		: "";
 
