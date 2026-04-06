@@ -9,8 +9,9 @@ import { LeadershipGrid } from "@/components/sections/leadership-grid";
 import { AnimatedCounter } from "@/components/shared/animated-counter";
 import { ScrollReveal } from "@/components/shared/scroll-reveal";
 import { SectionHeading } from "@/components/shared/section-heading";
-import { impactStats, milestones, team } from "@/lib/data";
+import { impactStats, milestones } from "@/lib/data";
 import { getGalleryImages } from "@/lib/queries/gallery";
+import { getTeamMembers } from "@/lib/queries/team";
 
 export const metadata = {
 	title: "About & Impact",
@@ -40,7 +41,7 @@ const values = [
 ];
 
 export default async function AboutPage() {
-	const galleryImages = await getGalleryImages();
+	const [galleryImages, team] = await Promise.all([getGalleryImages(), getTeamMembers()]);
 	return (
 		<article>
 			{/* -- 1. Page Hero ----------------------------------- */}

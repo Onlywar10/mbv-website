@@ -13,4 +13,5 @@ export { galleryImages } from "./gallery-images";
 export { membershipStatusEnum, memberships, membershipTypeEnum } from "./memberships";
 export { sessions } from "./sessions";
 export { siteSettings } from "./site-settings";
+export { teamMembers } from "./team-members";
 export { users } from "./users";

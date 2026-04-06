@@ -9,6 +9,7 @@ import {
 	Mail,
 	ScrollText,
 	Settings,
+	UserCog,
 	Users,
 } from "lucide-react";
 import Link from "next/link";
@@ -22,6 +23,7 @@ const navItems = [
 	{ href: "/admin/donations", label: "Donations", icon: DollarSign },
 	{ href: "/admin/members", label: "Members", icon: Crown },
 	{ href: "/admin/mailing-list", label: "Mailing List", icon: Mail },
+	{ href: "/admin/team", label: "Team", icon: UserCog },
 	{ href: "/admin/gallery", label: "Gallery", icon: ImageIcon },
 	{ href: "/admin/logs", label: "Logs", icon: ScrollText },
 	{ href: "/admin/settings", label: "Settings", icon: Settings },

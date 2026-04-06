@@ -3,7 +3,13 @@
 import { motion } from "motion/react";
 import Image from "next/image";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import type { TeamMember } from "@/lib/data";
+
+type TeamMember = {
+	name: string;
+	title: string;
+	bio: string;
+	imageUrl: string;
+};
 
 interface LeadershipGridProps {
 	team: TeamMember[];
@@ -28,7 +34,7 @@ export function LeadershipGrid({ team }: LeadershipGridProps) {
 						<CardHeader className="items-center pb-0">
 							<div className="relative mb-4 h-24 w-24 overflow-hidden rounded-full ring-2 ring-rust/20">
 								<Image
-									src={member.image}
+									src={member.imageUrl}
 									alt={member.name}
 									fill
 									className="object-cover"

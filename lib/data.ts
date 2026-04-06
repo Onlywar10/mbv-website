@@ -1,10 +1,3 @@
-export interface TeamMember {
-	name: string;
-	title: string;
-	bio: string;
-	image: string;
-}
-
 export interface Stat {
 	label: string;
 	value: number;
@@ -13,53 +6,7 @@ export interface Stat {
 }
 
 // Events are now served from the database via lib/queries/events.ts
-
-// --- TEAM ------------------------------------------------
-
-export const team: TeamMember[] = [
-	{
-		name: "Jefferson Ward",
-		title: "Executive Director",
-		bio: "Jefferson leads MBV's mission with a passion for serving those who served. Under his leadership, the organization has expanded its programs to impact over 5,000 veterans annually.",
-		image: "/images/team/JeffWard.jpg",
-	},
-	{
-		name: "Tiffany Bass-Breazile",
-		title: "Board President",
-		bio: "Tiffany brings extensive nonprofit leadership experience to MBV, guiding strategic direction and community partnerships that strengthen our veteran programs.",
-		image: "/images/team/Tiffany.jpg",
-	},
-	{
-		name: "James Bogan",
-		title: "Vice President",
-		bio: "James is a dedicated advocate for disabled veterans and plays a key role in program development and community outreach for MBV.",
-		image: "/images/team/JamesBogan.png",
-	},
-	{
-		name: "Kirk Johnson",
-		title: "Treasurer & Secretary",
-		bio: "Kirk ensures MBV's financial stewardship and organizational excellence, managing resources to maximize impact for the veteran community.",
-		image: "/images/team/KirkJohnson.jpg",
-	},
-	{
-		name: "Gina Ward",
-		title: "Director of Volunteer Operations",
-		bio: "Gina coordinates hundreds of volunteers across all MBV events, from fishing trips to community fundraisers, ensuring every event runs smoothly.",
-		image: "/images/team/GinaWard.jpg",
-	},
-	{
-		name: "Patricia Hendrix",
-		title: "Board Member",
-		bio: "Patricia contributes her expertise in community health and veteran services to guide MBV's programs and partnerships.",
-		image: "/images/team/Patricia.jpg",
-	},
-	{
-		name: "Ed Corliss",
-		title: "Board Member",
-		bio: "Ed brings decades of marine and boating experience to MBV, supporting fleet operations and on-water safety for all veteran programs.",
-		image: "/images/team/EdCorliss.png",
-	},
-];
+// Team members are now served from the database via lib/queries/team.ts
 
 // ─── IMPACT STATS ────────────────────────────────────────
 
