@@ -46,6 +46,11 @@ export async function POST(request: NextRequest) {
 
 	const transaction = payload.data ?? payload;
 
+	logger.info("givebutter", "Webhook received", {
+		transactionId: String(transaction.id ?? ""),
+		status: transaction.status ?? "unknown",
+	});
+
 	// Only process succeeded transactions
 	if (transaction.status && transaction.status !== "succeeded") {
 		return Response.json({ ok: true });
@@ -128,30 +133,57 @@ export async function POST(request: NextRequest) {
 			notes: donationNote,
 		});
 	} catch (err) {
-		logger.error("givebutter", "Failed to record donation", { email, amount: String(amount), error: String(err) });
+		logger.error("givebutter", "Failed to record donation", {
+			email,
+			amount: String(amount),
+			error: String(err),
+		});
 		return Response.json({ error: "Failed to record donation" }, { status: 500 });
 	}
+
+	logger.info("givebutter", "Donation recorded", {
+		email,
+		amount: String(amount),
+		paymentMethod,
+		transactionId,
+	});
 
 	// Send donation thank-you and admin notification for non-membership donations
 	if (!membershipType) {
 		// Notify admins
-		getNotificationEmails("notify_membership_donation").then((adminEmails) => {
-			if (adminEmails.length === 0) return;
+		getNotificationEmails("notify_membership_donation")
+			.then((adminEmails) => {
+				if (adminEmails.length === 0) return;
 
-			sendAdminDonationNotification({
-				adminEmails,
-				donorName: `${firstName} ${lastName}`,
-				donorEmail: email,
-				amount: String(amount),
-				paymentMethod,
-			}).catch((err) => logger.error("givebutter", "Failed to send admin donation notification", { email, error: String(err) }));
-		}).catch((err) => logger.error("givebutter", "Failed to get notification emails for donation", { error: String(err) }));
+				sendAdminDonationNotification({
+					adminEmails,
+					donorName: `${firstName} ${lastName}`,
+					donorEmail: email,
+					amount: String(amount),
+					paymentMethod,
+				}).catch((err) =>
+					logger.error("givebutter", "Failed to send admin donation notification", {
+						email,
+						error: String(err),
+					}),
+				);
+			})
+			.catch((err) =>
+				logger.error("givebutter", "Failed to get notification emails for donation", {
+					error: String(err),
+				}),
+			);
 
 		sendDonationThankYouEmail({
 			to: email,
 			firstName,
 			amount: String(amount),
-		}).catch((err) => logger.error("givebutter", "Failed to send donation thank-you", { to: email, error: String(err) }));
+		}).catch((err) =>
+			logger.error("givebutter", "Failed to send donation thank-you", {
+				to: email,
+				error: String(err),
+			}),
+		);
 	}
 
 	if (membershipType) {
@@ -198,28 +230,51 @@ export async function POST(request: NextRequest) {
 			});
 		}
 
+		logger.info("givebutter", "Membership processed", {
+			email,
+			type: membershipType,
+			isRenewal: !!existingMembership[0],
+			transactionId,
+		});
+
 		// Send confirmation email to member
 		sendMembershipConfirmationEmail({
 			to: email,
 			firstName,
 			type: membershipType,
 			expiresAt,
-		}).catch((err) => logger.error("givebutter", "Failed to send membership confirmation", { to: email, error: String(err) }));
+		}).catch((err) =>
+			logger.error("givebutter", "Failed to send membership confirmation", {
+				to: email,
+				error: String(err),
+			}),
+		);
 
 		// Notify admins of new/renewed membership
-		getNotificationEmails("notify_membership_donation").then((adminEmails) => {
-			if (adminEmails.length === 0) return;
+		getNotificationEmails("notify_membership_donation")
+			.then((adminEmails) => {
+				if (adminEmails.length === 0) return;
 
-			sendAdminMembershipNotification({
-				adminEmails,
-				memberName: `${firstName} ${lastName}`,
-				memberEmail: email,
-				type: membershipType!,
-				isRenewal: !!existingMembership[0],
-				expiresAt,
-				amount: String(amount),
-			}).catch((err) => logger.error("givebutter", "Failed to send admin membership notification", { email, error: String(err) }));
-		}).catch((err) => logger.error("givebutter", "Failed to get notification emails for membership", { error: String(err) }));
+				sendAdminMembershipNotification({
+					adminEmails,
+					memberName: `${firstName} ${lastName}`,
+					memberEmail: email,
+					type: membershipType!,
+					isRenewal: !!existingMembership[0],
+					expiresAt,
+					amount: String(amount),
+				}).catch((err) =>
+					logger.error("givebutter", "Failed to send admin membership notification", {
+						email,
+						error: String(err),
+					}),
+				);
+			})
+			.catch((err) =>
+				logger.error("givebutter", "Failed to get notification emails for membership", {
+					error: String(err),
+				}),
+			);
 	}
 
 	return Response.json({ ok: true });

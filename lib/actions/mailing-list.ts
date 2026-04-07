@@ -90,7 +90,10 @@ export async function sendMailingListBlastAction(
 					sent++;
 				} catch (err) {
 					errors.push(r.email);
-					logger.error("mailing-list", "Failed to send blast email", { to: r.email, error: String(err) });
+					logger.error("mailing-list", "Failed to send blast email", {
+						to: r.email,
+						error: String(err),
+					});
 				}
 			}),
 		);
@@ -106,8 +109,17 @@ export async function sendMailingListBlastAction(
 	// they're referenced as <img src> in recipients' inboxes.
 	if (attachments.length > 0) {
 		const attachmentBlobUrls = attachments.map((a) => a.path);
-		del(attachmentBlobUrls).catch((err) => logger.warn("mailing-list", "Failed to clean up attachment blobs", { error: String(err) }));
+		del(attachmentBlobUrls).catch((err) =>
+			logger.warn("mailing-list", "Failed to clean up attachment blobs", { error: String(err) }),
+		);
 	}
+
+	logger.info("mailing-list", "Mailing list blast completed", {
+		sent,
+		failed: errors.length,
+		total: recipients.length,
+		subject,
+	});
 
 	if (errors.length > 0) {
 		return {

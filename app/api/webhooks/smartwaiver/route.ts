@@ -2,8 +2,8 @@ import { and, eq } from "drizzle-orm";
 import type { NextRequest } from "next/server";
 
 import { db } from "@/lib/db";
-import { logger } from "@/lib/logger";
 import { clients } from "@/lib/db/schema/clients";
+import { logger } from "@/lib/logger";
 import { getWaiverDetails } from "@/lib/smartwaiver";
 
 /**
@@ -28,12 +28,7 @@ async function findClientByWaiver(email: string, firstName: string, lastName: st
 		const byName = await db
 			.select({ id: clients.id })
 			.from(clients)
-			.where(
-				and(
-					eq(clients.firstName, firstName),
-					eq(clients.lastName, lastName),
-				),
-			)
+			.where(and(eq(clients.firstName, firstName), eq(clients.lastName, lastName)))
 			.limit(1);
 
 		if (byName[0]) {
@@ -69,7 +64,10 @@ export async function POST(request: NextRequest) {
 		try {
 			waiverData = await getWaiverDetails(waiverId);
 		} catch (err) {
-			logger.error("smartwaiver", "Failed to fetch waiver details", { waiverId, error: String(err) });
+			logger.error("smartwaiver", "Failed to fetch waiver details", {
+				waiverId,
+				error: String(err),
+			});
 			return Response.json({ error: "Failed to fetch waiver" }, { status: 502 });
 		}
 
@@ -87,7 +85,11 @@ export async function POST(request: NextRequest) {
 	const client = await findClientByWaiver(email, firstName, lastName);
 
 	if (!client) {
-		logger.warn("smartwaiver", "No matching client found for waiver", { email, firstName, lastName });
+		logger.warn("smartwaiver", "No matching client found for waiver", {
+			email,
+			firstName,
+			lastName,
+		});
 		return Response.json({ ok: true, matched: false });
 	}
 
@@ -99,6 +101,12 @@ export async function POST(request: NextRequest) {
 		.update(clients)
 		.set({ waiverSignedAt: now, waiverExpiresAt: expiresAt })
 		.where(eq(clients.id, client.id));
+
+	logger.info("smartwaiver", "Waiver processed successfully", {
+		clientId: client.id,
+		email,
+		expiresAt: expiresAt.toISOString(),
+	});
 
 	return Response.json({ ok: true, matched: true });
 }

@@ -26,10 +26,7 @@ async function findOrCreateClient(data: {
 	if (existing) {
 		// If they opted in, update their preference
 		if (data.emailOptIn && !existing.emailOptIn) {
-			await db
-				.update(clients)
-				.set({ emailOptIn: true })
-				.where(eq(clients.id, existing.id));
+			await db.update(clients).set({ emailOptIn: true }).where(eq(clients.id, existing.id));
 		}
 		return existing.id;
 	}
@@ -110,7 +107,10 @@ export async function publicEventSignupAction(
 			emailOptIn: data.emailOptIn,
 		});
 	} catch (err) {
-		logger.error("registration", "Failed to find or create client", { email: data.email, error: String(err) });
+		logger.error("registration", "Failed to find or create client", {
+			email: data.email,
+			error: String(err),
+		});
 		return { error: "Failed to process your registration. Please try again." };
 	}
 
@@ -149,7 +149,11 @@ export async function publicEventSignupAction(
 		}
 		parentId = parentResult[0].id;
 	} catch (err) {
-		logger.error("registration", "Failed to create registration", { email: data.email, eventId: data.eventId, error: String(err) });
+		logger.error("registration", "Failed to create registration", {
+			email: data.email,
+			eventId: data.eventId,
+			error: String(err),
+		});
 		return { error: "Failed to submit your registration. Please try again." };
 	}
 
@@ -210,6 +214,12 @@ export async function publicEventSignupAction(
 		}
 	}
 
+	logger.info("registrations", "Event registration created", {
+		email: data.email,
+		eventId: data.eventId,
+		hasGuest: !!data.hasGuest,
+	});
+
 	// Fetch event details for confirmation email
 	const eventDetails = await db
 		.select({
@@ -234,7 +244,12 @@ export async function publicEventSignupAction(
 			eventDate: ev.date,
 			eventTime: ev.time,
 			eventLocation: ev.location,
-		}).catch((err) => logger.error("email", "Failed to send registration confirmation", { to: data.email, error: String(err) }));
+		}).catch((err) =>
+			logger.error("email", "Failed to send registration confirmation", {
+				to: data.email,
+				error: String(err),
+			}),
+		);
 
 		// Send confirmation to guest if applicable
 		if (data.hasGuest && data.guestEmail && data.guestFirstName) {
@@ -246,7 +261,12 @@ export async function publicEventSignupAction(
 				eventDate: ev.date,
 				eventTime: ev.time,
 				eventLocation: ev.location,
-			}).catch((err) => logger.error("email", "Failed to send guest confirmation", { to: data.guestEmail, error: String(err) }));
+			}).catch((err) =>
+				logger.error("email", "Failed to send guest confirmation", {
+					to: data.guestEmail,
+					error: String(err),
+				}),
+			);
 		}
 	}
 
@@ -277,7 +297,10 @@ export async function publicVolunteerSignupAction(
 			emailOptIn: data.emailOptIn,
 		});
 	} catch (err) {
-		logger.error("registration", "Failed to find or create volunteer client", { email: data.email, error: String(err) });
+		logger.error("registration", "Failed to find or create volunteer client", {
+			email: data.email,
+			error: String(err),
+		});
 		return { error: "Failed to process your signup. Please try again." };
 	}
 
@@ -292,6 +315,7 @@ export async function publicVolunteerSignupAction(
 		await db.insert(clientRoles).values({ clientId, role: "volunteer" });
 	}
 
+	logger.info("registrations", "Volunteer signed up", { email: data.email, clientId });
 	revalidatePath("/admin/clients");
 
 	redirect(`/support/volunteer?clientId=${clientId}`);
@@ -326,9 +350,15 @@ export async function volunteerForEventAction(
 			status: "waitlisted",
 		});
 	} catch (err) {
-		logger.error("registration", "Failed to create volunteer registration", { clientId, eventId, error: String(err) });
+		logger.error("registration", "Failed to create volunteer registration", {
+			clientId,
+			eventId,
+			error: String(err),
+		});
 		return { error: "Failed to submit your volunteer signup. Please try again." };
 	}
+
+	logger.info("registrations", "Volunteer registered for event", { clientId, eventId });
 
 	// Fetch client and event details for confirmation email
 	const [clientResult, eventResult] = await Promise.all([
@@ -358,7 +388,12 @@ export async function volunteerForEventAction(
 			eventDate: eventResult[0].date,
 			eventTime: eventResult[0].time,
 			eventLocation: eventResult[0].location,
-		}).catch((err) => logger.error("email", "Failed to send volunteer confirmation", { to: clientResult[0].email, error: String(err) }));
+		}).catch((err) =>
+			logger.error("email", "Failed to send volunteer confirmation", {
+				to: clientResult[0].email,
+				error: String(err),
+			}),
+		);
 	}
 
 	revalidatePath("/support/volunteer");

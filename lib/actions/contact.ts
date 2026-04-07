@@ -34,9 +34,19 @@ export async function submitContactFormAction(
 			message: data.message,
 		});
 	} catch (err) {
-		logger.error("contact", "Failed to send contact form notification", { senderEmail: data.email, error: String(err) });
+		logger.error("contact", "Failed to send contact form notification", {
+			senderEmail: data.email,
+			error: String(err),
+		});
 		return { error: "Failed to send your message. Please try again." };
 	}
 
-	return { success: "Your message has been sent! Our team will get back to you within 1-2 business days." };
+	logger.info("contact", "Contact form submitted", {
+		senderEmail: data.email,
+		subject: data.subject,
+	});
+
+	return {
+		success: "Your message has been sent! Our team will get back to you within 1-2 business days.",
+	};
 }

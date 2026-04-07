@@ -7,6 +7,7 @@ import { revalidatePath } from "next/cache";
 import { requireAuth } from "@/lib/auth/require-auth";
 import { db } from "@/lib/db";
 import { galleryImages } from "@/lib/db/schema/gallery-images";
+import { logger } from "@/lib/logger";
 import type { ActionState } from "@/lib/types";
 import { galleryImageSchema } from "@/lib/validations/gallery";
 
@@ -23,12 +24,21 @@ export async function createGalleryImageAction(
 
 	const data = parsed.data;
 
-	await db.insert(galleryImages).values({
-		url: data.url,
-		alt: data.alt,
-		sortOrder: data.sortOrder,
-	});
+	try {
+		await db.insert(galleryImages).values({
+			url: data.url,
+			alt: data.alt,
+			sortOrder: data.sortOrder,
+		});
+	} catch (err) {
+		logger.error("gallery", "Failed to create gallery image", {
+			alt: data.alt,
+			error: String(err),
+		});
+		return { error: "Failed to add image. Please try again." };
+	}
 
+	logger.info("gallery", "Gallery image added", { alt: data.alt });
 	revalidatePath("/admin/gallery");
 	revalidatePath("/");
 	revalidatePath("/about");
@@ -46,11 +56,21 @@ export async function deleteGalleryImageAction(id: string): Promise<ActionState>
 		.limit(1);
 
 	if (image[0]?.url.includes("blob.vercel-storage.com")) {
-		await del(image[0].url);
+		try {
+			await del(image[0].url);
+		} catch (err) {
+			logger.warn("gallery", "Failed to delete gallery image blob", { id, error: String(err) });
+		}
 	}
 
-	await db.delete(galleryImages).where(eq(galleryImages.id, id));
+	try {
+		await db.delete(galleryImages).where(eq(galleryImages.id, id));
+	} catch (err) {
+		logger.error("gallery", "Failed to delete gallery image", { id, error: String(err) });
+		return { error: "Failed to delete image. Please try again." };
+	}
 
+	logger.info("gallery", "Gallery image deleted", { id });
 	revalidatePath("/admin/gallery");
 	revalidatePath("/");
 	revalidatePath("/about");

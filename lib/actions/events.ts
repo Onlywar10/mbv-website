@@ -60,6 +60,7 @@ export async function createEventAction(
 		return { error: "Failed to create event. Please try again." };
 	}
 
+	logger.info("events", "Event created", { title: data.title, slug, category: data.category });
 	revalidatePath("/admin/events");
 	revalidatePath("/events");
 	revalidatePath("/");
@@ -139,6 +140,7 @@ export async function updateEventAction(
 		return { error: "Failed to update event. Please try again." };
 	}
 
+	logger.info("events", "Event updated", { id, title: data.title, slug });
 	revalidatePath("/admin/events");
 	revalidatePath(`/events/${slug}`);
 	revalidatePath("/events");
@@ -157,12 +159,16 @@ export async function deleteEventAction(id: string, reason?: string): Promise<Ac
 		.limit(1);
 
 	// Only send cancellation emails for active/upcoming events, not deactivated ones
-	const isDeactivated = event[0] && !event[0].isPublished && event[0].date < new Date().toISOString().split("T")[0];
+	const isDeactivated =
+		event[0] && !event[0].isPublished && event[0].date < new Date().toISOString().split("T")[0];
 	if (!isDeactivated) {
 		try {
 			await notifyEventCancellation(id, reason);
 		} catch (err) {
-			logger.error("events", "Failed to notify registrants of event cancellation", { id, error: String(err) });
+			logger.error("events", "Failed to notify registrants of event cancellation", {
+				id,
+				error: String(err),
+			});
 		}
 	}
 
@@ -181,6 +187,7 @@ export async function deleteEventAction(id: string, reason?: string): Promise<Ac
 		return { error: "Failed to delete event. Please try again." };
 	}
 
+	logger.info("events", "Event deleted", { id });
 	revalidatePath("/admin/events");
 	revalidatePath("/events");
 	revalidatePath("/");
@@ -209,6 +216,7 @@ export async function togglePublishAction(id: string): Promise<ActionState> {
 		return { error: "Failed to update publish status. Please try again." };
 	}
 
+	logger.info("events", "Event publish toggled", { id, isPublished: !current[0].isPublished });
 	revalidatePath("/admin/events");
 	revalidatePath("/events");
 	revalidatePath("/");
@@ -237,14 +245,22 @@ export async function updateRegistrationStatusAction(
 			.set({ status })
 			.where(eq(eventRegistrations.registeredBy, registrationId));
 	} catch (err) {
-		logger.error("registrations", "Failed to update registration status", { registrationId, error: String(err) });
+		logger.error("registrations", "Failed to update registration status", {
+			registrationId,
+			error: String(err),
+		});
 		return { error: "Failed to update registration status. Please try again." };
 	}
+
+	logger.info("registrations", "Registration status updated", { registrationId, eventId, status });
 
 	// Send approval email (fire-and-forget — don't block the status update)
 	if (status === "registered") {
 		notifyRegistrationStatusChange(registrationId, status).catch((err) =>
-			logger.error("registrations", "Failed to send approval email", { registrationId, error: String(err) }),
+			logger.error("registrations", "Failed to send approval email", {
+				registrationId,
+				error: String(err),
+			}),
 		);
 	}
 
@@ -263,7 +279,10 @@ export async function deleteRegistrationAction(
 	try {
 		await notifyRegistrationStatusChange(registrationId, "cancelled", reason);
 	} catch (err) {
-		logger.error("registrations", "Failed to send denial email", { registrationId, error: String(err) });
+		logger.error("registrations", "Failed to send denial email", {
+			registrationId,
+			error: String(err),
+		});
 	}
 
 	try {
@@ -271,10 +290,14 @@ export async function deleteRegistrationAction(
 		await db.delete(eventRegistrations).where(eq(eventRegistrations.registeredBy, registrationId));
 		await db.delete(eventRegistrations).where(eq(eventRegistrations.id, registrationId));
 	} catch (err) {
-		logger.error("registrations", "Failed to delete registration", { registrationId, error: String(err) });
+		logger.error("registrations", "Failed to delete registration", {
+			registrationId,
+			error: String(err),
+		});
 		return { error: "Failed to remove registration. Please try again." };
 	}
 
+	logger.info("registrations", "Registration deleted", { registrationId, eventId });
 	revalidatePath(`/admin/events/${eventId}`);
 	return { success: "Registration removed" };
 }
@@ -311,6 +334,7 @@ export async function createTemplateAction(
 		return { error: "Failed to create template. Please try again." };
 	}
 
+	logger.info("templates", "Template created", { name: data.name });
 	revalidatePath("/admin/events");
 	return { success: "Template created" };
 }
@@ -339,6 +363,7 @@ export async function deleteTemplateAction(id: string): Promise<ActionState> {
 		return { error: "Failed to delete template. Please try again." };
 	}
 
+	logger.info("templates", "Template deleted", { id });
 	revalidatePath("/admin/events");
 	return { success: "Template deleted" };
 }

@@ -6,6 +6,7 @@ import { revalidatePath } from "next/cache";
 import { requireAuth } from "@/lib/auth/require-auth";
 import { db } from "@/lib/db";
 import { memberships } from "@/lib/db/schema/memberships";
+import { logger } from "@/lib/logger";
 import type { ActionState } from "@/lib/types";
 
 export async function createMembershipAction(
@@ -25,15 +26,25 @@ export async function createMembershipAction(
 
 	const expiresAt = type === "annual" ? new Date(Date.now() + 365 * 24 * 60 * 60 * 1000) : null;
 
-	await db.insert(memberships).values({
-		firstName,
-		lastName,
+	try {
+		await db.insert(memberships).values({
+			firstName,
+			lastName,
+			email,
+			type,
+			status: "active",
+			expiresAt,
+		});
+	} catch (err) {
+		logger.error("memberships", "Failed to create membership", { email, type, error: String(err) });
+		return { error: "Failed to create membership. Please try again." };
+	}
+
+	logger.info("memberships", "Membership created", {
 		email,
 		type,
-		status: "active",
-		expiresAt,
+		name: `${firstName} ${lastName}`,
 	});
-
 	revalidatePath("/admin/members");
 	return {
 		success: `${type === "annual" ? "Annual" : "Lifetime"} membership created for ${firstName} ${lastName}.`,
@@ -56,11 +67,20 @@ export async function updateMembershipAction(
 	if (!membershipId) return { error: "Membership ID is required." };
 	if (!email) return { error: "Email is required." };
 
-	await db
-		.update(memberships)
-		.set({ type, status, email, expiresAt })
-		.where(eq(memberships.id, membershipId));
+	try {
+		await db
+			.update(memberships)
+			.set({ type, status, email, expiresAt })
+			.where(eq(memberships.id, membershipId));
+	} catch (err) {
+		logger.error("memberships", "Failed to update membership", {
+			membershipId,
+			error: String(err),
+		});
+		return { error: "Failed to update membership. Please try again." };
+	}
 
+	logger.info("memberships", "Membership updated", { membershipId, type, status });
 	revalidatePath("/admin/members");
 	return { success: "Membership updated." };
 }
@@ -68,8 +88,17 @@ export async function updateMembershipAction(
 export async function deleteMembershipAction(membershipId: string): Promise<ActionState> {
 	await requireAuth();
 
-	await db.delete(memberships).where(eq(memberships.id, membershipId));
+	try {
+		await db.delete(memberships).where(eq(memberships.id, membershipId));
+	} catch (err) {
+		logger.error("memberships", "Failed to delete membership", {
+			membershipId,
+			error: String(err),
+		});
+		return { error: "Failed to delete membership. Please try again." };
+	}
 
+	logger.info("memberships", "Membership deleted", { membershipId });
 	revalidatePath("/admin/members");
 	return { success: "Membership removed." };
 }

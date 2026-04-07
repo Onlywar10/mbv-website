@@ -37,6 +37,7 @@ export async function createTeamMemberAction(
 		return { error: "Failed to create team member. Please try again." };
 	}
 
+	logger.info("team", "Team member created", { name: data.name });
 	revalidatePath("/admin/team");
 	revalidatePath("/about");
 
@@ -88,6 +89,7 @@ export async function updateTeamMemberAction(
 		return { error: "Failed to update team member. Please try again." };
 	}
 
+	logger.info("team", "Team member updated", { id, name: data.name });
 	revalidatePath("/admin/team");
 	revalidatePath("/about");
 
@@ -118,6 +120,7 @@ export async function deleteTeamMemberAction(id: string): Promise<ActionState> {
 		return { error: "Failed to delete team member. Please try again." };
 	}
 
+	logger.info("team", "Team member deleted", { id });
 	revalidatePath("/admin/team");
 	revalidatePath("/about");
 

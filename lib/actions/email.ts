@@ -89,6 +89,12 @@ export async function sendRegistrationReportAction(_prevState: ActionState): Pro
 		return { error: "Failed to send report email. Please try again." };
 	}
 
+	logger.info("email", "Registration report sent", {
+		adminCount: adminEmails.length,
+		registrationCount: registrations.length,
+		eventCount: groupedEvents.length,
+	});
+
 	return {
 		success: `Report sent to ${adminEmails.length} admin${adminEmails.length !== 1 ? "s" : ""} with ${registrations.length} registration${registrations.length !== 1 ? "s" : ""} across ${groupedEvents.length} event${groupedEvents.length !== 1 ? "s" : ""}.`,
 	};
@@ -142,7 +148,13 @@ export async function notifyRegistrationStatusChange(
 		eventLocation: r.eventLocation,
 		reason,
 		waiverUrl,
-	}).catch((err) => logger.error("email", "Failed to send status update email", { to: r.clientEmail, registrationId, error: String(err) }));
+	}).catch((err) =>
+		logger.error("email", "Failed to send status update email", {
+			to: r.clientEmail,
+			registrationId,
+			error: String(err),
+		}),
+	);
 
 	// Notify guests registered by this person
 	const guests = await db
@@ -177,7 +189,12 @@ export async function notifyRegistrationStatusChange(
 				eventLocation: r.eventLocation,
 				reason,
 				waiverUrl: guestWaiverUrl,
-			}).catch((err) => logger.error("email", "Failed to send guest status update email", { to: guest.clientEmail, error: String(err) }));
+			}).catch((err) =>
+				logger.error("email", "Failed to send guest status update email", {
+					to: guest.clientEmail,
+					error: String(err),
+				}),
+			);
 		}
 	}
 }
@@ -212,7 +229,13 @@ export async function notifyEventCancellation(eventId: string, reason?: string) 
 				eventTitle: event.title,
 				eventDate: event.date,
 				reason,
-			}).catch((err) => logger.error("email", "Failed to send cancellation email", { to: registrant.email, eventId, error: String(err) }));
+			}).catch((err) =>
+				logger.error("email", "Failed to send cancellation email", {
+					to: registrant.email,
+					eventId,
+					error: String(err),
+				}),
+			);
 		}
 	}
 }
@@ -280,9 +303,18 @@ export async function sendVolunteerRecruitmentAction(
 			});
 			sent++;
 		} catch (err) {
-			logger.error("email", "Failed to send recruitment email", { to: v.email, error: String(err) });
+			logger.error("email", "Failed to send recruitment email", {
+				to: v.email,
+				error: String(err),
+			});
 		}
 	}
+
+	logger.info("email", "Volunteer recruitment emails sent", {
+		eventId,
+		sent,
+		total: volunteers.length,
+	});
 
 	return {
 		success: `Recruitment email sent to ${sent} volunteer${sent !== 1 ? "s" : ""}.`,
