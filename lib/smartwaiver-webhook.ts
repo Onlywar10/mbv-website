@@ -56,6 +56,11 @@ export async function handleSmartWaiverWebhook(
 		return Response.json({ error: "Invalid payload" }, { status: 400 });
 	}
 
+	logger.info("smartwaiver", `Webhook received (${waiverType})`, {
+		waiverType,
+		keys: Object.keys(body).join(", "),
+	});
+
 	let email = "";
 	let firstName = "";
 	let lastName = "";
@@ -67,6 +72,10 @@ export async function handleSmartWaiverWebhook(
 	} else {
 		const waiverId = body.unique_id;
 		if (!waiverId) {
+			logger.warn("smartwaiver", `Missing unique_id in webhook (${waiverType})`, {
+				waiverType,
+				bodyPreview: JSON.stringify(body).slice(0, 200),
+			});
 			return Response.json({ error: "Missing waiver ID" }, { status: 400 });
 		}
 
