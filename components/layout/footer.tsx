@@ -6,7 +6,7 @@ const quickLinks = [
 	{ href: "/", label: "Home" },
 	{ href: "/about", label: "About & Impact" },
 	{ href: "/events", label: "Events" },
-	{ href: "/support", label: "Get Involved" },
+	{ href: "/events?category=volunteer", label: "Get Involved" },
 ];
 
 export function Footer() {

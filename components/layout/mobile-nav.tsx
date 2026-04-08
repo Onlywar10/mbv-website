@@ -10,7 +10,7 @@ const navLinks = [
 	{ href: "/", label: "Home", icon: Home },
 	{ href: "/about", label: "About & Impact", icon: Info },
 	{ href: "/events", label: "Events & Contact", icon: Calendar },
-	{ href: "/support", label: "Get Involved", icon: Heart },
+	{ href: "/events?category=volunteer", label: "Get Involved", icon: Heart },
 ];
 
 interface MobileNavProps {
