@@ -24,8 +24,9 @@ export function CtaBanner() {
 					<p className="mx-auto mt-3 max-w-2xl text-base leading-relaxed text-white/85 sm:mt-4 sm:text-lg">
 						Every act of support helps a veteran experience the healing power of the ocean.
 						<span className="hidden sm:inline">
-							{" "}Whether you volunteer your time, donate to our programs, or simply spread the
-							word — together, we can serve those who served.
+							{" "}
+							Whether you volunteer your time, donate to our programs, or simply spread the word —
+							together, we can serve those who served.
 						</span>
 					</p>
 					<div className="mt-6 flex flex-col items-center justify-center gap-3 sm:mt-10 sm:flex-row sm:gap-4">

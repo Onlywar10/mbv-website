@@ -13,7 +13,7 @@ import { events } from "@/lib/db/schema/events";
 import { logger } from "@/lib/logger";
 import type { ActionState } from "@/lib/types";
 import { slugify } from "@/lib/utils";
-import { eventSchema, templateSchema } from "@/lib/validations/events";
+import { eventSchema } from "@/lib/validations/events";
 
 export async function createEventAction(
 	_prevState: ActionState,
@@ -21,7 +21,9 @@ export async function createEventAction(
 ): Promise<ActionState> {
 	await requireAuth();
 
-	const parsed = eventSchema.safeParse(Object.fromEntries(formData));
+	const raw = Object.fromEntries(formData);
+	raw.requiredWaivers = formData.getAll("requiredWaivers");
+	const parsed = eventSchema.safeParse(raw);
 	if (!parsed.success) {
 		return { error: parsed.error.issues[0].message };
 	}
@@ -48,11 +50,7 @@ export async function createEventAction(
 			imageUrl: data.imageUrl || null,
 			accessibility: data.accessibility || null,
 			participantCapacity: data.participantCapacity,
-			volunteerCapacity: data.volunteerCapacity,
-			volunteerEnabled: data.volunteerEnabled,
-			volunteerDescription: data.volunteerDescription || null,
-			volunteerTime: data.volunteerTime || null,
-			volunteerNotes: data.volunteerNotes || null,
+			requiredWaivers: data.requiredWaivers,
 			isPublished: data.isPublished,
 		});
 	} catch (err) {
@@ -75,7 +73,9 @@ export async function updateEventAction(
 ): Promise<ActionState> {
 	await requireAuth();
 
-	const parsed = eventSchema.safeParse(Object.fromEntries(formData));
+	const raw = Object.fromEntries(formData);
+	raw.requiredWaivers = formData.getAll("requiredWaivers");
+	const parsed = eventSchema.safeParse(raw);
 	if (!parsed.success) {
 		return { error: parsed.error.issues[0].message };
 	}
@@ -126,11 +126,7 @@ export async function updateEventAction(
 				imageUrl: data.imageUrl || null,
 				accessibility: data.accessibility || null,
 				participantCapacity: data.participantCapacity,
-				volunteerCapacity: data.volunteerCapacity,
-				volunteerEnabled: data.volunteerEnabled,
-				volunteerDescription: data.volunteerDescription || null,
-				volunteerTime: data.volunteerTime || null,
-				volunteerNotes: data.volunteerNotes || null,
+				requiredWaivers: data.requiredWaivers,
 				isPublished: data.isPublished,
 				updatedAt: new Date(),
 			})
@@ -304,39 +300,43 @@ export async function deleteRegistrationAction(
 
 // -- Templates ----------------------------------------------
 
-export async function createTemplateAction(
-	_prevState: ActionState,
-	formData: FormData,
+export async function saveEventAsTemplateAction(
+	eventId: string,
+	templateName: string,
 ): Promise<ActionState> {
 	await requireAuth();
 
-	const parsed = templateSchema.safeParse(Object.fromEntries(formData));
-	if (!parsed.success) {
-		return { error: parsed.error.issues[0].message };
+	if (!templateName.trim()) {
+		return { error: "Template name is required" };
 	}
 
-	const data = parsed.data;
+	const event = await db.select().from(events).where(eq(events.id, eventId)).limit(1);
+	if (!event[0]) {
+		return { error: "Event not found" };
+	}
+
+	const e = event[0];
 
 	try {
 		await db.insert(eventTemplates).values({
-			name: data.name,
-			title: data.title,
-			location: data.location || null,
-			category: data.category,
-			description: data.description || null,
-			longDescription: data.longDescription || null,
-			imageUrl: data.imageUrl || null,
-			accessibility: data.accessibility || null,
-			defaultSpots: data.defaultSpots,
+			name: templateName.trim(),
+			title: e.title,
+			location: e.location,
+			category: e.category,
+			description: e.description,
+			longDescription: e.longDescription,
+			imageUrl: e.imageUrl,
+			accessibility: e.accessibility,
+			defaultSpots: e.participantCapacity,
 		});
 	} catch (err) {
-		logger.error("templates", "Failed to create template", { error: String(err) });
-		return { error: "Failed to create template. Please try again." };
+		logger.error("templates", "Failed to save event as template", { error: String(err) });
+		return { error: "Failed to save template. Please try again." };
 	}
 
-	logger.info("templates", "Template created", { name: data.name });
+	logger.info("templates", "Event saved as template", { eventId, name: templateName });
 	revalidatePath("/admin/events");
-	return { success: "Template created" };
+	return { success: "Event saved as template" };
 }
 
 export async function deleteTemplateAction(id: string): Promise<ActionState> {

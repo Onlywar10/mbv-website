@@ -1,4 +1,4 @@
-import { eventDetailCard, formatEventDate, reasonBlock } from "../format";
+import { eventDetailCard, reasonBlock } from "../format";
 import { emailLayout } from "../layout";
 import { sendEmail } from "../send";
 
@@ -9,7 +9,6 @@ import { sendEmail } from "../send";
 interface RegistrationConfirmationParams {
 	to: string;
 	firstName: string;
-	role: "participant" | "volunteer";
 	eventTitle: string;
 	eventDate: string;
 	eventTime: string | null;
@@ -19,11 +18,9 @@ interface RegistrationConfirmationParams {
 export async function sendRegistrationConfirmation(
 	params: RegistrationConfirmationParams,
 ): Promise<void> {
-	const roleLabel = params.role === "volunteer" ? "volunteer" : "participant";
-
 	const body = `
 		<p>Hi ${params.firstName},</p>
-		<p>Thank you for signing up as a <strong>${roleLabel}</strong> for:</p>
+		<p>Thank you for signing up for:</p>
 		${eventDetailCard({ title: params.eventTitle, date: params.eventDate, time: params.eventTime, location: params.eventLocation })}
 		<p>Your registration has been received and is <strong>pending review</strong>. You should expect to hear back from us soon with full confirmation details.</p>
 		<p>If you have any questions in the meantime, feel free to reach out to us.</p>`;
@@ -46,30 +43,26 @@ export async function sendRegistrationConfirmation(
 interface StatusUpdateParams {
 	to: string;
 	firstName: string;
-	role: string;
 	status: "registered" | "cancelled";
 	eventTitle: string;
 	eventDate: string;
 	eventTime: string | null;
 	eventLocation: string | null;
 	reason?: string;
-	waiverUrl?: string;
+	waiverUrls?: { label: string; url: string }[];
 }
 
-export async function sendStatusUpdateEmail(
-	params: StatusUpdateParams,
-): Promise<void> {
+export async function sendStatusUpdateEmail(params: StatusUpdateParams): Promise<void> {
 	const approved = params.status === "registered";
-	const roleLabel = params.role === "volunteer" ? "volunteer" : "participant";
 
 	const subject = approved
 		? `You're Confirmed — ${params.eventTitle}`
 		: `Registration Update — ${params.eventTitle}`;
 
 	const message = approved
-		? `<p>Great news! Your registration as a <strong>${roleLabel}</strong> has been <strong style="color: #276749;">approved</strong>.</p>
+		? `<p>Great news! Your registration has been <strong style="color: #276749;">approved</strong>.</p>
 			<p>We look forward to seeing you there!</p>`
-		: `<p>Unfortunately, your registration as a <strong>${roleLabel}</strong> was <strong style="color: #c0392b;">not approved</strong> at this time.</p>
+		: `<p>Unfortunately, your registration was <strong style="color: #c0392b;">not approved</strong> at this time.</p>
 			${reasonBlock(params.reason)}
 			<p>If you have any questions, please don't hesitate to reach out to us.</p>`;
 
@@ -83,13 +76,14 @@ export async function sendStatusUpdateEmail(
 			})
 		: "";
 
-	const waiverBlock = approved && params.waiverUrl
-		? `<div style="background: #fffbeb; border-left: 4px solid #d97706; padding: 12px 16px; margin: 16px 0;">
-			<p style="margin: 0; font-weight: bold; font-size: 14px;">Waiver Required</p>
-			<p style="margin: 4px 0 0; color: #4a5568;">Please sign our liability waiver before attending the event:</p>
-			<p style="margin: 8px 0 0;"><a href="${params.waiverUrl}" style="color: #c0392b; font-weight: bold;">Sign the Waiver</a></p>
+	const waiverBlock =
+		approved && params.waiverUrls?.length
+			? `<div style="background: #fffbeb; border-left: 4px solid #d97706; padding: 12px 16px; margin: 16px 0;">
+			<p style="margin: 0; font-weight: bold; font-size: 14px;">Waiver(s) Required</p>
+			<p style="margin: 4px 0 0; color: #4a5568;">Please sign the following before attending:</p>
+			${params.waiverUrls.map((w) => `<p style="margin: 8px 0 0;"><a href="${w.url}" style="color: #c0392b; font-weight: bold;">${w.label}</a></p>`).join("")}
 		</div>`
-		: "";
+			: "";
 
 	const body = `
 		<p>Hi ${params.firstName},</p>

@@ -2,7 +2,6 @@
 
 import { and, count, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 
 import { db } from "@/lib/db";
 import { clientRoles } from "@/lib/db/schema/client-roles";
@@ -13,7 +12,7 @@ import { sendRegistrationConfirmation } from "@/lib/email";
 import { logger } from "@/lib/logger";
 import { findClientByEmail } from "@/lib/queries/clients";
 import type { ActionState } from "@/lib/types";
-import { eventSignupSchema, volunteerSignupSchema } from "@/lib/validations/public";
+import { eventSignupSchema } from "@/lib/validations/public";
 
 async function findOrCreateClient(data: {
 	firstName: string;
@@ -70,7 +69,7 @@ export async function publicEventSignupAction(
 
 	// Check capacity
 	const event = await db
-		.select({ participantCapacity: events.participantCapacity })
+		.select({ participantCapacity: events.participantCapacity, category: events.category })
 		.from(events)
 		.where(eq(events.id, data.eventId))
 		.limit(1);
@@ -79,13 +78,14 @@ export async function publicEventSignupAction(
 		return { error: "Event not found" };
 	}
 
+	const capacityRole = event[0].category === "volunteer" ? "volunteer" : "participant";
 	const regCountResult = await db
 		.select({ value: count() })
 		.from(eventRegistrations)
 		.where(
 			and(
 				eq(eventRegistrations.eventId, data.eventId),
-				eq(eventRegistrations.role, "participant"),
+				eq(eventRegistrations.role, capacityRole),
 				eq(eventRegistrations.status, "registered"),
 			),
 		);
@@ -114,7 +114,10 @@ export async function publicEventSignupAction(
 		return { error: "Failed to process your registration. Please try again." };
 	}
 
-	// Check if already registered as participant
+	// Determine registration role based on event category
+	const registrationRole = event[0].category === "volunteer" ? "volunteer" : "participant";
+
+	// Check if already registered
 	const existing = await db
 		.select({ id: eventRegistrations.id })
 		.from(eventRegistrations)
@@ -122,7 +125,7 @@ export async function publicEventSignupAction(
 			and(
 				eq(eventRegistrations.eventId, data.eventId),
 				eq(eventRegistrations.clientId, clientId),
-				eq(eventRegistrations.role, "participant"),
+				eq(eventRegistrations.role, registrationRole),
 			),
 		)
 		.limit(1);
@@ -130,8 +133,6 @@ export async function publicEventSignupAction(
 	if (existing.length > 0) {
 		return { error: "You are already registered for this event" };
 	}
-
-	// Create parent registration
 	let parentId: string;
 	try {
 		const parentResult = await db
@@ -139,7 +140,7 @@ export async function publicEventSignupAction(
 			.values({
 				eventId: data.eventId,
 				clientId,
-				role: "participant",
+				role: registrationRole,
 				status: "waitlisted",
 			})
 			.returning({ id: eventRegistrations.id });
@@ -157,15 +158,15 @@ export async function publicEventSignupAction(
 		return { error: "Failed to submit your registration. Please try again." };
 	}
 
-	// Add participant role if not already assigned
+	// Assign client role matching the registration role
 	const hasRole = await db
 		.select({ id: clientRoles.id })
 		.from(clientRoles)
-		.where(and(eq(clientRoles.clientId, clientId), eq(clientRoles.role, "participant")))
+		.where(and(eq(clientRoles.clientId, clientId), eq(clientRoles.role, registrationRole)))
 		.limit(1);
 
 	if (hasRole.length === 0) {
-		await db.insert(clientRoles).values({ clientId, role: "participant" });
+		await db.insert(clientRoles).values({ clientId, role: registrationRole });
 	}
 
 	// Create guest registration if bringing a guest
@@ -185,7 +186,7 @@ export async function publicEventSignupAction(
 				and(
 					eq(eventRegistrations.eventId, data.eventId),
 					eq(eventRegistrations.clientId, guestClientId),
-					eq(eventRegistrations.role, "participant"),
+					eq(eventRegistrations.role, registrationRole),
 				),
 			)
 			.limit(1);
@@ -197,20 +198,20 @@ export async function publicEventSignupAction(
 		await db.insert(eventRegistrations).values({
 			eventId: data.eventId,
 			clientId: guestClientId,
-			role: "participant",
+			role: registrationRole,
 			status: "waitlisted",
 			registeredBy: parentId,
 		});
 
-		// Add participant role to guest
+		// Assign guest role: volunteer for volunteer events, participant otherwise
 		const guestHasRole = await db
 			.select({ id: clientRoles.id })
 			.from(clientRoles)
-			.where(and(eq(clientRoles.clientId, guestClientId), eq(clientRoles.role, "participant")))
+			.where(and(eq(clientRoles.clientId, guestClientId), eq(clientRoles.role, registrationRole)))
 			.limit(1);
 
 		if (guestHasRole.length === 0) {
-			await db.insert(clientRoles).values({ clientId: guestClientId, role: "participant" });
+			await db.insert(clientRoles).values({ clientId: guestClientId, role: registrationRole });
 		}
 	}
 
@@ -239,7 +240,6 @@ export async function publicEventSignupAction(
 		sendRegistrationConfirmation({
 			to: data.email,
 			firstName: data.firstName,
-			role: "participant",
 			eventTitle: ev.title,
 			eventDate: ev.date,
 			eventTime: ev.time,
@@ -256,7 +256,6 @@ export async function publicEventSignupAction(
 			sendRegistrationConfirmation({
 				to: data.guestEmail,
 				firstName: data.guestFirstName,
-				role: "participant",
 				eventTitle: ev.title,
 				eventDate: ev.date,
 				eventTime: ev.time,
@@ -274,130 +273,4 @@ export async function publicEventSignupAction(
 	revalidatePath("/admin/events");
 
 	return { success: "Your registration has been submitted and is pending review" };
-}
-
-export async function publicVolunteerSignupAction(
-	_prevState: ActionState,
-	formData: FormData,
-): Promise<ActionState> {
-	const parsed = volunteerSignupSchema.safeParse(Object.fromEntries(formData));
-	if (!parsed.success) {
-		return { error: parsed.error.issues[0].message };
-	}
-
-	const data = parsed.data;
-
-	let clientId: string;
-	try {
-		clientId = await findOrCreateClient({
-			firstName: data.firstName,
-			lastName: data.lastName,
-			email: data.email,
-			phone: data.phone,
-			emailOptIn: data.emailOptIn,
-		});
-	} catch (err) {
-		logger.error("registration", "Failed to find or create volunteer client", {
-			email: data.email,
-			error: String(err),
-		});
-		return { error: "Failed to process your signup. Please try again." };
-	}
-
-	// Add volunteer role if not already assigned
-	const hasRole = await db
-		.select({ id: clientRoles.id })
-		.from(clientRoles)
-		.where(and(eq(clientRoles.clientId, clientId), eq(clientRoles.role, "volunteer")))
-		.limit(1);
-
-	if (hasRole.length === 0) {
-		await db.insert(clientRoles).values({ clientId, role: "volunteer" });
-	}
-
-	logger.info("registrations", "Volunteer signed up", { email: data.email, clientId });
-	revalidatePath("/admin/clients");
-
-	redirect(`/support/volunteer?clientId=${clientId}`);
-}
-
-export async function volunteerForEventAction(
-	clientId: string,
-	eventId: string,
-): Promise<ActionState> {
-	// Check if already registered as volunteer
-	const existing = await db
-		.select({ id: eventRegistrations.id })
-		.from(eventRegistrations)
-		.where(
-			and(
-				eq(eventRegistrations.eventId, eventId),
-				eq(eventRegistrations.clientId, clientId),
-				eq(eventRegistrations.role, "volunteer"),
-			),
-		)
-		.limit(1);
-
-	if (existing.length > 0) {
-		return { error: "You are already signed up to volunteer for this event" };
-	}
-
-	try {
-		await db.insert(eventRegistrations).values({
-			eventId,
-			clientId,
-			role: "volunteer",
-			status: "waitlisted",
-		});
-	} catch (err) {
-		logger.error("registration", "Failed to create volunteer registration", {
-			clientId,
-			eventId,
-			error: String(err),
-		});
-		return { error: "Failed to submit your volunteer signup. Please try again." };
-	}
-
-	logger.info("registrations", "Volunteer registered for event", { clientId, eventId });
-
-	// Fetch client and event details for confirmation email
-	const [clientResult, eventResult] = await Promise.all([
-		db
-			.select({ firstName: clients.firstName, email: clients.email })
-			.from(clients)
-			.where(eq(clients.id, clientId))
-			.limit(1),
-		db
-			.select({
-				title: events.title,
-				date: events.date,
-				time: events.time,
-				location: events.location,
-			})
-			.from(events)
-			.where(eq(events.id, eventId))
-			.limit(1),
-	]);
-
-	if (clientResult[0]?.email && eventResult[0]) {
-		sendRegistrationConfirmation({
-			to: clientResult[0].email,
-			firstName: clientResult[0].firstName,
-			role: "volunteer",
-			eventTitle: eventResult[0].title,
-			eventDate: eventResult[0].date,
-			eventTime: eventResult[0].time,
-			eventLocation: eventResult[0].location,
-		}).catch((err) =>
-			logger.error("email", "Failed to send volunteer confirmation", {
-				to: clientResult[0].email,
-				error: String(err),
-			}),
-		);
-	}
-
-	revalidatePath("/support/volunteer");
-	revalidatePath("/admin/events");
-
-	return { success: "Your volunteer signup has been submitted and is pending review" };
 }

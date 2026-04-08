@@ -3,11 +3,11 @@
 import { CheckCircle, Send } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useActionState, useState } from "react";
-import { submitContactFormAction } from "@/lib/actions/contact";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { submitContactFormAction } from "@/lib/actions/contact";
 import type { ActionState } from "@/lib/types";
 
 export function ContactForm() {
@@ -41,11 +41,7 @@ export function ContactForm() {
 					<p className="max-w-sm text-muted-foreground">
 						Thank you for reaching out. Our team will get back to you within 1-2 business days.
 					</p>
-					<Button
-						variant="outline"
-						onClick={() => setIsSubmitted(false)}
-						className="mt-2"
-					>
+					<Button variant="outline" onClick={() => setIsSubmitted(false)} className="mt-2">
 						Send Another Message
 					</Button>
 				</motion.div>

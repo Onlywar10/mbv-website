@@ -1,7 +1,7 @@
 "use client";
 
-import { Hand } from "lucide-react";
-import { useActionState, useState } from "react";
+import { Hand, Search } from "lucide-react";
+import { useActionState, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
 	Dialog,
@@ -11,6 +11,7 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { sendVolunteerRecruitmentAction } from "@/lib/actions/email";
 import type { ActionState } from "@/lib/types";
@@ -33,6 +34,7 @@ export function VolunteerRecruitmentDialog({
 }: VolunteerRecruitmentDialogProps) {
 	const [open, setOpen] = useState(false);
 	const [selected, setSelected] = useState<Set<string>>(() => new Set(volunteers.map((v) => v.id)));
+	const [search, setSearch] = useState("");
 	const [state, formAction, isPending] = useActionState<ActionState, FormData>(
 		sendVolunteerRecruitmentAction,
 		{},
@@ -43,13 +45,28 @@ export function VolunteerRecruitmentDialog({
 		setOpen(false);
 	}
 
-	const allSelected = volunteers.length > 0 && selected.size === volunteers.length;
+	const filtered = useMemo(() => {
+		if (!search.trim()) return volunteers;
+		const q = search.toLowerCase();
+		return volunteers.filter(
+			(v) =>
+				v.firstName.toLowerCase().includes(q) ||
+				v.lastName.toLowerCase().includes(q) ||
+				`${v.firstName} ${v.lastName}`.toLowerCase().includes(q),
+		);
+	}, [volunteers, search]);
+
+	const allFilteredSelected = filtered.length > 0 && filtered.every((v) => selected.has(v.id));
 
 	function toggleAll() {
-		if (allSelected) {
-			setSelected(new Set());
+		if (allFilteredSelected) {
+			const next = new Set(selected);
+			for (const v of filtered) next.delete(v.id);
+			setSelected(next);
 		} else {
-			setSelected(new Set(volunteers.map((v) => v.id)));
+			const next = new Set(selected);
+			for (const v of filtered) next.add(v.id);
+			setSelected(next);
 		}
 	}
 
@@ -84,9 +101,7 @@ export function VolunteerRecruitmentDialog({
 					</DialogHeader>
 
 					{state.error && (
-						<div className="rounded-sm bg-rust/10 px-3 py-2 text-sm text-rust">
-							{state.error}
-						</div>
+						<div className="rounded-sm bg-rust/10 px-3 py-2 text-sm text-rust">{state.error}</div>
 					)}
 
 					<form action={formAction} className="space-y-4">
@@ -99,44 +114,59 @@ export function VolunteerRecruitmentDialog({
 								No eligible past volunteers found.
 							</p>
 						) : (
-							<div className="space-y-1">
-								<div className="flex items-center justify-between pb-2">
+							<div className="space-y-2">
+								{/* Search */}
+								<div className="relative">
+									<Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+									<Input
+										value={search}
+										onChange={(e) => setSearch(e.target.value)}
+										placeholder="Search by name..."
+										className="h-8 pl-8 text-sm"
+									/>
+								</div>
+
+								<div className="flex items-center justify-between">
 									<label className="flex items-center gap-2 text-sm font-medium">
 										<input
 											type="checkbox"
-											checked={allSelected}
+											checked={allFilteredSelected}
 											onChange={toggleAll}
 											className="h-4 w-4 rounded border-border accent-rust"
 										/>
-										Select All ({volunteers.length})
+										Select All ({filtered.length})
 									</label>
-									<span className="text-xs text-muted-foreground">
-										{selected.size} selected
-									</span>
+									<span className="text-xs text-muted-foreground">{selected.size} selected</span>
 								</div>
 
 								<div className="max-h-48 overflow-y-auto rounded-sm border border-border">
-									{volunteers.map((v) => (
-										<label
-											key={v.id}
-											className={`flex cursor-pointer items-center gap-3 border-b border-border px-3 py-2 text-sm last:border-b-0 hover:bg-muted/50 ${
-												selected.has(v.id) ? "bg-rust/5" : ""
-											}`}
-										>
-											<input
-												type="checkbox"
-												checked={selected.has(v.id)}
-												onChange={() => toggleOne(v.id)}
-												className="h-4 w-4 shrink-0 rounded border-border accent-rust"
-											/>
-											<div className="min-w-0 flex-1">
-												<span className="font-medium text-primary">
-													{v.firstName} {v.lastName}
-												</span>
-												<span className="ml-2 text-muted-foreground">{v.email}</span>
-											</div>
-										</label>
-									))}
+									{filtered.length === 0 ? (
+										<p className="px-3 py-4 text-center text-sm text-muted-foreground">
+											No volunteers match &quot;{search}&quot;
+										</p>
+									) : (
+										filtered.map((v) => (
+											<label
+												key={v.id}
+												className={`flex cursor-pointer items-center gap-3 border-b border-border px-3 py-2 text-sm last:border-b-0 hover:bg-muted/50 ${
+													selected.has(v.id) ? "bg-rust/5" : ""
+												}`}
+											>
+												<input
+													type="checkbox"
+													checked={selected.has(v.id)}
+													onChange={() => toggleOne(v.id)}
+													className="h-4 w-4 shrink-0 rounded border-border accent-rust"
+												/>
+												<div className="min-w-0 flex-1">
+													<span className="font-medium text-primary">
+														{v.firstName} {v.lastName}
+													</span>
+													<span className="ml-2 text-muted-foreground">{v.email}</span>
+												</div>
+											</label>
+										))
+									)}
 								</div>
 							</div>
 						)}
@@ -161,11 +191,7 @@ export function VolunteerRecruitmentDialog({
 						</div>
 
 						<DialogFooter>
-							<Button
-								type="button"
-								variant="outline"
-								onClick={() => setOpen(false)}
-							>
+							<Button type="button" variant="outline" onClick={() => setOpen(false)}>
 								Cancel
 							</Button>
 							<Button
@@ -173,7 +199,9 @@ export function VolunteerRecruitmentDialog({
 								disabled={isPending || selected.size === 0}
 								className="bg-rust font-heading uppercase text-cream hover:bg-rust-light"
 							>
-								{isPending ? "Sending..." : `Send to ${selected.size} Volunteer${selected.size !== 1 ? "s" : ""}`}
+								{isPending
+									? "Sending..."
+									: `Send to ${selected.size} Volunteer${selected.size !== 1 ? "s" : ""}`}
 							</Button>
 						</DialogFooter>
 					</form>

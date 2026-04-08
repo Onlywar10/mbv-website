@@ -31,7 +31,6 @@ export default async function NewEventPage({ searchParams }: PageProps) {
 				imageUrl: template.imageUrl ?? "",
 				accessibility: template.accessibility ?? "",
 				participantCapacity: template.defaultSpots,
-				volunteerCapacity: 0,
 			};
 		}
 	}

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import { getTeamMembers } from "@/lib/queries/team";
 import { createTeamMemberAction } from "@/lib/actions/team";
+import { getTeamMembers } from "@/lib/queries/team";
 import { TeamForm } from "./team-form";
 import { TeamGrid } from "./team-grid";
 

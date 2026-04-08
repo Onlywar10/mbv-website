@@ -70,7 +70,11 @@ export default function RootLayout({
 	children: React.ReactNode;
 }>) {
 	return (
-		<html lang="en" data-scroll-behavior="smooth" className={`${barlowCondensed.variable} ${dmSans.variable} h-full overflow-x-hidden antialiased`}>
+		<html
+			lang="en"
+			data-scroll-behavior="smooth"
+			className={`${barlowCondensed.variable} ${dmSans.variable} h-full overflow-x-hidden antialiased`}
+		>
 			<body className="min-h-full flex flex-col overflow-x-hidden">{children}</body>
 		</html>
 	);

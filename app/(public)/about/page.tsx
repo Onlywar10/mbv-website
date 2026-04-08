@@ -227,7 +227,9 @@ export default async function AboutPage() {
 						<p className="mt-3 text-base text-muted-foreground sm:mt-4 sm:text-lg">
 							There are many ways to make a difference in a veteran&apos;s life.
 							<span className="hidden sm:inline">
-								{" "}Join us on the water, volunteer your time, or support our mission through a donation.
+								{" "}
+								Join us on the water, volunteer your time, or support our mission through a
+								donation.
 							</span>
 						</p>
 						<div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">

@@ -91,7 +91,11 @@ export async function updateSmartWaiverSettingsAction(
 	await requireAuth();
 
 	const entries: [string, string][] = [
-		["smartwaiver_waiver_url", (formData.get("smartwaiver_waiver_url") as string)?.trim() || ""],
+		[
+			"smartwaiver_volunteering_url",
+			(formData.get("smartwaiver_volunteering_url") as string)?.trim() || "",
+		],
+		["smartwaiver_boating_url", (formData.get("smartwaiver_boating_url") as string)?.trim() || ""],
 	];
 
 	try {

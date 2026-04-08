@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState } from "react";
 import { FormField } from "@/components/admin/form-field";
 import { ImageUpload } from "@/components/admin/image-upload";
 import { Button } from "@/components/ui/button";
@@ -28,11 +28,7 @@ interface EventFormProps {
 		imageUrl?: string;
 		accessibility?: string;
 		participantCapacity?: number;
-		volunteerCapacity?: number;
-		volunteerEnabled?: boolean;
-		volunteerDescription?: string;
-		volunteerTime?: string;
-		volunteerNotes?: string;
+		requiredWaivers?: string[];
 		isPublished?: boolean;
 	};
 	submitLabel?: string;
@@ -42,9 +38,6 @@ const initialState: ActionState = {};
 
 export function EventForm({ action, defaultValues, submitLabel = "Create Event" }: EventFormProps) {
 	const [state, formAction, isPending] = useActionState(action, initialState);
-	const [volunteerEnabled, setVolunteerEnabled] = useState(
-		defaultValues?.volunteerEnabled ?? false,
-	);
 
 	return (
 		<form action={formAction} className="space-y-6">
@@ -134,60 +127,36 @@ export function EventForm({ action, defaultValues, submitLabel = "Create Event" 
 				placeholder="ADA and accessibility details"
 			/>
 
-			{/* Volunteer Section */}
-			<div className="rounded-sm border border-ochre/30 bg-ochre/5 p-5 space-y-5">
-				<div className="flex items-center gap-3">
-					<input
-						type="checkbox"
-						id="field-volunteerEnabled"
-						name="volunteerEnabled"
-						value="on"
-						checked={volunteerEnabled}
-						onChange={(e) => setVolunteerEnabled(e.target.checked)}
-						className="h-4 w-4 rounded-sm border-border"
-					/>
-					<Label
-						htmlFor="field-volunteerEnabled"
-						className="font-heading text-sm uppercase tracking-wider text-ochre"
-					>
-						Enable Volunteering for This Event
-					</Label>
+			{/* Required Waivers */}
+			<div className="rounded-sm border border-ochre/30 bg-ochre/5 p-5 space-y-3">
+				<Label className="font-heading text-sm uppercase tracking-wider text-ochre">
+					Required Waivers
+				</Label>
+				<p className="text-xs text-muted-foreground">
+					Select which waivers participants must sign for this event.
+				</p>
+				<div className="space-y-2">
+					<label className="flex items-center gap-2 text-sm">
+						<input
+							type="checkbox"
+							name="requiredWaivers"
+							value="volunteering"
+							defaultChecked={defaultValues?.requiredWaivers?.includes("volunteering")}
+							className="h-4 w-4 rounded-sm border-border"
+						/>
+						Volunteering Waiver
+					</label>
+					<label className="flex items-center gap-2 text-sm">
+						<input
+							type="checkbox"
+							name="requiredWaivers"
+							value="boating"
+							defaultChecked={defaultValues?.requiredWaivers?.includes("boating")}
+							className="h-4 w-4 rounded-sm border-border"
+						/>
+						Boating Waiver
+					</label>
 				</div>
-
-				{volunteerEnabled && (
-					<div className="space-y-5">
-						<div className="grid gap-6 sm:grid-cols-2">
-							<FormField
-								name="volunteerCapacity"
-								label="Volunteers Needed"
-								type="number"
-								defaultValue={defaultValues?.volunteerCapacity ?? 0}
-							/>
-							<FormField
-								name="volunteerTime"
-								label="Volunteer Arrival Time"
-								defaultValue={defaultValues?.volunteerTime}
-								placeholder="e.g. 5:00 AM (1 hour before event)"
-							/>
-						</div>
-
-						<FormField
-							name="volunteerDescription"
-							label="Volunteer Role Description"
-							defaultValue={defaultValues?.volunteerDescription}
-							textarea
-							placeholder="What will volunteers be doing? e.g. Setting up equipment, guiding participants, etc."
-						/>
-
-						<FormField
-							name="volunteerNotes"
-							label="Volunteer Notes"
-							defaultValue={defaultValues?.volunteerNotes}
-							textarea
-							placeholder="Extra notes for volunteers. e.g. Wear comfortable shoes, bring sunscreen, etc."
-						/>
-					</div>
-				)}
 			</div>
 
 			<div className="flex items-center gap-3">

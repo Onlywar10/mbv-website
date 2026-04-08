@@ -5,7 +5,7 @@ import { GalleryCarousel } from "@/components/sections/gallery-carousel";
 import { Hero } from "@/components/sections/hero";
 import { ImpactCounters } from "@/components/sections/impact-counters";
 import { MissionBar } from "@/components/sections/mission-bar";
-import { getRegistrationCountsByEvent, getPublishedEvents } from "@/lib/queries/events";
+import { getPublishedEvents, getRegistrationCountsByEvent } from "@/lib/queries/events";
 import { getGalleryImages } from "@/lib/queries/gallery";
 
 export default async function Home() {

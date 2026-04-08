@@ -15,9 +15,7 @@ interface ContactNotificationParams {
 	message: string;
 }
 
-export async function sendContactNotification(
-	params: ContactNotificationParams,
-): Promise<void> {
+export async function sendContactNotification(params: ContactNotificationParams): Promise<void> {
 	const phoneLine = params.senderPhone
 		? `<p style="margin: 2px 0; color: #4a5568;"><strong>Phone:</strong> ${escapeHtml(params.senderPhone)}</p>`
 		: "";

@@ -22,19 +22,14 @@ interface TeamGridProps {
 export function TeamGrid({ members }: TeamGridProps) {
 	if (members.length === 0) {
 		return (
-			<p className="py-12 text-center text-muted-foreground">
-				No team members yet. Add one above.
-			</p>
+			<p className="py-12 text-center text-muted-foreground">No team members yet. Add one above.</p>
 		);
 	}
 
 	return (
 		<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
 			{members.map((member) => (
-				<div
-					key={member.id}
-					className="overflow-hidden rounded-sm ring-1 ring-border"
-				>
+				<div key={member.id} className="overflow-hidden rounded-sm ring-1 ring-border">
 					<div className="relative aspect-square">
 						<Image
 							src={member.imageUrl}

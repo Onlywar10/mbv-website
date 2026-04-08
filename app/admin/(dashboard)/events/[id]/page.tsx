@@ -8,6 +8,7 @@ import { getPastVolunteersNotRegistered } from "@/lib/queries/email";
 import { getEventById, getEventRegistrations, getRegistrationCount } from "@/lib/queries/events";
 import { PendingApprovals } from "./pending-approvals";
 import { RegisteredParticipants } from "./registered-participants";
+import { SaveTemplateButton } from "./save-template-button";
 import { VolunteerRecruitmentDialog } from "./volunteer-recruitment-dialog";
 
 export const metadata: Metadata = {
@@ -28,7 +29,7 @@ export default async function EventDetailPage({ params }: PageProps) {
 	const [registrations, regCount, pastVolunteers] = await Promise.all([
 		getEventRegistrations(id),
 		getRegistrationCount(id),
-		event.volunteerEnabled ? getPastVolunteersNotRegistered(id) : Promise.resolve([]),
+		event.category === "volunteer" ? getPastVolunteersNotRegistered(id) : Promise.resolve([]),
 	]);
 
 	const waitlisted = registrations.filter((r) => r.status === "waitlisted");
@@ -60,11 +61,9 @@ export default async function EventDetailPage({ params }: PageProps) {
 					</div>
 				</div>
 				<div className="flex items-center gap-3">
-					{event.volunteerEnabled && (
-						<VolunteerRecruitmentDialog
-							eventId={id}
-							volunteers={pastVolunteers}
-						/>
+					<SaveTemplateButton eventId={id} eventTitle={event.title} />
+					{event.category === "volunteer" && (
+						<VolunteerRecruitmentDialog eventId={id} volunteers={pastVolunteers} />
 					)}
 					<Link
 						href={`/admin/events/${id}/edit`}
@@ -94,8 +93,7 @@ export default async function EventDetailPage({ params }: PageProps) {
 						<div className="flex items-center gap-2">
 							<Users className="h-4 w-4 text-rust" />
 							<span>
-								{event.participantCapacity} participants / {event.volunteerCapacity} volunteers
-								capacity, {regCount} registered
+								{event.participantCapacity} capacity, {regCount} registered
 							</span>
 						</div>
 					</div>

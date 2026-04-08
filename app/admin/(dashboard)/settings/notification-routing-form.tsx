@@ -85,8 +85,8 @@ export function NotificationRoutingForm({
 			</div>
 
 			<p className="text-xs text-muted-foreground">
-				Separate multiple addresses with commas. If left blank, all active admin users will
-				receive notifications.
+				Separate multiple addresses with commas. If left blank, all active admin users will receive
+				notifications.
 			</p>
 
 			<Button

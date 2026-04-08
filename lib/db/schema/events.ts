@@ -1,3 +1,4 @@
+import { sql } from "drizzle-orm";
 import {
 	boolean,
 	date,
@@ -30,11 +31,7 @@ export const events = pgTable("events", {
 	imageUrl: text("image_url"),
 	accessibility: text("accessibility"),
 	participantCapacity: integer("participant_capacity").notNull().default(0),
-	volunteerCapacity: integer("volunteer_capacity").notNull().default(0),
-	volunteerEnabled: boolean("volunteer_enabled").notNull().default(false),
-	volunteerDescription: text("volunteer_description"),
-	volunteerTime: text("volunteer_time"),
-	volunteerNotes: text("volunteer_notes"),
+	requiredWaivers: text("required_waivers").array().notNull().default(sql`'{}'::text[]`),
 	isPublished: boolean("is_published").notNull().default(false),
 	createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 	updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),

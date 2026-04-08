@@ -1,9 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { motion } from "motion/react";
 import Link from "next/link";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -72,7 +72,9 @@ export function Hero() {
 				{VIDEOS.map((src, i) => (
 					<video
 						key={src}
-						ref={(el) => { videoRefs.current[i] = el; }}
+						ref={(el) => {
+							videoRefs.current[i] = el;
+						}}
 						src={src}
 						autoPlay={i === 0}
 						muted

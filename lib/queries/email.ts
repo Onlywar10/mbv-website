@@ -40,14 +40,15 @@ export async function getUpcomingEventsWithRegistrants(daysAhead: number) {
 
 	return db
 		.select({
+			eventId: events.id,
 			eventTitle: events.title,
 			eventDate: events.date,
 			eventTime: events.time,
 			eventLocation: events.location,
+			requiredWaivers: events.requiredWaivers,
+			clientId: clients.id,
 			clientEmail: clients.email,
 			clientFirstName: clients.firstName,
-			waiverExpiresAt: clients.waiverExpiresAt,
-			role: eventRegistrations.role,
 		})
 		.from(eventRegistrations)
 		.innerJoin(events, eq(eventRegistrations.eventId, events.id))
@@ -79,8 +80,8 @@ export async function getRecentlyExpiredMemberships() {
 		);
 }
 
-/** Get registered volunteers for events that happened yesterday. */
-export async function getYesterdayEventsWithVolunteers() {
+/** Get registrants for volunteer-category events that happened yesterday. */
+export async function getYesterdayVolunteerEventRegistrants() {
 	const yesterday = new Date();
 	yesterday.setDate(yesterday.getDate() - 1);
 	const dateStr = yesterday.toISOString().split("T")[0];
@@ -98,7 +99,7 @@ export async function getYesterdayEventsWithVolunteers() {
 		.where(
 			and(
 				eq(events.date, dateStr),
-				eq(eventRegistrations.role, "volunteer"),
+				eq(events.category, "volunteer"),
 				eq(eventRegistrations.status, "registered"),
 			),
 		);
@@ -118,18 +119,13 @@ export async function getMailingListClients() {
 		.orderBy(clients.lastName);
 }
 
-/** Get clients with the volunteer role who are NOT already registered as a volunteer for a specific event. */
+/** Get clients with the volunteer role who are NOT already registered for a specific event. */
 export async function getPastVolunteersNotRegistered(eventId: string) {
-	// Get IDs of clients already registered as volunteers for this event
+	// Get IDs of clients already registered for this event (any role)
 	const registered = await db
 		.select({ clientId: eventRegistrations.clientId })
 		.from(eventRegistrations)
-		.where(
-			and(
-				eq(eventRegistrations.eventId, eventId),
-				eq(eventRegistrations.role, "volunteer"),
-			),
-		);
+		.where(eq(eventRegistrations.eventId, eventId));
 
 	const registeredIds = registered.map((r) => r.clientId);
 
@@ -147,9 +143,7 @@ export async function getPastVolunteersNotRegistered(eventId: string) {
 				eq(clientRoles.role, "volunteer"),
 				eq(clients.isActive, true),
 				eq(clients.emailOptIn, true),
-				...(registeredIds.length > 0
-					? [notInArray(clients.id, registeredIds)]
-					: []),
+				...(registeredIds.length > 0 ? [notInArray(clients.id, registeredIds)] : []),
 			),
 		);
 }

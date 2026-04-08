@@ -1,6 +1,5 @@
 import { handleSmartWaiverWebhook } from "@/lib/smartwaiver-webhook";
 
-/** Legacy endpoint — forwards to boating waiver handler for backwards compatibility. */
 export async function POST(request: Request) {
 	return handleSmartWaiverWebhook(request, "boating");
 }

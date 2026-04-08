@@ -135,9 +135,7 @@ export function ComposeForm({ recipientCount }: ComposeFormProps) {
 		<div className="space-y-6">
 			<form ref={formRef} action={formAction} className="space-y-6">
 				{state.error && (
-					<div className="rounded-sm bg-rust/10 px-4 py-3 text-sm text-rust">
-						{state.error}
-					</div>
+					<div className="rounded-sm bg-rust/10 px-4 py-3 text-sm text-rust">{state.error}</div>
 				)}
 				{state.success && (
 					<div className="rounded-sm bg-green-500/10 px-4 py-3 text-sm text-green-700">
@@ -156,16 +154,8 @@ export function ComposeForm({ recipientCount }: ComposeFormProps) {
 					name="attachmentNames"
 					value={attachments.map((a) => a.name).join(",")}
 				/>
-				<input
-					type="hidden"
-					name="imageUrls"
-					value={images.map((img) => img.url).join(",")}
-				/>
-				<input
-					type="hidden"
-					name="imageNames"
-					value={images.map((img) => img.name).join(",")}
-				/>
+				<input type="hidden" name="imageUrls" value={images.map((img) => img.url).join(",")} />
+				<input type="hidden" name="imageNames" value={images.map((img) => img.name).join(",")} />
 
 				{/* Subject */}
 				<div className="space-y-2">
@@ -197,16 +187,14 @@ export function ComposeForm({ recipientCount }: ComposeFormProps) {
 						required
 					/>
 					<p className="text-xs text-muted-foreground">
-						Plain text — blank lines create paragraph breaks. The email will be wrapped in the
-						MBV brand template automatically.
+						Plain text — blank lines create paragraph breaks. The email will be wrapped in the MBV
+						brand template automatically.
 					</p>
 				</div>
 
 				{/* Embedded Images */}
 				<div className="space-y-2">
-					<Label className="font-heading text-xs uppercase tracking-wider">
-						Embedded Images
-					</Label>
+					<Label className="font-heading text-xs uppercase tracking-wider">Embedded Images</Label>
 					<p className="text-xs text-muted-foreground">
 						These images will be displayed inline in the email body, below the message text.
 					</p>
@@ -272,9 +260,7 @@ export function ComposeForm({ recipientCount }: ComposeFormProps) {
 
 				{/* Attachments */}
 				<div className="space-y-2">
-					<Label className="font-heading text-xs uppercase tracking-wider">
-						Attachments
-					</Label>
+					<Label className="font-heading text-xs uppercase tracking-wider">Attachments</Label>
 
 					{attachments.length > 0 && (
 						<div className="space-y-2">
@@ -319,9 +305,7 @@ export function ComposeForm({ recipientCount }: ComposeFormProps) {
 						)}
 					</button>
 
-					{uploadError && (
-						<p className="text-xs text-destructive">{uploadError}</p>
-					)}
+					{uploadError && <p className="text-xs text-destructive">{uploadError}</p>}
 
 					<input
 						ref={fileInputRef}
@@ -356,7 +340,8 @@ export function ComposeForm({ recipientCount }: ComposeFormProps) {
 					{confirming ? (
 						<div className="flex flex-1 items-center gap-3 rounded-sm border border-ochre/30 bg-ochre/10 px-4 py-3">
 							<p className="flex-1 text-sm text-foreground">
-								Send to <strong>{recipientCount}</strong> recipient{recipientCount !== 1 ? "s" : ""}?
+								Send to <strong>{recipientCount}</strong> recipient{recipientCount !== 1 ? "s" : ""}
+								?
 							</p>
 							<Button
 								type="button"

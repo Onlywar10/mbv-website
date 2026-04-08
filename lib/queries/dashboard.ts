@@ -26,10 +26,7 @@ export async function getDashboardStats() {
 		db.select({ value: count() }).from(eventRegistrations),
 		db.select({ value: count() }).from(events).where(gte(events.date, today)),
 		db.select({ value: sum(donations.amount) }).from(donations),
-		db
-			.select({ value: count() })
-			.from(memberships)
-			.where(eq(memberships.status, "active")),
+		db.select({ value: count() }).from(memberships).where(eq(memberships.status, "active")),
 		db
 			.select({ value: count() })
 			.from(eventRegistrations)
@@ -65,30 +62,19 @@ export async function getUpcomingEventsWithCapacity(limit = 3) {
 
 	const eventsWithCounts = await Promise.all(
 		upcomingEvents.map(async (event) => {
-			const [participantResult] = await db
+			const role = event.category === "volunteer" ? "volunteer" : "participant";
+			const [result] = await db
 				.select({ value: count() })
 				.from(eventRegistrations)
 				.where(
 					and(
 						eq(eventRegistrations.eventId, event.id),
-						eq(eventRegistrations.role, "participant"),
+						eq(eventRegistrations.role, role),
 						eq(eventRegistrations.status, "registered"),
 					),
 				);
 
-			const [volunteerResult] = await db
-				.select({ value: count() })
-				.from(eventRegistrations)
-				.where(
-					and(
-						eq(eventRegistrations.eventId, event.id),
-						eq(eventRegistrations.role, "volunteer"),
-						eq(eventRegistrations.status, "registered"),
-					),
-				);
-
-			const participantCount = participantResult?.value ?? 0;
-			const volunteerCount = volunteerResult?.value ?? 0;
+			const registeredCount = result?.value ?? 0;
 
 			return {
 				id: event.id,
@@ -98,14 +84,8 @@ export async function getUpcomingEventsWithCapacity(limit = 3) {
 				location: event.location,
 				category: event.category,
 				participantCapacity: event.participantCapacity,
-				participantCount,
-				volunteerCapacity: event.volunteerCapacity,
-				volunteerCount,
-				volunteerEnabled: event.volunteerEnabled,
-				volunteersNeeded: event.volunteerEnabled
-					? Math.max(0, event.volunteerCapacity - volunteerCount)
-					: 0,
-				spotsLeft: Math.max(0, event.participantCapacity - participantCount),
+				participantCount: registeredCount,
+				spotsLeft: Math.max(0, event.participantCapacity - registeredCount),
 			};
 		}),
 	);

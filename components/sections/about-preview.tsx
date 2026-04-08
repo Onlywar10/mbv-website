@@ -25,7 +25,8 @@ export function AboutPreview() {
 								Since 1987, Monterey Bay Veterans has been dedicated to improving the quality of
 								life for disabled veterans through the therapeutic power of the ocean.
 								<span className="hidden sm:inline">
-									{" "}What started as a single wheelchair-accessible salmon derby has grown into a
+									{" "}
+									What started as a single wheelchair-accessible salmon derby has grown into a
 									year-round program impacting over 5,000 veterans annually.
 								</span>
 							</p>
@@ -65,7 +66,9 @@ export function AboutPreview() {
 							{/* Floating stat card */}
 							<div className="absolute -bottom-4 -left-2 rounded-sm bg-white p-3 shadow-sharp ring-1 ring-border sm:-bottom-6 sm:-left-6 sm:p-4">
 								<div className="text-2xl font-bold text-rust sm:text-3xl">38+</div>
-								<div className="text-xs font-medium text-ink sm:text-sm">Years Serving Veterans</div>
+								<div className="text-xs font-medium text-ink sm:text-sm">
+									Years Serving Veterans
+								</div>
 							</div>
 						</div>
 					</ScrollReveal>

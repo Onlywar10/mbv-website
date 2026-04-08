@@ -1,6 +1,11 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { getGivebutterCampaignCodes, getNotificationSettings, getSmartWaiverSettings } from "@/lib/queries/settings";
+import {
+	getGivebutterCampaignCodes,
+	getNotificationSettings,
+	getSmartWaiverSettings,
+} from "@/lib/queries/settings";
 import { CampaignCodesForm } from "./campaign-codes-form";
 import { NotificationRoutingForm } from "./notification-routing-form";
 import { SendReportButton } from "./send-report-button";
@@ -12,11 +17,16 @@ export const metadata: Metadata = {
 };
 
 export default async function SettingsPage() {
-	const [campaignCodes, notificationSettings, smartWaiverSettings] = await Promise.all([
+	const [campaignCodes, notificationSettings, smartWaiverSettings, hdrs] = await Promise.all([
 		getGivebutterCampaignCodes(),
 		getNotificationSettings(),
 		getSmartWaiverSettings(),
+		headers(),
 	]);
+
+	const host = hdrs.get("host") ?? "localhost:3000";
+	const protocol = host.startsWith("localhost") ? "http" : "https";
+	const baseUrl = `${protocol}://${host}`;
 
 	return (
 		<div>
@@ -66,13 +76,16 @@ export default async function SettingsPage() {
 						SmartWaiver Integration
 					</CardTitle>
 					<CardDescription>
-						Configure SmartWaiver for event liability waivers. Events with waivers enabled will
-						show the signing widget and track completion status.
+						Configure SmartWaiver URLs for event liability waivers. When creating an event, you can
+						select which waivers participants must sign. These URLs are included in approval and
+						reminder emails.
 					</CardDescription>
 				</CardHeader>
 				<CardContent>
 					<SmartWaiverForm
-						waiverUrl={smartWaiverSettings.waiverUrl ?? ""}
+						volunteeringUrl={smartWaiverSettings.volunteeringUrl ?? ""}
+						boatingUrl={smartWaiverSettings.boatingUrl ?? ""}
+						webhookBaseUrl={baseUrl}
 					/>
 				</CardContent>
 			</Card>

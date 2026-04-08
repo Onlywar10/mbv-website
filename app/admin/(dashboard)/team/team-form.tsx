@@ -35,13 +35,37 @@ export function TeamForm({ action, defaultValues, submitLabel = "Add Member" }: 
 			<ImageUpload name="imageUrl" label="Photo" currentUrl={defaultValues?.imageUrl} />
 
 			<div className="grid gap-4 sm:grid-cols-2">
-				<FormField name="name" label="Name" required defaultValue={defaultValues?.name} placeholder="Full name" />
-				<FormField name="title" label="Title / Role" required defaultValue={defaultValues?.title} placeholder="e.g. Board Member" />
+				<FormField
+					name="name"
+					label="Name"
+					required
+					defaultValue={defaultValues?.name}
+					placeholder="Full name"
+				/>
+				<FormField
+					name="title"
+					label="Title / Role"
+					required
+					defaultValue={defaultValues?.title}
+					placeholder="e.g. Board Member"
+				/>
 			</div>
 
-			<FormField name="bio" label="Bio" required textarea defaultValue={defaultValues?.bio} placeholder="Short description..." />
+			<FormField
+				name="bio"
+				label="Bio"
+				required
+				textarea
+				defaultValue={defaultValues?.bio}
+				placeholder="Short description..."
+			/>
 
-			<FormField name="sortOrder" label="Sort Order" type="number" defaultValue={defaultValues?.sortOrder ?? 0} />
+			<FormField
+				name="sortOrder"
+				label="Sort Order"
+				type="number"
+				defaultValue={defaultValues?.sortOrder ?? 0}
+			/>
 
 			<Button
 				type="submit"

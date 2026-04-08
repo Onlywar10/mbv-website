@@ -1,7 +1,12 @@
 import { Plus } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { getEvents, getEventTemplates, getRegistrationCountsByEvent, getWaitlistedCountsByEvent } from "@/lib/queries/events";
+import {
+	getEvents,
+	getEventTemplates,
+	getRegistrationCountsByEvent,
+	getWaitlistedCountsByEvent,
+} from "@/lib/queries/events";
 import { EventFilterBar } from "./event-filter-bar";
 import { TemplatesDialog } from "./templates-dialog";
 
@@ -38,7 +43,11 @@ export default async function EventsPage() {
 			</div>
 
 			<div className="mt-6">
-				<EventFilterBar events={events} registrationCounts={registrationCounts} waitlistedCounts={waitlistedCounts} />
+				<EventFilterBar
+					events={events}
+					registrationCounts={registrationCounts}
+					waitlistedCounts={waitlistedCounts}
+				/>
 			</div>
 		</div>
 	);

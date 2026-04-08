@@ -14,9 +14,7 @@ interface DonationNotifyParams {
 	paymentMethod: string;
 }
 
-export async function sendAdminDonationNotification(
-	params: DonationNotifyParams,
-): Promise<void> {
+export async function sendAdminDonationNotification(params: DonationNotifyParams): Promise<void> {
 	const body = `
 		<h2 style="font-size: 18px; margin-bottom: 4px;">New Donation Received</h2>
 		<div style="background: #f7fafc; border-left: 4px solid #276749; padding: 12px 16px; margin: 16px 0;">

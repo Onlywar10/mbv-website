@@ -242,12 +242,6 @@ export default async function EventDetailPage({ params }: PageProps) {
 											eventTitle={event.title}
 											category={event.category}
 										/>
-										<p className="text-center text-xs text-cream/60">
-											Want to help out?{" "}
-											<Link href="/support#volunteer-form" className="underline underline-offset-2 hover:text-cream">
-												Sign up to volunteer
-											</Link>
-										</p>
 									</CardContent>
 								</Card>
 							</ScrollReveal>

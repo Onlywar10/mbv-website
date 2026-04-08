@@ -36,8 +36,7 @@ export async function sendMembershipConfirmationEmail(
 		subject: `Welcome, ${typeLabel} Member — Monterey Bay Veterans`,
 		html: emailLayout({
 			body,
-			disclaimer:
-				"You received this email because you became a member of Monterey Bay Veterans.",
+			disclaimer: "You received this email because you became a member of Monterey Bay Veterans.",
 		}),
 	});
 }
@@ -53,9 +52,7 @@ interface MembershipExpiredParams {
 	expiresAt: Date;
 }
 
-export async function sendMembershipExpiredEmail(
-	params: MembershipExpiredParams,
-): Promise<void> {
+export async function sendMembershipExpiredEmail(params: MembershipExpiredParams): Promise<void> {
 	const typeLabel = params.type === "lifetime" ? "Lifetime" : "Annual";
 
 	const body = `
@@ -69,8 +66,7 @@ export async function sendMembershipExpiredEmail(
 		subject: "Your Membership Has Expired — Monterey Bay Veterans",
 		html: emailLayout({
 			body,
-			disclaimer:
-				"You received this email because you were a member of Monterey Bay Veterans.",
+			disclaimer: "You received this email because you were a member of Monterey Bay Veterans.",
 		}),
 	});
 }

@@ -72,7 +72,7 @@ export function Footer() {
 						</ul>
 					</div>
 
-{/* Contact */}
+					{/* Contact */}
 					<div>
 						<h3 className="text-sm font-heading uppercase tracking-widest text-rust">Contact Us</h3>
 						<ul className="mt-4 space-y-3">

@@ -1,9 +1,61 @@
 {
-	"id": "e7102cda-bdbe-419b-9469-2ea093810513",
-	"prevId": "c3d5e7f9-2a4b-5c6d-8e0f-1a3b5c7d9e11",
+	"id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+	"prevId": "7ac837fc-f2b5-4f97-b130-dca1b4c39953",
 	"version": "7",
 	"dialect": "postgresql",
 	"tables": {
+		"public.app_logs": {
+			"name": "app_logs",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "uuid",
+					"primaryKey": true,
+					"notNull": true,
+					"default": "gen_random_uuid()"
+				},
+				"level": {
+					"name": "level",
+					"type": "log_level",
+					"typeSchema": "public",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"source": {
+					"name": "source",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"message": {
+					"name": "message",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"metadata": {
+					"name": "metadata",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"created_at": {
+					"name": "created_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "now()"
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		},
 		"public.client_event_history": {
 			"name": "client_event_history",
 			"schema": "",
@@ -214,6 +266,18 @@
 					"notNull": true,
 					"default": 0
 				},
+				"waiver_signed_at": {
+					"name": "waiver_signed_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"waiver_expires_at": {
+					"name": "waiver_expires_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": false
+				},
 				"created_at": {
 					"name": "created_at",
 					"type": "timestamp with time zone",
@@ -356,12 +420,11 @@
 					"notNull": true,
 					"default": "'registered'"
 				},
-				"guest_count": {
-					"name": "guest_count",
-					"type": "integer",
+				"registered_by": {
+					"name": "registered_by",
+					"type": "uuid",
 					"primaryKey": false,
-					"notNull": true,
-					"default": 0
+					"notNull": false
 				},
 				"registered_at": {
 					"name": "registered_at",
@@ -579,37 +642,12 @@
 					"notNull": true,
 					"default": 0
 				},
-				"volunteer_capacity": {
-					"name": "volunteer_capacity",
-					"type": "integer",
+				"required_waivers": {
+					"name": "required_waivers",
+					"type": "text[]",
 					"primaryKey": false,
 					"notNull": true,
-					"default": 0
-				},
-				"volunteer_enabled": {
-					"name": "volunteer_enabled",
-					"type": "boolean",
-					"primaryKey": false,
-					"notNull": true,
-					"default": false
-				},
-				"volunteer_description": {
-					"name": "volunteer_description",
-					"type": "text",
-					"primaryKey": false,
-					"notNull": false
-				},
-				"volunteer_time": {
-					"name": "volunteer_time",
-					"type": "text",
-					"primaryKey": false,
-					"notNull": false
-				},
-				"volunteer_notes": {
-					"name": "volunteer_notes",
-					"type": "text",
-					"primaryKey": false,
-					"notNull": false
+					"default": "'{}'::text[]"
 				},
 				"is_published": {
 					"name": "is_published",
@@ -668,7 +706,8 @@
 					"name": "alt",
 					"type": "text",
 					"primaryKey": false,
-					"notNull": true
+					"notNull": false,
+					"default": "''"
 				},
 				"sort_order": {
 					"name": "sort_order",
@@ -687,6 +726,101 @@
 			},
 			"indexes": {},
 			"foreignKeys": {},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		},
+		"public.memberships": {
+			"name": "memberships",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "uuid",
+					"primaryKey": true,
+					"notNull": true,
+					"default": "gen_random_uuid()"
+				},
+				"first_name": {
+					"name": "first_name",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"last_name": {
+					"name": "last_name",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"email": {
+					"name": "email",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"client_id": {
+					"name": "client_id",
+					"type": "uuid",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"type": {
+					"name": "type",
+					"type": "membership_type",
+					"typeSchema": "public",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"status": {
+					"name": "status",
+					"type": "membership_status",
+					"typeSchema": "public",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "'active'"
+				},
+				"started_at": {
+					"name": "started_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "now()"
+				},
+				"expires_at": {
+					"name": "expires_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"givebutter_id": {
+					"name": "givebutter_id",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"created_at": {
+					"name": "created_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "now()"
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {
+				"memberships_client_id_clients_id_fk": {
+					"name": "memberships_client_id_clients_id_fk",
+					"tableFrom": "memberships",
+					"tableTo": "clients",
+					"columnsFrom": ["client_id"],
+					"columnsTo": ["id"],
+					"onDelete": "set null",
+					"onUpdate": "no action"
+				}
+			},
 			"compositePrimaryKeys": {},
 			"uniqueConstraints": {},
 			"policies": {},
@@ -750,6 +884,103 @@
 					"columns": ["token_hash"]
 				}
 			},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		},
+		"public.site_settings": {
+			"name": "site_settings",
+			"schema": "",
+			"columns": {
+				"key": {
+					"name": "key",
+					"type": "text",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"value": {
+					"name": "value",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"updated_at": {
+					"name": "updated_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "now()"
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		},
+		"public.team_members": {
+			"name": "team_members",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "uuid",
+					"primaryKey": true,
+					"notNull": true,
+					"default": "gen_random_uuid()"
+				},
+				"name": {
+					"name": "name",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"title": {
+					"name": "title",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"bio": {
+					"name": "bio",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"image_url": {
+					"name": "image_url",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"sort_order": {
+					"name": "sort_order",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true,
+					"default": 0
+				},
+				"created_at": {
+					"name": "created_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "now()"
+				},
+				"updated_at": {
+					"name": "updated_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "now()"
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
 			"policies": {},
 			"checkConstraints": {},
 			"isRLSEnabled": false
@@ -828,6 +1059,11 @@
 		}
 	},
 	"enums": {
+		"public.log_level": {
+			"name": "log_level",
+			"schema": "public",
+			"values": ["info", "warn", "error", "critical"]
+		},
 		"public.client_role": {
 			"name": "client_role",
 			"schema": "public",
@@ -852,6 +1088,16 @@
 			"name": "event_category",
 			"schema": "public",
 			"values": ["fishing", "whale-watching", "volunteer", "community", "derby"]
+		},
+		"public.membership_status": {
+			"name": "membership_status",
+			"schema": "public",
+			"values": ["active", "expired", "cancelled"]
+		},
+		"public.membership_type": {
+			"name": "membership_type",
+			"schema": "public",
+			"values": ["annual", "lifetime"]
 		}
 	},
 	"schemas": {},

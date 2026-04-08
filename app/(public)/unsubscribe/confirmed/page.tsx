@@ -18,8 +18,8 @@ export default function UnsubscribeConfirmedPage() {
 					You&apos;ve Been Unsubscribed
 				</h1>
 				<p className="mt-4 text-muted-foreground">
-					You will no longer receive mailing list emails from Monterey Bay Veterans. If this was
-					a mistake, please contact us at{" "}
+					You will no longer receive mailing list emails from Monterey Bay Veterans. If this was a
+					mistake, please contact us at{" "}
 					<a href="mailto:Info@mbv.org" className="text-rust hover:underline">
 						Info@mbv.org
 					</a>{" "}

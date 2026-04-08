@@ -1,23 +1,23 @@
-import { and, eq, isNotNull, lt } from "drizzle-orm";
+import { eq, lt } from "drizzle-orm";
 import { verifyCronRequest } from "@/lib/auth/verify-cron";
-import { logger } from "@/lib/logger";
 import { db } from "@/lib/db";
-import { clients } from "@/lib/db/schema/clients";
+import { clientWaivers } from "@/lib/db/schema/client-waivers";
 import { memberships } from "@/lib/db/schema/memberships";
 import {
 	sendDailyRegistrationReport,
-	sendEventDayOfReminderEmail,
 	sendEventReminderEmail,
 	sendMembershipExpiredEmail,
 	sendPostEventThanksEmail,
 } from "@/lib/email";
+import { logger } from "@/lib/logger";
 import {
 	getRecentlyExpiredMemberships,
 	getUpcomingEventsWithRegistrants,
 	getWaitlistedRegistrations,
-	getYesterdayEventsWithVolunteers,
+	getYesterdayVolunteerEventRegistrants,
 } from "@/lib/queries/email";
-import { getNotificationEmails, getSetting } from "@/lib/queries/settings";
+import { getNotificationEmails, getWaiverUrlsForEvent } from "@/lib/queries/settings";
+import { getMissingWaivers } from "@/lib/queries/waivers";
 
 function getBaseUrl(): string {
 	if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
@@ -31,8 +31,8 @@ export async function GET(request: Request) {
 
 	const results = {
 		dailyReport: 0,
-		eventDayOfReminders: 0,
-		eventReminders: 0,
+		event3DayReminders: 0,
+		event1DayReminders: 0,
 		membershipExpiry: 0,
 		postEventThanks: 0,
 		waiverExpiry: 0,
@@ -83,59 +83,93 @@ export async function GET(request: Request) {
 		logger.error("cron", "Daily report failed", { error: String(err) });
 	}
 
-	// --- 2. Event Reminders (2 days out) — include waiver link if needed ---
+	// --- 2. Event Reminders (3 days out) — include missing waiver links ---
 	try {
-		const registrants = await getUpcomingEventsWithRegistrants(2);
-		const waiverUrl = await getSetting("smartwaiver_waiver_url");
+		const registrants = await getUpcomingEventsWithRegistrants(3);
+
+		// Cache waiver URLs per event
+		const waiverUrlCache = new Map<string, { label: string; url: string }[]>();
 
 		for (const r of registrants) {
-			if (!r.clientEmail) continue;
+			if (!r.clientEmail || !r.clientId) continue;
 
-			// Check if this registrant needs a waiver
-			const needsWaiver = waiverUrl && (!r.waiverExpiresAt || new Date(r.waiverExpiresAt) <= new Date());
+			let waiverUrls: { label: string; url: string }[] | undefined;
+
+			if (r.requiredWaivers?.length) {
+				const missing = await getMissingWaivers(r.clientId, r.requiredWaivers);
+				if (missing.length > 0) {
+					const cacheKey = missing.sort().join(",");
+					if (!waiverUrlCache.has(cacheKey)) {
+						waiverUrlCache.set(cacheKey, await getWaiverUrlsForEvent(missing));
+					}
+					const urls = waiverUrlCache.get(cacheKey);
+					if (urls?.length) waiverUrls = urls;
+				}
+			}
 
 			sendEventReminderEmail({
 				to: r.clientEmail,
 				firstName: r.clientFirstName,
-				role: r.role,
 				eventTitle: r.eventTitle,
 				eventDate: r.eventDate,
 				eventTime: r.eventTime,
 				eventLocation: r.eventLocation,
-				waiverUrl: needsWaiver ? waiverUrl : undefined,
-			}).catch((err) => logger.error("cron", "Failed to send event reminder", { to: r.clientEmail, error: String(err) }));
+				waiverUrls,
+			}).catch((err) =>
+				logger.error("cron", "Failed to send 3-day event reminder", {
+					to: r.clientEmail,
+					error: String(err),
+				}),
+			);
 
-			results.eventReminders++;
+			results.event3DayReminders++;
 		}
 	} catch (err) {
-		logger.error("cron", "Event reminders failed", { error: String(err) });
+		logger.error("cron", "3-day event reminders failed", { error: String(err) });
 	}
 
-	// --- 3. Day-Of Event Reminder (morning of) ---
+	// --- 3. Event Reminders (1 day out) ---
 	try {
-		const todayRegistrants = await getUpcomingEventsWithRegistrants(0);
-		const dayOfWaiverUrl = await getSetting("smartwaiver_waiver_url");
+		const registrants = await getUpcomingEventsWithRegistrants(1);
 
-		for (const r of todayRegistrants) {
-			if (!r.clientEmail) continue;
+		const waiverUrlCache = new Map<string, { label: string; url: string }[]>();
 
-			const needsWaiver = dayOfWaiverUrl && (!r.waiverExpiresAt || new Date(r.waiverExpiresAt) <= new Date());
+		for (const r of registrants) {
+			if (!r.clientEmail || !r.clientId) continue;
 
-			sendEventDayOfReminderEmail({
+			let waiverUrls: { label: string; url: string }[] | undefined;
+
+			if (r.requiredWaivers?.length) {
+				const missing = await getMissingWaivers(r.clientId, r.requiredWaivers);
+				if (missing.length > 0) {
+					const cacheKey = missing.sort().join(",");
+					if (!waiverUrlCache.has(cacheKey)) {
+						waiverUrlCache.set(cacheKey, await getWaiverUrlsForEvent(missing));
+					}
+					const urls = waiverUrlCache.get(cacheKey);
+					if (urls?.length) waiverUrls = urls;
+				}
+			}
+
+			sendEventReminderEmail({
 				to: r.clientEmail,
 				firstName: r.clientFirstName,
-				role: r.role,
 				eventTitle: r.eventTitle,
 				eventDate: r.eventDate,
 				eventTime: r.eventTime,
 				eventLocation: r.eventLocation,
-				waiverUrl: needsWaiver ? dayOfWaiverUrl : undefined,
-			}).catch((err) => logger.error("cron", "Failed to send day-of reminder", { to: r.clientEmail, error: String(err) }));
+				waiverUrls,
+			}).catch((err) =>
+				logger.error("cron", "Failed to send 1-day event reminder", {
+					to: r.clientEmail,
+					error: String(err),
+				}),
+			);
 
-			results.eventDayOfReminders++;
+			results.event1DayReminders++;
 		}
 	} catch (err) {
-		logger.error("cron", "Day-of event reminders failed", { error: String(err) });
+		logger.error("cron", "1-day event reminders failed", { error: String(err) });
 	}
 
 	// --- 4. Membership Expiry (7 days after) ---
@@ -145,17 +179,19 @@ export async function GET(request: Request) {
 		for (const m of expired) {
 			if (!m.email || !m.expiresAt) continue;
 
-			await db
-				.update(memberships)
-				.set({ status: "expired" })
-				.where(eq(memberships.id, m.id));
+			await db.update(memberships).set({ status: "expired" }).where(eq(memberships.id, m.id));
 
 			sendMembershipExpiredEmail({
 				to: m.email,
 				firstName: m.firstName,
 				type: m.type as "annual" | "lifetime",
 				expiresAt: m.expiresAt,
-			}).catch((err) => logger.error("cron", "Failed to send membership expiry email", { to: m.email, error: String(err) }));
+			}).catch((err) =>
+				logger.error("cron", "Failed to send membership expiry email", {
+					to: m.email,
+					error: String(err),
+				}),
+			);
 
 			results.membershipExpiry++;
 		}
@@ -163,9 +199,9 @@ export async function GET(request: Request) {
 		logger.error("cron", "Membership expiry failed", { error: String(err) });
 	}
 
-	// --- 5. Post-Event Volunteer Thank You (yesterday's events) ---
+	// --- 5. Post-Event Volunteer Thank You (yesterday's volunteer events) ---
 	try {
-		const volunteers = await getYesterdayEventsWithVolunteers();
+		const volunteers = await getYesterdayVolunteerEventRegistrants();
 
 		for (const v of volunteers) {
 			if (!v.clientEmail) continue;
@@ -175,7 +211,12 @@ export async function GET(request: Request) {
 				firstName: v.clientFirstName,
 				eventTitle: v.eventTitle,
 				eventDate: v.eventDate,
-			}).catch((err) => logger.error("cron", "Failed to send post-event thanks", { to: v.clientEmail, error: String(err) }));
+			}).catch((err) =>
+				logger.error("cron", "Failed to send post-event thanks", {
+					to: v.clientEmail,
+					error: String(err),
+				}),
+			);
 
 			results.postEventThanks++;
 		}
@@ -183,21 +224,10 @@ export async function GET(request: Request) {
 		logger.error("cron", "Post-event thanks failed", { error: String(err) });
 	}
 
-	// --- 6. Waiver Expiry — clear expired waivers so clients must re-sign ---
+	// --- 6. Waiver Expiry — delete expired waiver records ---
 	try {
 		const now = new Date();
-
-		await db
-			.update(clients)
-			.set({ waiverSignedAt: null, waiverExpiresAt: null })
-			.where(
-				and(
-					isNotNull(clients.waiverSignedAt),
-					lt(clients.waiverExpiresAt, now),
-				),
-			);
-
-		// Drizzle doesn't return count from update, so we log the action
+		await db.delete(clientWaivers).where(lt(clientWaivers.expiresAt, now));
 		logger.info("cron", "Waiver expiry check completed");
 	} catch (err) {
 		logger.error("cron", "Waiver expiry failed", { error: String(err) });

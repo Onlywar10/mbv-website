@@ -1,6 +1,6 @@
 "use client";
 
-import { CalendarDays, Eye, EyeOff, Hand, MapPin, Pencil, Trash2, Users } from "lucide-react";
+import { CalendarDays, Eye, EyeOff, MapPin, Pencil, Trash2, Users } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { ReasonDialog } from "@/components/admin/reason-dialog";
@@ -21,20 +21,17 @@ type AdminEvent = {
 	imageUrl: string | null;
 	description: string | null;
 	participantCapacity: number;
-	volunteerCapacity: number;
 	isPublished: boolean;
 };
 
 interface AdminEventCardProps {
 	event: AdminEvent;
 	participantCount: number;
-	volunteerCount: number;
 	waitlistedCount: number;
 }
 
-export function AdminEventCard({ event, participantCount, volunteerCount, waitlistedCount }: AdminEventCardProps) {
+export function AdminEventCard({ event, participantCount, waitlistedCount }: AdminEventCardProps) {
 	const spotsLeft = Math.max(0, event.participantCapacity - participantCount);
-	const volunteersNeeded = Math.max(0, event.volunteerCapacity - volunteerCount);
 
 	return (
 		<Card className="flex h-full flex-col overflow-hidden rounded-sm bg-cream pt-0 ring-1 ring-border transition-shadow hover:shadow-sharp">
@@ -81,9 +78,7 @@ export function AdminEventCard({ event, participantCount, volunteerCount, waitli
 						</span>
 						<span>
 							{participantCount} / {event.participantCapacity}
-							{spotsLeft > 0 && (
-								<span className="ml-1 text-green-700">({spotsLeft} left)</span>
-							)}
+							{spotsLeft > 0 && <span className="ml-1 text-green-700">({spotsLeft} left)</span>}
 							{spotsLeft === 0 && event.participantCapacity > 0 && (
 								<span className="ml-1 font-medium text-rust">(Full)</span>
 							)}
@@ -98,35 +93,6 @@ export function AdminEventCard({ event, participantCount, volunteerCount, waitli
 						/>
 					</div>
 				</div>
-
-				{/* Volunteer capacity */}
-				{event.volunteerCapacity > 0 && (
-					<div>
-						<div className="flex items-center justify-between text-xs text-muted-foreground">
-							<span className="flex items-center gap-1">
-								<Hand className="h-3 w-3" />
-								Volunteers
-							</span>
-							<span>
-								{volunteerCount} / {event.volunteerCapacity}
-								{volunteersNeeded > 0 && (
-									<span className="ml-1 font-medium text-amber-700">({volunteersNeeded} needed)</span>
-								)}
-								{volunteersNeeded === 0 && (
-									<span className="ml-1 text-green-700">(Filled)</span>
-								)}
-							</span>
-						</div>
-						<div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-muted">
-							<div
-								className="h-full rounded-full bg-amber-500 transition-all"
-								style={{
-									width: `${Math.min(100, event.volunteerCapacity > 0 ? (volunteerCount / event.volunteerCapacity) * 100 : 0)}%`,
-								}}
-							/>
-						</div>
-					</div>
-				)}
 
 				{waitlistedCount > 0 && (
 					<Badge variant="secondary" className="w-fit border-ochre/20 bg-ochre/10 text-ochre">
@@ -160,14 +126,15 @@ export function AdminEventCard({ event, participantCount, volunteerCount, waitli
 					</Button>
 				</form>
 				{(() => {
-					const isDeactivated = !event.isPublished && event.date < new Date().toISOString().split("T")[0];
+					const isDeactivated =
+						!event.isPublished && event.date < new Date().toISOString().split("T")[0];
 					return (
 						<ReasonDialog
 							title={isDeactivated ? "Delete Event" : "Cancel Event"}
 							description={
 								isDeactivated
 									? `"${event.title}" will be permanently deleted. No emails will be sent.`
-									: `"${event.title}" will be deleted and all registered participants and volunteers will be notified by email.`
+									: `"${event.title}" will be deleted and all registered participants will be notified by email.`
 							}
 							confirmLabel={isDeactivated ? "Delete Event" : "Cancel Event"}
 							pendingLabel={isDeactivated ? "Deleting..." : "Cancelling..."}

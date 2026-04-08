@@ -13,8 +13,10 @@ export function MissionBar() {
 						Free fishing, whale watching, and community events for{" "}
 						<span className="font-bold text-ochre">disabled veterans</span>
 						<span className="hidden sm:inline">
-							{" "}in the Monterey Bay area — plus ADA shuttle services
-						</span>.
+							{" "}
+							in the Monterey Bay area — plus ADA shuttle services
+						</span>
+						.
 					</p>
 				</ScrollReveal>
 			</div>

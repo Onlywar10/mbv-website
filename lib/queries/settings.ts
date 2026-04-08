@@ -48,8 +48,29 @@ export async function getNotificationSettings() {
 }
 
 export async function getSmartWaiverSettings() {
-	const waiverUrl = await getSetting("smartwaiver_waiver_url");
-	return { waiverUrl };
+	const [volunteeringUrl, boatingUrl] = await Promise.all([
+		getSetting("smartwaiver_volunteering_url"),
+		getSetting("smartwaiver_boating_url"),
+	]);
+	return { volunteeringUrl, boatingUrl };
+}
+
+const waiverLabels: Record<string, string> = {
+	volunteering: "Volunteering Waiver",
+	boating: "Boating Waiver",
+};
+
+export async function getWaiverUrlsForEvent(
+	requiredWaivers: string[],
+): Promise<{ label: string; url: string }[]> {
+	const results: { label: string; url: string }[] = [];
+	for (const key of requiredWaivers) {
+		const url = await getSetting(`smartwaiver_${key}_url`);
+		if (url) {
+			results.push({ label: waiverLabels[key] ?? key, url });
+		}
+	}
+	return results;
 }
 
 export async function getGivebutterCampaignCodes() {

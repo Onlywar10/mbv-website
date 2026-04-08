@@ -83,7 +83,7 @@ function EventCard({ event, index }: { event: PublicEvent; index: number }) {
 					</div>
 				</CardContent>
 
-				<CardFooter className="flex-col gap-2">
+				<CardFooter>
 					<Link
 						href={`/events/${event.slug}`}
 						className={cn(
@@ -92,12 +92,6 @@ function EventCard({ event, index }: { event: PublicEvent; index: number }) {
 						)}
 					>
 						View Details
-					</Link>
-					<Link
-						href="/support#volunteer-form"
-						className="text-xs text-muted-foreground transition-colors hover:text-rust"
-					>
-						Interested in volunteering? Click here
 					</Link>
 				</CardFooter>
 			</Card>

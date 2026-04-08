@@ -11,9 +11,7 @@ interface DonationThankYouParams {
 	amount: string;
 }
 
-export async function sendDonationThankYouEmail(
-	params: DonationThankYouParams,
-): Promise<void> {
+export async function sendDonationThankYouEmail(params: DonationThankYouParams): Promise<void> {
 	const body = `
 		<p>Hi ${params.firstName},</p>
 		<p>Thank you for your generous donation of <strong>$${Number(params.amount).toLocaleString()}</strong> to Monterey Bay Veterans!</p>
@@ -25,8 +23,7 @@ export async function sendDonationThankYouEmail(
 		subject: "Thank You for Your Donation — Monterey Bay Veterans",
 		html: emailLayout({
 			body,
-			disclaimer:
-				"You received this email because you made a donation to Monterey Bay Veterans.",
+			disclaimer: "You received this email because you made a donation to Monterey Bay Veterans.",
 		}),
 	});
 }

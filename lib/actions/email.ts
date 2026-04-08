@@ -105,17 +105,17 @@ export async function notifyRegistrationStatusChange(
 	status: "registered" | "cancelled",
 	reason?: string,
 ) {
-	// Fetch primary registrant + event details + waiver status
+	// Fetch primary registrant + event details
 	const result = await db
 		.select({
+			clientId: eventRegistrations.clientId,
 			clientEmail: clients.email,
 			clientFirstName: clients.firstName,
-			waiverExpiresAt: clients.waiverExpiresAt,
-			role: eventRegistrations.role,
 			eventTitle: events.title,
 			eventDate: events.date,
 			eventTime: events.time,
 			eventLocation: events.location,
+			requiredWaivers: events.requiredWaivers,
 		})
 		.from(eventRegistrations)
 		.innerJoin(clients, eq(eventRegistrations.clientId, clients.id))
@@ -127,27 +127,27 @@ export async function notifyRegistrationStatusChange(
 
 	const r = result[0];
 
-	// Include waiver link in approval emails if client hasn't signed a valid waiver
-	let waiverUrl: string | undefined;
-	if (status === "registered") {
-		const needsWaiver = !r.waiverExpiresAt || new Date(r.waiverExpiresAt) <= new Date();
-		if (needsWaiver) {
-			const { getSetting } = await import("@/lib/queries/settings");
-			waiverUrl = (await getSetting("smartwaiver_waiver_url")) ?? undefined;
+	// Check which waivers the client is missing for this event
+	let waiverUrls: { label: string; url: string }[] = [];
+	if (status === "registered" && r.requiredWaivers?.length) {
+		const { getMissingWaivers } = await import("@/lib/queries/waivers");
+		const { getWaiverUrlsForEvent } = await import("@/lib/queries/settings");
+		const missing = await getMissingWaivers(r.clientId, r.requiredWaivers);
+		if (missing.length > 0) {
+			waiverUrls = await getWaiverUrlsForEvent(missing);
 		}
 	}
 
 	sendStatusUpdateEmail({
 		to: r.clientEmail,
 		firstName: r.clientFirstName,
-		role: r.role,
 		status,
 		eventTitle: r.eventTitle,
 		eventDate: r.eventDate,
 		eventTime: r.eventTime,
 		eventLocation: r.eventLocation,
 		reason,
-		waiverUrl,
+		waiverUrls: waiverUrls.length > 0 ? waiverUrls : undefined,
 	}).catch((err) =>
 		logger.error("email", "Failed to send status update email", {
 			to: r.clientEmail,
@@ -159,10 +159,9 @@ export async function notifyRegistrationStatusChange(
 	// Notify guests registered by this person
 	const guests = await db
 		.select({
+			clientId: eventRegistrations.clientId,
 			clientEmail: clients.email,
 			clientFirstName: clients.firstName,
-			waiverExpiresAt: clients.waiverExpiresAt,
-			role: eventRegistrations.role,
 		})
 		.from(eventRegistrations)
 		.innerJoin(clients, eq(eventRegistrations.clientId, clients.id))
@@ -170,25 +169,26 @@ export async function notifyRegistrationStatusChange(
 
 	for (const guest of guests) {
 		if (guest.clientEmail) {
-			let guestWaiverUrl: string | undefined;
-			if (status === "registered") {
-				const needsWaiver = !guest.waiverExpiresAt || new Date(guest.waiverExpiresAt) <= new Date();
-				if (needsWaiver) {
-					guestWaiverUrl = waiverUrl; // reuse already-fetched URL
+			let guestWaiverUrls: { label: string; url: string }[] | undefined;
+			if (status === "registered" && r.requiredWaivers?.length) {
+				const { getMissingWaivers } = await import("@/lib/queries/waivers");
+				const { getWaiverUrlsForEvent } = await import("@/lib/queries/settings");
+				const missing = await getMissingWaivers(guest.clientId, r.requiredWaivers);
+				if (missing.length > 0) {
+					guestWaiverUrls = await getWaiverUrlsForEvent(missing);
 				}
 			}
 
 			sendStatusUpdateEmail({
 				to: guest.clientEmail,
 				firstName: guest.clientFirstName,
-				role: guest.role,
 				status,
 				eventTitle: r.eventTitle,
 				eventDate: r.eventDate,
 				eventTime: r.eventTime,
 				eventLocation: r.eventLocation,
 				reason,
-				waiverUrl: guestWaiverUrl,
+				waiverUrls: guestWaiverUrls,
 			}).catch((err) =>
 				logger.error("email", "Failed to send guest status update email", {
 					to: guest.clientEmail,
@@ -263,6 +263,7 @@ export async function sendVolunteerRecruitmentAction(
 	const eventResult = await db
 		.select({
 			title: events.title,
+			slug: events.slug,
 			date: events.date,
 			time: events.time,
 			location: events.location,
@@ -299,7 +300,7 @@ export async function sendVolunteerRecruitmentAction(
 				eventTime: event.time,
 				eventLocation: event.location,
 				personalMessage,
-				volunteerUrl: `${getBaseUrl()}/support#volunteer-form`,
+				volunteerUrl: `${getBaseUrl()}/events/${event.slug}`,
 			});
 			sent++;
 		} catch (err) {

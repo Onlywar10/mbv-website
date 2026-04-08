@@ -23,9 +23,7 @@ interface DailyReportParams {
 	baseUrl: string;
 }
 
-export async function sendDailyRegistrationReport(
-	params: DailyReportParams,
-): Promise<void> {
+export async function sendDailyRegistrationReport(params: DailyReportParams): Promise<void> {
 	const yesterday = new Intl.DateTimeFormat("en-US", {
 		timeZone: "America/Los_Angeles",
 		weekday: "long",
@@ -34,10 +32,7 @@ export async function sendDailyRegistrationReport(
 		day: "numeric",
 	}).format(new Date(Date.now() - 24 * 60 * 60 * 1000));
 
-	const totalRegistrations = params.events.reduce(
-		(sum, e) => sum + e.registrations.length,
-		0,
-	);
+	const totalRegistrations = params.events.reduce((sum, e) => sum + e.registrations.length, 0);
 
 	const eventSections = params.events
 		.map(

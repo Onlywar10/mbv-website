@@ -14,7 +14,6 @@ type Event = {
 	imageUrl: string | null;
 	description: string | null;
 	participantCapacity: number;
-	volunteerCapacity: number;
 	isPublished: boolean;
 };
 
@@ -24,7 +23,11 @@ interface EventFilterBarProps {
 	waitlistedCounts: Record<string, number>;
 }
 
-export function EventFilterBar({ events, registrationCounts, waitlistedCounts }: EventFilterBarProps) {
+export function EventFilterBar({
+	events,
+	registrationCounts,
+	waitlistedCounts,
+}: EventFilterBarProps) {
 	const [filter, setFilter] = useState("all");
 
 	const today = new Date().toISOString().split("T")[0];
@@ -76,8 +79,11 @@ export function EventFilterBar({ events, registrationCounts, waitlistedCounts }:
 						<AdminEventCard
 							key={event.id}
 							event={event}
-							participantCount={registrationCounts[event.id]?.participants ?? 0}
-							volunteerCount={registrationCounts[event.id]?.volunteers ?? 0}
+							participantCount={
+								event.category === "volunteer"
+									? (registrationCounts[event.id]?.volunteers ?? 0)
+									: (registrationCounts[event.id]?.participants ?? 0)
+							}
 							waitlistedCount={waitlistedCounts[event.id] ?? 0}
 						/>
 					))}

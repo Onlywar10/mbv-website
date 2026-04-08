@@ -39,8 +39,7 @@ export function ClientsTable({ clients }: ClientsTableProps) {
 			)
 		: clients;
 
-	const allFilteredSelected =
-		filtered.length > 0 && filtered.every((c) => selected.has(c.id));
+	const allFilteredSelected = filtered.length > 0 && filtered.every((c) => selected.has(c.id));
 
 	function toggleAll() {
 		if (allFilteredSelected) {
@@ -208,14 +207,18 @@ export function ClientsTable({ clients }: ClientsTableProps) {
 									<td className="px-4 py-3">
 										<span
 											className={`inline-flex rounded-sm px-2 py-0.5 text-xs font-medium ${
-												client.waiverSignedAt && client.waiverExpiresAt && new Date(client.waiverExpiresAt) > new Date()
+												client.waiverSignedAt &&
+												client.waiverExpiresAt &&
+												new Date(client.waiverExpiresAt) > new Date()
 													? "bg-sage/10 text-sage"
 													: client.waiverSignedAt && client.waiverExpiresAt
 														? "bg-rust/10 text-rust"
 														: "bg-ochre/10 text-ochre"
 											}`}
 										>
-											{client.waiverSignedAt && client.waiverExpiresAt && new Date(client.waiverExpiresAt) > new Date()
+											{client.waiverSignedAt &&
+											client.waiverExpiresAt &&
+											new Date(client.waiverExpiresAt) > new Date()
 												? "Signed"
 												: client.waiverSignedAt && client.waiverExpiresAt
 													? "Expired"

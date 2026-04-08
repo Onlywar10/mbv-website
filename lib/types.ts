@@ -16,10 +16,6 @@ export type PublicEvent = {
 	imageUrl: string | null;
 	accessibility: string | null;
 	participantCapacity: number;
-	volunteerCapacity: number;
-	volunteerEnabled: boolean;
-	volunteerDescription: string | null;
-	volunteerTime: string | null;
-	volunteerNotes: string | null;
+	requiredWaivers: string[];
 	spotsLeft: number;
 };

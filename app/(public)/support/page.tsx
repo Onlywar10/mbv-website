@@ -2,7 +2,6 @@ import { ArrowRight, Check, Crown, HandCoins, Sparkles } from "lucide-react";
 import Link from "next/link";
 import Script from "next/script";
 import { PageHero } from "@/components/layout/page-hero";
-import { VolunteerForm } from "@/components/sections/volunteer-form";
 import { ScrollReveal } from "@/components/shared/scroll-reveal";
 import { SectionHeading } from "@/components/shared/section-heading";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -27,7 +26,7 @@ export default function SupportPage() {
 			{/* --- 1. Page Hero ------------------------------- */}
 			<PageHero
 				title="Support Our Veterans"
-				subtitle="Donate, become a member, or volunteer your time to serve disabled veterans"
+				subtitle="Donate or become a member to serve disabled veterans"
 				image="/images/support/support-image.jpg"
 				imagePosition="center 60%"
 			/>
@@ -66,8 +65,7 @@ export default function SupportPage() {
 
 					<ScrollReveal delay={0.3}>
 						<p className="mt-6 text-center text-xs text-muted-foreground">
-							All donations are tax-deductible. MBV is a registered 501(c)(3) veterans
-							organization.
+							All donations are tax-deductible. MBV is a registered 501(c)(3) veterans organization.
 						</p>
 					</ScrollReveal>
 				</div>
@@ -180,10 +178,7 @@ export default function SupportPage() {
 				</div>
 			</section>
 
-			{/* --- 4. Volunteer ------------------------------- */}
-			<VolunteerForm />
-
-			{/* --- 5. Bottom CTA ------------------------------ */}
+			{/* --- 4. Bottom CTA ------------------------------ */}
 			<section className="section-gradient py-20">
 				<div className="mx-auto max-w-3xl px-6 text-center">
 					<ScrollReveal>

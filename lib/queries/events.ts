@@ -1,5 +1,6 @@
-import { and, asc, count, desc, eq, lt, sql } from "drizzle-orm";
+import { and, asc, count, desc, eq, inArray, lt, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
+import { clientWaivers } from "@/lib/db/schema/client-waivers";
 import { clients } from "@/lib/db/schema/clients";
 import { eventRegistrations } from "@/lib/db/schema/event-registrations";
 import { eventTemplates } from "@/lib/db/schema/event-templates";
@@ -17,22 +18,11 @@ export async function getEvents() {
 	return db
 		.select()
 		.from(events)
-		.orderBy(
-			sql`CASE WHEN ${events.date} >= ${today} THEN 0 ELSE 1 END`,
-			asc(events.date),
-		);
+		.orderBy(sql`CASE WHEN ${events.date} >= ${today} THEN 0 ELSE 1 END`, asc(events.date));
 }
 
 export async function getPublishedEvents() {
 	return db.select().from(events).where(eq(events.isPublished, true)).orderBy(asc(events.date));
-}
-
-export async function getVolunteerEvents() {
-	return db
-		.select()
-		.from(events)
-		.where(and(eq(events.isPublished, true), eq(events.volunteerEnabled, true)))
-		.orderBy(asc(events.date));
 }
 
 export async function getEventById(id: string) {
@@ -55,7 +45,7 @@ export async function getEventTemplateById(id: string) {
 }
 
 export async function getEventRegistrations(eventId: string) {
-	return db
+	const rows = await db
 		.select({
 			id: eventRegistrations.id,
 			clientId: clients.id,
@@ -67,13 +57,47 @@ export async function getEventRegistrations(eventId: string) {
 			registeredBy: eventRegistrations.registeredBy,
 			registeredAt: eventRegistrations.registeredAt,
 			notes: eventRegistrations.notes,
-			waiverSignedAt: clients.waiverSignedAt,
-			waiverExpiresAt: clients.waiverExpiresAt,
 		})
 		.from(eventRegistrations)
 		.innerJoin(clients, eq(eventRegistrations.clientId, clients.id))
 		.where(eq(eventRegistrations.eventId, eventId))
 		.orderBy(desc(eventRegistrations.registeredAt));
+
+	// Look up waiver status for all clients in this event
+	const clientIds = [...new Set(rows.map((r) => r.clientId))];
+	const waiverRows =
+		clientIds.length > 0
+			? await db
+					.select({
+						clientId: clientWaivers.clientId,
+						waiverType: clientWaivers.waiverType,
+						signedAt: clientWaivers.signedAt,
+						expiresAt: clientWaivers.expiresAt,
+					})
+					.from(clientWaivers)
+					.where(inArray(clientWaivers.clientId, clientIds))
+			: [];
+
+	const waiverMap = new Map<string, { signedAt: Date; expiresAt: Date }[]>();
+	for (const w of waiverRows) {
+		if (!waiverMap.has(w.clientId)) waiverMap.set(w.clientId, []);
+		waiverMap.get(w.clientId)?.push({ signedAt: w.signedAt, expiresAt: w.expiresAt });
+	}
+
+	return rows.map((r) => {
+		const waivers = waiverMap.get(r.clientId) ?? [];
+		// Derive a simple signed/expired status from the most recent waiver
+		const validWaiver = waivers.find((w) => new Date(w.expiresAt) > new Date());
+		const expiredWaiver = !validWaiver
+			? waivers.find((w) => new Date(w.expiresAt) <= new Date())
+			: null;
+
+		return {
+			...r,
+			waiverSignedAt: validWaiver?.signedAt ?? expiredWaiver?.signedAt ?? null,
+			waiverExpiresAt: validWaiver?.expiresAt ?? expiredWaiver?.expiresAt ?? null,
+		};
+	});
 }
 
 export async function getRegistrationCount(eventId: string) {

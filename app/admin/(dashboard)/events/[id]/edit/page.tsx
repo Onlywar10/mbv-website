@@ -50,11 +50,7 @@ export default async function EditEventPage({ params }: PageProps) {
 						imageUrl: event.imageUrl ?? "",
 						accessibility: event.accessibility ?? "",
 						participantCapacity: event.participantCapacity,
-						volunteerCapacity: event.volunteerCapacity,
-						volunteerEnabled: event.volunteerEnabled,
-						volunteerDescription: event.volunteerDescription ?? "",
-						volunteerTime: event.volunteerTime ?? "",
-						volunteerNotes: event.volunteerNotes ?? "",
+						requiredWaivers: event.requiredWaivers ?? [],
 						isPublished: event.isPublished,
 					}}
 					submitLabel="Save Changes"

@@ -14,9 +14,7 @@ interface MailingListParams {
 	attachments?: { filename: string; path: string }[];
 }
 
-export async function sendMailingListEmail(
-	params: MailingListParams,
-): Promise<void> {
+export async function sendMailingListEmail(params: MailingListParams): Promise<void> {
 	const unsubscribeUrl = buildUnsubscribeUrl(params.to);
 
 	const content = `

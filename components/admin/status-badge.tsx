@@ -1,11 +1,11 @@
 import { Badge } from "@/components/ui/badge";
 
 const categoryColors: Record<string, string> = {
-	fishing: "bg-rust/10 text-rust border-rust/20",
-	"whale-watching": "bg-ink/10 text-ink border-ink/20",
-	volunteer: "bg-ochre/10 text-ochre border-ochre/20",
-	community: "bg-sage/10 text-sage border-sage/20",
-	derby: "bg-ink/10 text-ink border-ink/20",
+	fishing: "bg-rust text-cream border-rust",
+	"whale-watching": "bg-ink text-cream border-ink",
+	volunteer: "bg-ochre text-ink border-ochre",
+	community: "bg-sage text-cream border-sage",
+	derby: "bg-ink text-cream border-ink",
 };
 
 const roleColors: Record<string, string> = {
@@ -28,9 +28,7 @@ export function PublishBadge({ isPublished }: { isPublished: boolean }) {
 		<Badge
 			variant="outline"
 			className={
-				isPublished
-					? "bg-sage/10 text-sage border-sage/20"
-					: "bg-mid-gray/10 text-muted-foreground border-mid-gray/30"
+				isPublished ? "bg-sage text-cream border-sage" : "bg-mid-gray text-cream border-mid-gray"
 			}
 		>
 			{isPublished ? "Published" : "Draft"}
@@ -61,7 +59,13 @@ export function RegistrationStatusBadge({ status }: { status: string }) {
 	);
 }
 
-export function WaiverBadge({ signedAt, expiresAt }: { signedAt: Date | null; expiresAt: Date | null }) {
+export function WaiverBadge({
+	signedAt,
+	expiresAt,
+}: {
+	signedAt: Date | null;
+	expiresAt: Date | null;
+}) {
 	if (signedAt && expiresAt && new Date(expiresAt) > new Date()) {
 		return (
 			<Badge variant="outline" className="bg-sage/10 text-sage border-sage/20">

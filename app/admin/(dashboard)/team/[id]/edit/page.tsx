@@ -33,7 +33,9 @@ export default async function EditTeamMemberPage({ params }: PageProps) {
 				Back to Team
 			</Link>
 
-			<h1 className="font-heading text-2xl uppercase tracking-tight text-primary">Edit Team Member</h1>
+			<h1 className="font-heading text-2xl uppercase tracking-tight text-primary">
+				Edit Team Member
+			</h1>
 			<p className="mt-1 text-sm text-muted-foreground">{member.name}</p>
 
 			<div className="mt-6 max-w-xl rounded-sm bg-cream p-6 ring-1 ring-border shadow-sharp">

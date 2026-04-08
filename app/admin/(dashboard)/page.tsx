@@ -3,7 +3,6 @@ import {
 	CalendarCheck,
 	Clock,
 	DollarSign,
-	Hand,
 	MapPin,
 	UserCheck,
 	UserPlus,
@@ -57,30 +56,14 @@ export default async function DashboardPage() {
 
 	return (
 		<div>
-			<h1 className="font-heading text-2xl uppercase tracking-tight text-primary">
-				Dashboard
-			</h1>
-			<p className="mt-1 text-sm text-muted-foreground">
-				Overview of Monterey Bay Veterans
-			</p>
+			<h1 className="font-heading text-2xl uppercase tracking-tight text-primary">Dashboard</h1>
+			<p className="mt-1 text-sm text-muted-foreground">Overview of Monterey Bay Veterans</p>
 
 			{/* Stats Grid */}
 			<div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-				<StatCard
-					label="Pending Applications"
-					value={stats.pendingApplications}
-					icon={UserPlus}
-				/>
-				<StatCard
-					label="Active Members"
-					value={stats.activeMembers}
-					icon={UserCheck}
-				/>
-				<StatCard
-					label="Total Clients"
-					value={stats.totalClients}
-					icon={Users}
-				/>
+				<StatCard label="Pending Applications" value={stats.pendingApplications} icon={UserPlus} />
+				<StatCard label="Active Members" value={stats.activeMembers} icon={UserCheck} />
+				<StatCard label="Total Clients" value={stats.totalClients} icon={Users} />
 				<StatCard
 					label="Total Donations"
 					value={`$${Number(stats.totalDonations).toLocaleString()}`}
@@ -95,18 +78,13 @@ export default async function DashboardPage() {
 						<h2 className="font-heading text-lg uppercase tracking-tight text-primary">
 							Upcoming Events
 						</h2>
-						<Link
-							href="/admin/events"
-							className="text-sm font-medium text-rust hover:underline"
-						>
+						<Link href="/admin/events" className="text-sm font-medium text-rust hover:underline">
 							View all
 						</Link>
 					</div>
 
 					{upcomingEvents.length === 0 ? (
-						<p className="mt-4 text-sm text-muted-foreground">
-							No upcoming events scheduled.
-						</p>
+						<p className="mt-4 text-sm text-muted-foreground">No upcoming events scheduled.</p>
 					) : (
 						<div className="mt-4 space-y-4">
 							{upcomingEvents.map((event) => (
@@ -118,9 +96,7 @@ export default async function DashboardPage() {
 									<div className="flex items-start justify-between gap-3">
 										<div className="min-w-0 flex-1">
 											<div className="flex items-center gap-2">
-												<h3 className="truncate font-semibold text-primary">
-													{event.title}
-												</h3>
+												<h3 className="truncate font-semibold text-primary">{event.title}</h3>
 												<span
 													className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${categoryColors[event.category] ?? "bg-gray-100 text-gray-800"}`}
 												>
@@ -148,70 +124,31 @@ export default async function DashboardPage() {
 										</div>
 									</div>
 
-									{/* Capacity bars */}
-									<div className="mt-3 space-y-2">
-										<div>
-											<div className="flex items-center justify-between text-xs text-muted-foreground">
-												<span className="flex items-center gap-1">
-													<Users className="h-3 w-3" />
-													Participants
-												</span>
-												<span>
-													{event.participantCount} / {event.participantCapacity}
-													{event.spotsLeft > 0 && (
-														<span className="ml-1 text-green-700">
-															({event.spotsLeft} left)
-														</span>
-													)}
-													{event.spotsLeft === 0 && (
-														<span className="ml-1 font-medium text-rust">
-															(Full)
-														</span>
-													)}
-												</span>
-											</div>
-											<div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-muted">
-												<div
-													className={`h-full rounded-full transition-all ${event.spotsLeft === 0 ? "bg-rust" : "bg-primary"}`}
-													style={{
-														width: `${Math.min(100, event.participantCapacity > 0 ? (event.participantCount / event.participantCapacity) * 100 : 0)}%`,
-													}}
-												/>
-											</div>
+									{/* Capacity bar */}
+									<div className="mt-3">
+										<div className="flex items-center justify-between text-xs text-muted-foreground">
+											<span className="flex items-center gap-1">
+												<Users className="h-3 w-3" />
+												Participants
+											</span>
+											<span>
+												{event.participantCount} / {event.participantCapacity}
+												{event.spotsLeft > 0 && (
+													<span className="ml-1 text-green-700">({event.spotsLeft} left)</span>
+												)}
+												{event.spotsLeft === 0 && (
+													<span className="ml-1 font-medium text-rust">(Full)</span>
+												)}
+											</span>
 										</div>
-
-										{event.volunteerEnabled && (
-											<div>
-												<div className="flex items-center justify-between text-xs text-muted-foreground">
-													<span className="flex items-center gap-1">
-														<Hand className="h-3 w-3" />
-														Volunteers
-													</span>
-													<span>
-														{event.volunteerCount} / {event.volunteerCapacity}
-														{event.volunteersNeeded > 0 && (
-															<span className="ml-1 font-medium text-amber-700">
-																({event.volunteersNeeded} needed)
-															</span>
-														)}
-														{event.volunteersNeeded === 0 &&
-															event.volunteerCapacity > 0 && (
-																<span className="ml-1 text-green-700">
-																	(Filled)
-																</span>
-															)}
-													</span>
-												</div>
-												<div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-muted">
-													<div
-														className="h-full rounded-full bg-amber-500 transition-all"
-														style={{
-															width: `${Math.min(100, event.volunteerCapacity > 0 ? (event.volunteerCount / event.volunteerCapacity) * 100 : 0)}%`,
-														}}
-													/>
-												</div>
-											</div>
-										)}
+										<div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-muted">
+											<div
+												className={`h-full rounded-full transition-all ${event.spotsLeft === 0 ? "bg-rust" : "bg-primary"}`}
+												style={{
+													width: `${Math.min(100, event.participantCapacity > 0 ? (event.participantCount / event.participantCapacity) * 100 : 0)}%`,
+												}}
+											/>
+										</div>
 									</div>
 								</Link>
 							))}
@@ -225,18 +162,13 @@ export default async function DashboardPage() {
 						<h2 className="font-heading text-lg uppercase tracking-tight text-primary">
 							Recent Registrations
 						</h2>
-						<Link
-							href="/admin/clients"
-							className="text-sm font-medium text-rust hover:underline"
-						>
+						<Link href="/admin/clients" className="text-sm font-medium text-rust hover:underline">
 							View all
 						</Link>
 					</div>
 
 					{recentRegistrations.length === 0 ? (
-						<p className="mt-4 text-sm text-muted-foreground">
-							No registrations yet.
-						</p>
+						<p className="mt-4 text-sm text-muted-foreground">No registrations yet.</p>
 					) : (
 						<div className="mt-4 divide-y divide-border">
 							{recentRegistrations.map((reg) => (
@@ -248,9 +180,7 @@ export default async function DashboardPage() {
 										<p className="truncate font-medium text-primary">
 											{reg.firstName} {reg.lastName}
 										</p>
-										<p className="truncate text-sm text-muted-foreground">
-											{reg.eventTitle}
-										</p>
+										<p className="truncate text-sm text-muted-foreground">{reg.eventTitle}</p>
 									</div>
 									<div className="flex shrink-0 flex-col items-end gap-1">
 										<div className="flex items-center gap-1.5">
@@ -290,21 +220,9 @@ export default async function DashboardPage() {
 
 			{/* Quick Stats Row */}
 			<div className="mt-6 grid gap-4 sm:grid-cols-3">
-				<StatCard
-					label="Total Events"
-					value={stats.totalEvents}
-					icon={Calendar}
-				/>
-				<StatCard
-					label="Upcoming Events"
-					value={stats.upcomingEvents}
-					icon={CalendarCheck}
-				/>
-				<StatCard
-					label="Total Registrations"
-					value={stats.totalRegistrations}
-					icon={Users}
-				/>
+				<StatCard label="Total Events" value={stats.totalEvents} icon={Calendar} />
+				<StatCard label="Upcoming Events" value={stats.upcomingEvents} icon={CalendarCheck} />
+				<StatCard label="Total Registrations" value={stats.totalRegistrations} icon={Users} />
 			</div>
 		</div>
 	);

@@ -77,9 +77,7 @@ export function LogsTable({ logs }: LogsTableProps) {
 								<span className="shrink-0 font-mono text-xs text-muted-foreground">
 									{log.source}
 								</span>
-								<span className="min-w-0 flex-1 truncate text-primary">
-									{log.message}
-								</span>
+								<span className="min-w-0 flex-1 truncate text-primary">{log.message}</span>
 							</button>
 
 							{expandedId === log.id && log.metadata && (

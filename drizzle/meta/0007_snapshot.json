@@ -60,12 +60,8 @@
 					"name": "client_event_history_client_id_clients_id_fk",
 					"tableFrom": "client_event_history",
 					"tableTo": "clients",
-					"columnsFrom": [
-						"client_id"
-					],
-					"columnsTo": [
-						"id"
-					],
+					"columnsFrom": ["client_id"],
+					"columnsTo": ["id"],
 					"onDelete": "cascade",
 					"onUpdate": "no action"
 				}
@@ -114,12 +110,8 @@
 					"name": "client_roles_client_id_clients_id_fk",
 					"tableFrom": "client_roles",
 					"tableTo": "clients",
-					"columnsFrom": [
-						"client_id"
-					],
-					"columnsTo": [
-						"id"
-					],
+					"columnsFrom": ["client_id"],
+					"columnsTo": ["id"],
 					"onDelete": "cascade",
 					"onUpdate": "no action"
 				}
@@ -129,10 +121,7 @@
 				"client_roles_client_id_role_unique": {
 					"name": "client_roles_client_id_role_unique",
 					"nullsNotDistinct": false,
-					"columns": [
-						"client_id",
-						"role"
-					]
+					"columns": ["client_id", "role"]
 				}
 			},
 			"policies": {},
@@ -247,9 +236,7 @@
 				"clients_email_unique": {
 					"name": "clients_email_unique",
 					"nullsNotDistinct": false,
-					"columns": [
-						"email"
-					]
+					"columns": ["email"]
 				}
 			},
 			"policies": {},
@@ -318,12 +305,8 @@
 					"name": "donations_client_id_clients_id_fk",
 					"tableFrom": "donations",
 					"tableTo": "clients",
-					"columnsFrom": [
-						"client_id"
-					],
-					"columnsTo": [
-						"id"
-					],
+					"columnsFrom": ["client_id"],
+					"columnsTo": ["id"],
 					"onDelete": "set null",
 					"onUpdate": "no action"
 				}
@@ -399,12 +382,8 @@
 					"name": "event_registrations_event_id_events_id_fk",
 					"tableFrom": "event_registrations",
 					"tableTo": "events",
-					"columnsFrom": [
-						"event_id"
-					],
-					"columnsTo": [
-						"id"
-					],
+					"columnsFrom": ["event_id"],
+					"columnsTo": ["id"],
 					"onDelete": "cascade",
 					"onUpdate": "no action"
 				},
@@ -412,12 +391,8 @@
 					"name": "event_registrations_client_id_clients_id_fk",
 					"tableFrom": "event_registrations",
 					"tableTo": "clients",
-					"columnsFrom": [
-						"client_id"
-					],
-					"columnsTo": [
-						"id"
-					],
+					"columnsFrom": ["client_id"],
+					"columnsTo": ["id"],
 					"onDelete": "cascade",
 					"onUpdate": "no action"
 				}
@@ -427,11 +402,7 @@
 				"event_registrations_event_id_client_id_role_unique": {
 					"name": "event_registrations_event_id_client_id_role_unique",
 					"nullsNotDistinct": false,
-					"columns": [
-						"event_id",
-						"client_id",
-						"role"
-					]
+					"columns": ["event_id", "client_id", "role"]
 				}
 			},
 			"policies": {},
@@ -668,9 +639,7 @@
 				"events_slug_unique": {
 					"name": "events_slug_unique",
 					"nullsNotDistinct": false,
-					"columns": [
-						"slug"
-					]
+					"columns": ["slug"]
 				}
 			},
 			"policies": {},
@@ -767,12 +736,8 @@
 					"name": "sessions_user_id_users_id_fk",
 					"tableFrom": "sessions",
 					"tableTo": "users",
-					"columnsFrom": [
-						"user_id"
-					],
-					"columnsTo": [
-						"id"
-					],
+					"columnsFrom": ["user_id"],
+					"columnsTo": ["id"],
 					"onDelete": "cascade",
 					"onUpdate": "no action"
 				}
@@ -782,9 +747,7 @@
 				"sessions_token_hash_unique": {
 					"name": "sessions_token_hash_unique",
 					"nullsNotDistinct": false,
-					"columns": [
-						"token_hash"
-					]
+					"columns": ["token_hash"]
 				}
 			},
 			"policies": {},
@@ -856,9 +819,7 @@
 				"users_email_unique": {
 					"name": "users_email_unique",
 					"nullsNotDistinct": false,
-					"columns": [
-						"email"
-					]
+					"columns": ["email"]
 				}
 			},
 			"policies": {},
@@ -870,53 +831,27 @@
 		"public.client_role": {
 			"name": "client_role",
 			"schema": "public",
-			"values": [
-				"volunteer",
-				"participant",
-				"member",
-				"donor"
-			]
+			"values": ["volunteer", "participant", "member", "donor"]
 		},
 		"public.payment_method": {
 			"name": "payment_method",
 			"schema": "public",
-			"values": [
-				"venmo",
-				"paypal",
-				"check",
-				"cash",
-				"card",
-				"other"
-			]
+			"values": ["venmo", "paypal", "check", "cash", "card", "other"]
 		},
 		"public.registration_role": {
 			"name": "registration_role",
 			"schema": "public",
-			"values": [
-				"participant",
-				"volunteer"
-			]
+			"values": ["participant", "volunteer"]
 		},
 		"public.registration_status": {
 			"name": "registration_status",
 			"schema": "public",
-			"values": [
-				"registered",
-				"waitlisted",
-				"attended",
-				"cancelled"
-			]
+			"values": ["registered", "waitlisted", "attended", "cancelled"]
 		},
 		"public.event_category": {
 			"name": "event_category",
 			"schema": "public",
-			"values": [
-				"fishing",
-				"whale-watching",
-				"volunteer",
-				"community",
-				"derby"
-			]
+			"values": ["fishing", "whale-watching", "volunteer", "community", "derby"]
 		}
 	},
 	"schemas": {},

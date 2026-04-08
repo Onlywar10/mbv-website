@@ -1,12 +1,41 @@
-import { desc, eq, sql } from "drizzle-orm";
+import { desc, eq, gt, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { clientEventHistory } from "@/lib/db/schema/client-event-history";
 import { clientRoles } from "@/lib/db/schema/client-roles";
+import { clientWaivers } from "@/lib/db/schema/client-waivers";
 import { clients } from "@/lib/db/schema/clients";
 import { donations } from "@/lib/db/schema/donations";
 
 export async function getClients() {
-	return db.select().from(clients).orderBy(desc(clients.createdAt));
+	const rows = await db.select().from(clients).orderBy(desc(clients.createdAt));
+
+	// Batch-load waiver status for all clients
+	const now = new Date();
+	const allWaivers = await db
+		.select({
+			clientId: clientWaivers.clientId,
+			signedAt: clientWaivers.signedAt,
+			expiresAt: clientWaivers.expiresAt,
+		})
+		.from(clientWaivers);
+
+	const waiverMap = new Map<string, { signedAt: Date; expiresAt: Date }>();
+	for (const w of allWaivers) {
+		const existing = waiverMap.get(w.clientId);
+		// Keep the most relevant waiver: valid > expired, most recent
+		if (!existing || new Date(w.expiresAt) > new Date(existing.expiresAt)) {
+			waiverMap.set(w.clientId, { signedAt: w.signedAt, expiresAt: w.expiresAt });
+		}
+	}
+
+	return rows.map((c) => {
+		const waiver = waiverMap.get(c.id);
+		return {
+			...c,
+			waiverSignedAt: waiver?.signedAt ?? null,
+			waiverExpiresAt: waiver?.expiresAt ?? null,
+		};
+	});
 }
 
 export async function findClientByEmail(email: string) {
