@@ -31,7 +31,7 @@ export function CtaBanner() {
 					</p>
 					<div className="mt-6 flex flex-col items-center justify-center gap-3 sm:mt-10 sm:flex-row sm:gap-4">
 						<Link
-							href="/support"
+							href="/events?category=volunteer"
 							className={cn(
 								buttonVariants({ size: "lg" }),
 								"h-11 gap-2 rounded-sm bg-cream px-6 text-sm font-heading uppercase text-ink hover:bg-cream/90 sm:h-12 sm:px-8 sm:text-base",

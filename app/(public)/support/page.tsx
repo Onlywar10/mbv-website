@@ -14,7 +14,6 @@ export const metadata = {
 
 const membershipBenefits = [
 	"Support veteran programs year-round",
-	"Voting rights at annual meetings",
 	"Quarterly newsletter and updates",
 	"Invitation to member-only events",
 	"MBV member card and merchandise",

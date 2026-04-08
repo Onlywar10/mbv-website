@@ -14,7 +14,12 @@ export const metadata: Metadata = {
 		"Browse upcoming fishing trips, whale watching expeditions, and volunteer events. Contact Monterey Bay Veterans to get involved.",
 };
 
-export default async function EventsPage() {
+type PageProps = {
+	searchParams: Promise<{ category?: string }>;
+};
+
+export default async function EventsPage({ searchParams }: PageProps) {
+	const { category } = await searchParams;
 	const [rawEvents, registrationCounts] = await Promise.all([
 		getPublishedEvents(),
 		getRegistrationCountsByEvent(),
@@ -51,7 +56,7 @@ export default async function EventsPage() {
 					</ScrollReveal>
 
 					<ScrollReveal delay={0.15}>
-						<EventFilter events={events} />
+						<EventFilter events={events} defaultCategory={category} />
 					</ScrollReveal>
 				</div>
 			</section>

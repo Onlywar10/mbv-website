@@ -101,11 +101,17 @@ function EventCard({ event, index }: { event: PublicEvent; index: number }) {
 
 interface EventFilterProps {
 	events: PublicEvent[];
+	defaultCategory?: string;
 }
 
-export function EventFilter({ events }: EventFilterProps) {
+export function EventFilter({ events, defaultCategory }: EventFilterProps) {
+	const initial =
+		defaultCategory && categories.some((c) => c.value === defaultCategory)
+			? defaultCategory
+			: "all";
+
 	return (
-		<Tabs defaultValue="all" className="w-full">
+		<Tabs defaultValue={initial} className="w-full">
 			<TabsList
 				className="mx-auto mb-8 flex flex-wrap gap-1 bg-muted/80 p-1 h-auto"
 				aria-label="Filter events by category"
