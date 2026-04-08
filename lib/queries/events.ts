@@ -44,7 +44,7 @@ export async function getEventTemplateById(id: string) {
 	return result[0] ?? null;
 }
 
-export async function getEventRegistrations(eventId: string) {
+export async function getEventRegistrations(eventId: string, requiredWaivers: string[] = []) {
 	const rows = await db
 		.select({
 			id: eventRegistrations.id,
@@ -78,15 +78,21 @@ export async function getEventRegistrations(eventId: string) {
 					.where(inArray(clientWaivers.clientId, clientIds))
 			: [];
 
-	const waiverMap = new Map<string, { signedAt: Date; expiresAt: Date }[]>();
+	const waiverMap = new Map<string, { waiverType: string; signedAt: Date; expiresAt: Date }[]>();
 	for (const w of waiverRows) {
 		if (!waiverMap.has(w.clientId)) waiverMap.set(w.clientId, []);
-		waiverMap.get(w.clientId)?.push({ signedAt: w.signedAt, expiresAt: w.expiresAt });
+		waiverMap
+			.get(w.clientId)
+			?.push({ waiverType: w.waiverType, signedAt: w.signedAt, expiresAt: w.expiresAt });
 	}
 
 	return rows.map((r) => {
-		const waivers = waiverMap.get(r.clientId) ?? [];
-		// Derive a simple signed/expired status from the most recent waiver
+		const allWaivers = waiverMap.get(r.clientId) ?? [];
+		// Only consider waivers that match the event's required types
+		const waivers =
+			requiredWaivers.length > 0
+				? allWaivers.filter((w) => requiredWaivers.includes(w.waiverType))
+				: allWaivers;
 		const validWaiver = waivers.find((w) => new Date(w.expiresAt) > new Date());
 		const expiredWaiver = !validWaiver
 			? waivers.find((w) => new Date(w.expiresAt) <= new Date())

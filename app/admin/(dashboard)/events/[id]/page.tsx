@@ -27,7 +27,7 @@ export default async function EventDetailPage({ params }: PageProps) {
 	if (!event) notFound();
 
 	const [registrations, regCount, pastVolunteers] = await Promise.all([
-		getEventRegistrations(id),
+		getEventRegistrations(id, event.requiredWaivers),
 		getRegistrationCount(id),
 		event.category === "volunteer" ? getPastVolunteersNotRegistered(id) : Promise.resolve([]),
 	]);
