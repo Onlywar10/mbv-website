@@ -120,6 +120,7 @@ export function PendingApprovals({ registrations, eventId }: PendingApprovalsPro
 									>
 										guest
 									</Badge>
+									<WaiverBadge expiresAt={guest.waiverExpiresAt} signedAt={guest.waiverSignedAt} />
 								</div>
 								<p className="text-xs text-muted-foreground">{guest.email}</p>
 							</div>

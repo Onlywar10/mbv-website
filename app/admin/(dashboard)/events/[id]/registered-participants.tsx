@@ -90,6 +90,7 @@ export function RegisteredParticipants({ registrations, eventId }: RegisteredPar
 										guest
 									</Badge>
 									<RegistrationStatusBadge status={guest.status} />
+									<WaiverBadge expiresAt={guest.waiverExpiresAt} signedAt={guest.waiverSignedAt} />
 								</div>
 								<p className="text-xs text-muted-foreground">{guest.email}</p>
 							</div>
