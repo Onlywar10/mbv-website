@@ -21,7 +21,7 @@ export async function createEventAction(
 ): Promise<ActionState> {
 	await requireAuth();
 
-	const raw = Object.fromEntries(formData);
+	const raw: Record<string, unknown> = Object.fromEntries(formData);
 	raw.requiredWaivers = formData.getAll("requiredWaivers");
 	const parsed = eventSchema.safeParse(raw);
 	if (!parsed.success) {
@@ -73,7 +73,7 @@ export async function updateEventAction(
 ): Promise<ActionState> {
 	await requireAuth();
 
-	const raw = Object.fromEntries(formData);
+	const raw: Record<string, unknown> = Object.fromEntries(formData);
 	raw.requiredWaivers = formData.getAll("requiredWaivers");
 	const parsed = eventSchema.safeParse(raw);
 	if (!parsed.success) {
