@@ -44,21 +44,37 @@ export async function handleSmartWaiverWebhook(
 	request: Request,
 	waiverType: string,
 ): Promise<Response> {
-	let body: any;
-	try {
-		body = await request.json();
-	} catch {
-		return Response.json({ error: "Invalid JSON" }, { status: 400 });
+	const contentType = request.headers.get("content-type") ?? "";
+	const rawBody = await request.clone().text();
+
+	logger.info("smartwaiver", `Webhook raw (${waiverType})`, {
+		waiverType,
+		contentType,
+		bodyPreview: rawBody.slice(0, 500),
+	});
+
+	let body: Record<string, any>;
+
+	if (contentType.includes("application/json")) {
+		try {
+			body = await request.json();
+		} catch {
+			return Response.json({ error: "Invalid JSON" }, { status: 400 });
+		}
+	} else {
+		// SmartWaiver sends application/x-www-form-urlencoded
+		const formData = await request.formData();
+		body = Object.fromEntries(formData.entries());
 	}
 
-	// Reject obviously invalid payloads early
 	if (typeof body !== "object" || body === null) {
 		return Response.json({ error: "Invalid payload" }, { status: 400 });
 	}
 
 	logger.info("smartwaiver", `Webhook received (${waiverType})`, {
 		waiverType,
-		keys: Object.keys(body).join(", "),
+		uniqueId: body.unique_id ?? "none",
+		event: body.event ?? "none",
 	});
 
 	let email = "";
