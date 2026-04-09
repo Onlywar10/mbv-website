@@ -15,7 +15,7 @@ import { db } from "@/lib/db";
 import { users } from "@/lib/db/schema/users";
 
 const loginSchema = z.object({
-	email: z.string().email("Invalid email address"),
+	username: z.string().min(1, "Username is required"),
 	password: z.string().min(1, "Password is required"),
 });
 
@@ -25,7 +25,7 @@ export type LoginState = {
 
 export async function loginAction(_prevState: LoginState, formData: FormData): Promise<LoginState> {
 	const parsed = loginSchema.safeParse({
-		email: formData.get("email"),
+		username: formData.get("username"),
 		password: formData.get("password"),
 	});
 
@@ -33,19 +33,23 @@ export async function loginAction(_prevState: LoginState, formData: FormData): P
 		return { error: parsed.error.issues[0].message };
 	}
 
-	const { email, password } = parsed.data;
+	const { username, password } = parsed.data;
 
-	const result = await db.select().from(users).where(eq(users.email, email.toLowerCase())).limit(1);
+	const result = await db
+		.select()
+		.from(users)
+		.where(eq(users.email, username.toLowerCase()))
+		.limit(1);
 
 	const user = result[0];
 
 	if (!user || !user.isActive) {
-		return { error: "Invalid email or password" };
+		return { error: "Invalid username or password" };
 	}
 
 	const valid = await verifyPassword(password, user.passwordHash);
 	if (!valid) {
-		return { error: "Invalid email or password" };
+		return { error: "Invalid username or password" };
 	}
 
 	const token = await createSession(user.id);

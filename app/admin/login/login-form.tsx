@@ -18,16 +18,16 @@ export function LoginForm() {
 			)}
 
 			<div className="space-y-2">
-				<Label htmlFor="email" className="font-heading uppercase text-xs tracking-wider">
-					Email
+				<Label htmlFor="username" className="font-heading uppercase text-xs tracking-wider">
+					Username
 				</Label>
 				<Input
-					id="email"
-					name="email"
-					type="email"
-					autoComplete="email"
+					id="username"
+					name="username"
+					type="text"
+					autoComplete="username"
 					required
-					placeholder="admin@mbv.org"
+					placeholder="Enter your username"
 				/>
 			</div>
 
