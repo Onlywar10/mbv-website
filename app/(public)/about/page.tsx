@@ -169,7 +169,7 @@ export default async function AboutPage() {
 									</li>
 									<li className="flex items-start gap-2">
 										<span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-rust" />
-										Accommodates up to 25 veterans per trip
+										Accommodates up to 10 veterans per trip
 									</li>
 								</ul>
 								<div className="h-1 w-16 bg-ochre" />

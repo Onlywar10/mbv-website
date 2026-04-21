@@ -259,14 +259,22 @@ export default async function EventDetailPage({ params }: PageProps) {
 												{categoryLabels[event.category]}
 											</Badge>
 										</div>
-										<div>
-											<p className="font-medium text-primary">Cost</p>
-											<p className="text-muted-foreground">Free for all veterans</p>
-										</div>
-										<div>
-											<p className="font-medium text-primary">Veteran ID Required</p>
-											<p className="text-muted-foreground">DD-214 or valid veteran ID</p>
-										</div>
+										{event.category === "volunteer" ? (
+											<div>
+												<p className="font-medium text-primary">Support your Veteran Community</p>
+											</div>
+										) : (
+											<>
+												<div>
+													<p className="font-medium text-primary">Cost</p>
+													<p className="text-muted-foreground">Free for all veterans</p>
+												</div>
+												<div>
+													<p className="font-medium text-primary">Veteran ID Required</p>
+													<p className="text-muted-foreground">DD-214 or valid veteran ID</p>
+												</div>
+											</>
+										)}
 									</CardContent>
 								</Card>
 							</ScrollReveal>
