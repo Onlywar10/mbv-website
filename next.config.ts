@@ -14,6 +14,15 @@ const nextConfig: NextConfig = {
 			},
 		],
 	},
+	async redirects() {
+		return [
+			{
+				source: "/donations",
+				destination: "/support",
+				permanent: true,
+			},
+		];
+	},
 };
 
 export default nextConfig;
