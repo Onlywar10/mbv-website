@@ -1,4 +1,4 @@
-import { and, asc, count, desc, eq, inArray, lt, sql } from "drizzle-orm";
+import { and, asc, count, desc, eq, gte, inArray, lt, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { clientWaivers } from "@/lib/db/schema/client-waivers";
 import { clients } from "@/lib/db/schema/clients";
@@ -22,7 +22,12 @@ export async function getEvents() {
 }
 
 export async function getPublishedEvents() {
-	return db.select().from(events).where(eq(events.isPublished, true)).orderBy(asc(events.date));
+	const today = new Date().toISOString().split("T")[0];
+	return db
+		.select()
+		.from(events)
+		.where(and(eq(events.isPublished, true), gte(events.date, today)))
+		.orderBy(asc(events.date));
 }
 
 export async function getEventById(id: string) {
