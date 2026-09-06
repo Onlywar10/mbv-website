@@ -1,4 +1,4 @@
-import { Facebook, Instagram, Mail, MapPin, Phone } from "lucide-react";
+import { Facebook, Instagram, LockKeyhole, Mail, MapPin, Phone } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -117,7 +117,16 @@ export function Footer() {
 							&copy; {new Date().getFullYear()} Monterey Bay Veterans, Inc. All rights reserved.
 							501(c)(3) Non-Profit Organization.
 						</p>
-						<p className="text-xs text-white/50">Serving disabled veterans since 1987</p>
+						<div className="flex items-center gap-4">
+							<p className="text-xs text-white/50">Serving disabled veterans since 1987</p>
+							<Link
+								href="/admin/login"
+								className="inline-flex items-center gap-1.5 rounded-sm bg-white/10 px-3 py-1.5 font-heading text-xs uppercase tracking-wider text-white/70 transition-colors hover:bg-rust hover:text-white"
+							>
+								<LockKeyhole className="h-3.5 w-3.5" />
+								Admin Login
+							</Link>
+						</div>
 					</div>
 				</div>
 			</div>
