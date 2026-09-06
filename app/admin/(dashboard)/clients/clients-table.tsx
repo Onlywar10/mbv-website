@@ -6,12 +6,14 @@ import { useState } from "react";
 import { DeleteDialog } from "@/components/admin/delete-dialog";
 import { Button } from "@/components/ui/button";
 import { deleteClientAction, deleteClientsAction } from "@/lib/actions/clients";
+import { formatPhone, phoneHref } from "@/lib/utils";
 
 type Client = {
 	id: string;
 	firstName: string;
 	lastName: string;
 	email: string;
+	phone: string | null;
 	isActive: boolean;
 	emailOptIn: boolean;
 	totalEventsAttended: number;
@@ -30,12 +32,15 @@ export function ClientsTable({ clients }: ClientsTableProps) {
 	const [deleting, setDeleting] = useState(false);
 	const [showConfirm, setShowConfirm] = useState(false);
 
+	const query = search.toLowerCase();
+	const queryDigits = search.replace(/\D/g, "");
 	const filtered = search
 		? clients.filter(
 				(c) =>
-					c.firstName.toLowerCase().includes(search.toLowerCase()) ||
-					c.lastName.toLowerCase().includes(search.toLowerCase()) ||
-					c.email.toLowerCase().includes(search.toLowerCase()),
+					c.firstName.toLowerCase().includes(query) ||
+					c.lastName.toLowerCase().includes(query) ||
+					c.email.toLowerCase().includes(query) ||
+					(queryDigits.length > 0 && (c.phone ?? "").replace(/\D/g, "").includes(queryDigits)),
 			)
 		: clients;
 
@@ -140,6 +145,9 @@ export function ClientsTable({ clients }: ClientsTableProps) {
 								Email
 							</th>
 							<th className="px-4 py-3 font-heading text-xs uppercase tracking-wider text-muted-foreground">
+								Phone
+							</th>
+							<th className="px-4 py-3 font-heading text-xs uppercase tracking-wider text-muted-foreground">
 								Events
 							</th>
 							<th className="px-4 py-3 font-heading text-xs uppercase tracking-wider text-muted-foreground">
@@ -159,7 +167,7 @@ export function ClientsTable({ clients }: ClientsTableProps) {
 					<tbody className="divide-y divide-border bg-cream/50">
 						{filtered.length === 0 ? (
 							<tr>
-								<td colSpan={8} className="px-4 py-8 text-center text-muted-foreground">
+								<td colSpan={9} className="px-4 py-8 text-center text-muted-foreground">
 									No clients found
 								</td>
 							</tr>
@@ -181,6 +189,15 @@ export function ClientsTable({ clients }: ClientsTableProps) {
 										{client.firstName} {client.lastName}
 									</td>
 									<td className="px-4 py-3 text-muted-foreground">{client.email}</td>
+									<td className="px-4 py-3 whitespace-nowrap">
+										{client.phone ? (
+											<a href={phoneHref(client.phone)} className="text-primary hover:underline">
+												{formatPhone(client.phone)}
+											</a>
+										) : (
+											<span className="text-muted-foreground/60">—</span>
+										)}
+									</td>
 									<td className="px-4 py-3 text-muted-foreground">{client.totalEventsAttended}</td>
 									<td className="px-4 py-3">
 										<span
