@@ -1,4 +1,4 @@
-import { ChevronLeft, Pencil } from "lucide-react";
+import { ChevronLeft, Pencil, Phone } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -45,6 +45,15 @@ export default async function ClientDetailPage({ params }: PageProps) {
 						{client.firstName} {client.lastName}
 					</h1>
 					<p className="mt-1 text-sm text-muted-foreground">{client.email}</p>
+					{client.phone && (
+						<a
+							href={`tel:${client.phone}`}
+							className="mt-1 inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
+						>
+							<Phone className="h-3.5 w-3.5" />
+							{client.phone}
+						</a>
+					)}
 				</div>
 				<Link
 					href={`/admin/clients/${id}/edit`}
@@ -62,12 +71,18 @@ export default async function ClientDetailPage({ params }: PageProps) {
 						Information
 					</h2>
 					<dl className="grid gap-4 sm:grid-cols-2">
-						{client.phone && (
-							<div>
-								<dt className="text-xs text-muted-foreground">Phone</dt>
-								<dd className="text-sm text-primary">{client.phone}</dd>
-							</div>
-						)}
+						<div>
+							<dt className="text-xs text-muted-foreground">Phone</dt>
+							<dd className="text-sm text-primary">
+								{client.phone ? (
+									<a href={`tel:${client.phone}`} className="hover:underline">
+										{client.phone}
+									</a>
+								) : (
+									<span className="italic text-muted-foreground">Not provided</span>
+								)}
+							</dd>
+						</div>
 						{client.address && (
 							<div>
 								<dt className="text-xs text-muted-foreground">Address</dt>

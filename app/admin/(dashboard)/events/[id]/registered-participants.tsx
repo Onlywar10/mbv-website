@@ -11,6 +11,7 @@ type Registration = {
 	firstName: string;
 	lastName: string;
 	email: string;
+	phone: string | null;
 	role: "participant" | "volunteer";
 	status: "registered" | "waitlisted" | "attended" | "cancelled";
 	registeredBy: string | null;
@@ -64,6 +65,11 @@ export function RegisteredParticipants({ registrations, eventId }: RegisteredPar
 									<WaiverBadge expiresAt={reg.waiverExpiresAt} signedAt={reg.waiverSignedAt} />
 								</div>
 								<p className="text-sm text-muted-foreground">{reg.email}</p>
+								{reg.phone && (
+									<a href={`tel:${reg.phone}`} className="text-sm text-primary hover:underline">
+										{reg.phone}
+									</a>
+								)}
 								<p className="mt-1 text-xs text-muted-foreground">
 									{new Date(reg.registeredAt).toLocaleDateString()}
 								</p>
@@ -93,6 +99,11 @@ export function RegisteredParticipants({ registrations, eventId }: RegisteredPar
 									<WaiverBadge expiresAt={guest.waiverExpiresAt} signedAt={guest.waiverSignedAt} />
 								</div>
 								<p className="text-xs text-muted-foreground">{guest.email}</p>
+								{guest.phone && (
+									<a href={`tel:${guest.phone}`} className="text-xs text-primary hover:underline">
+										{guest.phone}
+									</a>
+								)}
 							</div>
 						)}
 					</div>

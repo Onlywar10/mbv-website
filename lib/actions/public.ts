@@ -23,9 +23,12 @@ async function findOrCreateClient(data: {
 }): Promise<string> {
 	const existing = await findClientByEmail(data.email);
 	if (existing) {
-		// If they opted in, update their preference
-		if (data.emailOptIn && !existing.emailOptIn) {
-			await db.update(clients).set({ emailOptIn: true }).where(eq(clients.id, existing.id));
+		// Fill in anything we learned that the existing record is missing
+		const updates: Partial<typeof clients.$inferInsert> = {};
+		if (data.emailOptIn && !existing.emailOptIn) updates.emailOptIn = true;
+		if (data.phone && !existing.phone) updates.phone = data.phone;
+		if (Object.keys(updates).length > 0) {
+			await db.update(clients).set(updates).where(eq(clients.id, existing.id));
 		}
 		return existing.id;
 	}

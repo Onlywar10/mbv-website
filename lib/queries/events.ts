@@ -57,6 +57,7 @@ export async function getEventRegistrations(eventId: string, requiredWaivers: st
 			firstName: clients.firstName,
 			lastName: clients.lastName,
 			email: clients.email,
+			phone: clients.phone,
 			role: eventRegistrations.role,
 			status: eventRegistrations.status,
 			registeredBy: eventRegistrations.registeredBy,

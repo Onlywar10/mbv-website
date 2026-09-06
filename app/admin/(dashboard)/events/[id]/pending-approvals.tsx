@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, X } from "lucide-react";
+import { Check, Phone, X } from "lucide-react";
 import { ReasonDialog } from "@/components/admin/reason-dialog";
 import { WaiverBadge } from "@/components/admin/status-badge";
 import { Badge } from "@/components/ui/badge";
@@ -13,6 +13,7 @@ type Registration = {
 	firstName: string;
 	lastName: string;
 	email: string;
+	phone: string | null;
 	role: "participant" | "volunteer";
 	status: "registered" | "waitlisted" | "attended" | "cancelled";
 	registeredBy: string | null;
@@ -65,6 +66,17 @@ export function PendingApprovals({ registrations, eventId }: PendingApprovalsPro
 									<WaiverBadge expiresAt={reg.waiverExpiresAt} signedAt={reg.waiverSignedAt} />
 								</div>
 								<p className="text-sm text-muted-foreground">{reg.email}</p>
+								{reg.phone ? (
+									<a
+										href={`tel:${reg.phone}`}
+										className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
+									>
+										<Phone className="h-3.5 w-3.5" />
+										{reg.phone}
+									</a>
+								) : (
+									<p className="text-sm italic text-muted-foreground">No phone on file</p>
+								)}
 								<p className="mt-1 text-xs text-muted-foreground">
 									{new Date(reg.registeredAt).toLocaleDateString()}
 								</p>
@@ -123,6 +135,15 @@ export function PendingApprovals({ registrations, eventId }: PendingApprovalsPro
 									<WaiverBadge expiresAt={guest.waiverExpiresAt} signedAt={guest.waiverSignedAt} />
 								</div>
 								<p className="text-xs text-muted-foreground">{guest.email}</p>
+								{guest.phone && (
+									<a
+										href={`tel:${guest.phone}`}
+										className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
+									>
+										<Phone className="h-3 w-3" />
+										{guest.phone}
+									</a>
+								)}
 							</div>
 						)}
 					</div>
