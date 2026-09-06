@@ -7,6 +7,7 @@ import {
 	getClientEventHistory,
 	getClientWithRoles,
 } from "@/lib/queries/clients";
+import { formatPhone, phoneHref } from "@/lib/utils";
 import { RoleManager } from "./role-manager";
 
 export const metadata: Metadata = {
@@ -47,11 +48,11 @@ export default async function ClientDetailPage({ params }: PageProps) {
 					<p className="mt-1 text-sm text-muted-foreground">{client.email}</p>
 					{client.phone && (
 						<a
-							href={`tel:${client.phone}`}
+							href={phoneHref(client.phone)}
 							className="mt-1 inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
 						>
 							<Phone className="h-3.5 w-3.5" />
-							{client.phone}
+							{formatPhone(client.phone)}
 						</a>
 					)}
 				</div>
@@ -75,8 +76,8 @@ export default async function ClientDetailPage({ params }: PageProps) {
 							<dt className="text-xs text-muted-foreground">Phone</dt>
 							<dd className="text-sm text-primary">
 								{client.phone ? (
-									<a href={`tel:${client.phone}`} className="hover:underline">
-										{client.phone}
+									<a href={phoneHref(client.phone)} className="hover:underline">
+										{formatPhone(client.phone)}
 									</a>
 								) : (
 									<span className="italic text-muted-foreground">Not provided</span>

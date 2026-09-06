@@ -6,6 +6,7 @@ import { WaiverBadge } from "@/components/admin/status-badge";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { deleteRegistrationAction, updateRegistrationStatusAction } from "@/lib/actions/events";
+import { formatPhone, phoneHref } from "@/lib/utils";
 
 type Registration = {
 	id: string;
@@ -68,11 +69,11 @@ export function PendingApprovals({ registrations, eventId }: PendingApprovalsPro
 								<p className="text-sm text-muted-foreground">{reg.email}</p>
 								{reg.phone ? (
 									<a
-										href={`tel:${reg.phone}`}
+										href={phoneHref(reg.phone)}
 										className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
 									>
 										<Phone className="h-3.5 w-3.5" />
-										{reg.phone}
+										{formatPhone(reg.phone)}
 									</a>
 								) : (
 									<p className="text-sm italic text-muted-foreground">No phone on file</p>
@@ -137,11 +138,11 @@ export function PendingApprovals({ registrations, eventId }: PendingApprovalsPro
 								<p className="text-xs text-muted-foreground">{guest.email}</p>
 								{guest.phone && (
 									<a
-										href={`tel:${guest.phone}`}
+										href={phoneHref(guest.phone)}
 										className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
 									>
 										<Phone className="h-3 w-3" />
-										{guest.phone}
+										{formatPhone(guest.phone)}
 									</a>
 								)}
 							</div>

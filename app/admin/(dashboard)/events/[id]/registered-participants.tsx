@@ -4,6 +4,7 @@ import { DeleteDialog } from "@/components/admin/delete-dialog";
 import { RegistrationStatusBadge, WaiverBadge } from "@/components/admin/status-badge";
 import { Badge } from "@/components/ui/badge";
 import { deleteRegistrationAction } from "@/lib/actions/events";
+import { formatPhone, phoneHref } from "@/lib/utils";
 
 type Registration = {
 	id: string;
@@ -66,8 +67,8 @@ export function RegisteredParticipants({ registrations, eventId }: RegisteredPar
 								</div>
 								<p className="text-sm text-muted-foreground">{reg.email}</p>
 								{reg.phone && (
-									<a href={`tel:${reg.phone}`} className="text-sm text-primary hover:underline">
-										{reg.phone}
+									<a href={phoneHref(reg.phone)} className="text-sm text-primary hover:underline">
+										{formatPhone(reg.phone)}
 									</a>
 								)}
 								<p className="mt-1 text-xs text-muted-foreground">
@@ -100,8 +101,8 @@ export function RegisteredParticipants({ registrations, eventId }: RegisteredPar
 								</div>
 								<p className="text-xs text-muted-foreground">{guest.email}</p>
 								{guest.phone && (
-									<a href={`tel:${guest.phone}`} className="text-xs text-primary hover:underline">
-										{guest.phone}
+									<a href={phoneHref(guest.phone)} className="text-xs text-primary hover:underline">
+										{formatPhone(guest.phone)}
 									</a>
 								)}
 							</div>
